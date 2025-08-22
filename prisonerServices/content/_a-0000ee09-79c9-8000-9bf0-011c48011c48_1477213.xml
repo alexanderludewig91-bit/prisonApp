@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee46-8277-8000-88d4-179188179188_12591</versionUuid>
+    <interface>
+        <name>PS_F_FillOutEventOpinion</name>
+        <uuid>_a-0000ee09-79c9-8000-9bf0-011c48011c48_1477213</uuid>
+        <description></description>
+        <parentUuid>4e30e89d-6b0d-415f-8a87-1107bebc8692</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>a!localVariables(
+  local!event: #"_a-0000ee09-79c9-8000-9bf0-011c48011c48_1477251"(id: ri!eventId),
+  local!prison: #"_a-0000ee09-79c9-8000-9bf0-011c48011c48_1488362"(id: local!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/e1088bb7-c94e-425c-8e45-84e65157b5eb"]),
+  local!station: #"_a-0000ee09-79c9-8000-9bf0-011c48011c48_1488375"(id: local!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/560658f6-6063-49cc-bca5-d2960a038634"]),
+  local!eventType: #"_a-0000ee09-79c9-8000-9bf0-011c48011c48_1488387"(id: local!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/096e0c76-b28e-4985-a673-0232d1bbc9e3"]),
+  local!place: #"_a-0000ee09-79c9-8000-9bf0-011c48011c48_1488638"(id: local!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/01cd3a97-9761-4cf3-82a6-ff4be94235d3"]),
+  local!participantsAndInmates: #"_a-0000ee09-79c9-8000-9bf0-011c48011c48_1488663"(eventId: ri!eventId),
+  #"SYSTEM_SYSRULES_formLayout_v2"(
+    titleBar: #"urn:appian:translation-string:v1:8d4efe56-c04f-4ea9-8eec-15740ea4cb0a"(#"urn:appian:translation-variable:v1:c61b6b05-75a3-4dbb-976b-9e2d63e8f4f9": local!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/7bd3ce80-0696-4abd-a32c-6f6f775a9f5d"], #"urn:appian:translation-variable:v1:d811fd12-bcf1-4dae-864a-6b3276dac59f": ri!eventOpinion[#"urn:appian:record-field:v1:d20e13d7-6450-4ab5-8eb8-31b00904e791/b816fde2-3f17-4fae-984d-c99216d6a968"]),
+    showTitleBarDivider: true,
+    contentsWidth: "FULL",
+    contents: {
+      #"SYSTEM_SYSRULES_columnsLayout"(
+        columns: {
+          #"SYSTEM_SYSRULES_columnLayout"(contents: {}, width: "1X"),
+          #"SYSTEM_SYSRULES_columnLayout"(
+            contents: {
+              #"SYSTEM_SYSRULES_sectionLayout_v1"(
+                label: #"urn:appian:translation-string:v1:5f18fc35-6124-485e-82fc-8e328a1ce1e5",
+                labelColor: "STANDARD",
+                contents: {
+                  #"SYSTEM_SYSRULES_columnsLayout"(
+                    columns: {
+                      #"SYSTEM_SYSRULES_columnLayout"(
+                        contents: {
+                          #"SYSTEM_SYSRULES_richTextDisplayField"(
+                            label: #"urn:appian:translation-string:v1:21f519fb-6dba-47e7-915c-9d4292d4f40b",
+                            value: #"SYSTEM_SYSRULES_richTextItem_v1"(
+                              text: local!prison[#"urn:appian:record-field:v1:c035ef79-0201-4600-a2b7-9075b42e1d87/83d6cf30-3b09-4a38-89c5-2de99cf67942"]
+                            )
+                          ),
+                          #"SYSTEM_SYSRULES_richTextDisplayField"(
+                            label: #"urn:appian:translation-string:v1:c1d2fd0f-80d1-4bf3-91e1-3459cdb3342d",
+                            value: #"SYSTEM_SYSRULES_richTextItem_v1"(
+                              text: local!place[#"urn:appian:record-field:v1:cdfae70b-b79d-4fbd-b48b-2040a42a95ff/bed8f611-f13e-4a6e-8d37-c2d979088ded"]
+                            )
+                          ),
+                          #"SYSTEM_SYSRULES_richTextDisplayField"(
+                            label: #"urn:appian:translation-string:v1:391473a1-407e-42b1-a167-b165949872b6",
+                            value: #"SYSTEM_SYSRULES_richTextItem_v1"(
+                              text: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1546843"(user: local!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/403bc5e5-66a1-471a-aac7-14b98f50f0e9"])
+                            )
+                          )
+                        }
+                      ),
+                      #"SYSTEM_SYSRULES_columnLayout"(
+                        contents: {
+                          #"SYSTEM_SYSRULES_richTextDisplayField"(
+                            label: #"urn:appian:translation-string:v1:87f37044-115b-438d-8408-6d8c74c97150",
+                            value: #"SYSTEM_SYSRULES_richTextItem_v1"(
+                              text: local!station[#"urn:appian:record-field:v1:16cdeca3-e0b7-4859-86a9-795adf54d8a2/5cd0e531-bede-4d76-8761-65c73515a8d5"]
+                            )
+                          ),
+                          #"SYSTEM_SYSRULES_richTextDisplayField"(
+                            label: #"urn:appian:translation-string:v1:f89fa137-c04f-487f-a8d5-bb79bee90fd2",
+                            value: #"SYSTEM_SYSRULES_richTextItem_v1"(
+                              text: local!eventType[#"urn:appian:record-field:v1:d5a7da26-3c12-415b-9167-ee3cdac1eba7/29cd76cb-80e7-44d1-962a-2ea20474655e"]
+                            )
+                          ),
+                          #"SYSTEM_SYSRULES_richTextDisplayField"(
+                            label: #"urn:appian:translation-string:v1:6e7b5fcc-07ee-4932-ad39-8142f82c0df2",
+                            value: #"SYSTEM_SYSRULES_richTextItem_v1"(
+                              text: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1609689"(
+                                dateTime: local!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/98c7949e-598f-4d8a-b5b7-c0beacd1cef5"]
+                              ),
+                            )
+                          ),
+                          #"SYSTEM_SYSRULES_richTextDisplayField"(
+                            label: #"urn:appian:translation-string:v1:766faef4-b451-4350-b598-8cc492c5f8a9",
+                            value: #"SYSTEM_SYSRULES_richTextItem_v1"(
+                              text: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1609689"(
+                                dateTime: local!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/5cf9b82f-8b4b-428f-9881-846628e1eeb8"]
+                              )
+                            )
+                          )
+                        }
+                      )
+                    }
+                  ),
+                  #"SYSTEM_SYSRULES_columnsLayout"(
+                    columns: {
+                      #"SYSTEM_SYSRULES_columnLayout"(
+                        contents: {
+                          #"SYSTEM_SYSRULES_headingField"(
+                            text: #"urn:appian:translation-string:v1:4d45002c-836c-4e02-95f4-03631802dbb1",
+                            size: "EXTRA_SMALL",
+                            fontWeight: "BOLD"
+                          ),
+                          #"SYSTEM_SYSRULES_forEach"(
+                            items: property(local!participantsAndInmates,"participants",null),
+                            expression: #"SYSTEM_SYSRULES_sideBySideLayout"(
+                              alignVertical: "MIDDLE",
+                              items: {
+                                #"SYSTEM_SYSRULES_sideBySideItem"(
+                                  width: "MINIMIZE",
+                                  item: #"SYSTEM_SYSRULES_imageField_v1"(
+                                    style: "AVATAR",
+                                    labelPosition: "COLLAPSED",
+                                    size: "ICON_PLUS",
+                                    images: #"SYSTEM_SYSRULES_userImage"(
+                                      user: fv!item[#"urn:appian:record-field:v1:3854eb39-6a61-48cd-82b6-e4645b2900fe/02011db0-86ad-4cf2-bf76-8358c5fd0dc2"]
+                                    )
+                                  )
+                                ),
+                                #"SYSTEM_SYSRULES_sideBySideItem"(
+                                  item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                                    label: #"urn:appian:translation-string:v1:4d45002c-836c-4e02-95f4-03631802dbb1",
+                                    labelPosition: "COLLAPSED",
+                                    value: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1546843"(user: fv!item[#"urn:appian:record-field:v1:3854eb39-6a61-48cd-82b6-e4645b2900fe/02011db0-86ad-4cf2-bf76-8358c5fd0dc2"])
+                                  )
+                                )
+                              }
+                            )
+                          )
+                        }
+                      ),
+                      #"SYSTEM_SYSRULES_columnLayout"(
+                        contents: {
+                          #"SYSTEM_SYSRULES_headingField"(
+                            text: #"urn:appian:translation-string:v1:3c2f1b79-f08c-47dd-a565-3fe566a9f5be",
+                            size: "EXTRA_SMALL",
+                            fontWeight: "BOLD"
+                          ),
+                          #"SYSTEM_SYSRULES_forEach"(
+                            items: property(local!participantsAndInmates,"inmates",null),
+                            expression: #"SYSTEM_SYSRULES_sideBySideLayout"(
+                              alignVertical: "MIDDLE",
+                              items: {
+                                #"SYSTEM_SYSRULES_sideBySideItem"(
+                                  width: "MINIMIZE",
+                                  item: #"SYSTEM_SYSRULES_imageField_v1"(
+                                    style: "AVATAR",
+                                    labelPosition: "COLLAPSED",
+                                    size: "ICON_PLUS",
+                                    images: #"SYSTEM_SYSRULES_documentImage"(
+                                      document:a!defaultValue(
+                                        value: fv!item[#"urn:appian:record-field:v1:b9f2b8a1-aa3c-420e-9856-a362e5c58683/7e4bd5e8-fc29-462e-be26-b3c83494d1ba"],
+                                        default: #"_a-0000ed87-2144-8000-9bee-011c48011c48_1444462"
+                                      )
+                                    )
+                                  )
+                                ),
+                                #"SYSTEM_SYSRULES_sideBySideItem"(
+                                  item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                                    label: #"urn:appian:translation-string:v1:a5b5b659-bf28-444c-8e96-50fd2e142e09",
+                                    labelPosition: "COLLAPSED",
+                                    value: fv!item[#"urn:appian:record-field:v1:b9f2b8a1-aa3c-420e-9856-a362e5c58683/7daa88ab-46be-4aa0-8fd9-53cf52511478"] &amp; char(160) &amp; fv!item[#"urn:appian:record-field:v1:b9f2b8a1-aa3c-420e-9856-a362e5c58683/897606a4-d50b-4a42-bcd0-e4d68bbb2856"]
+                                  )
+                                )
+                              }
+                            )
+                          )
+                        }
+                      )
+                    }
+                  ),
+                  #"SYSTEM_SYSRULES_styledTextEditorField"(
+                    label: #"urn:appian:translation-string:v1:352ab866-8386-4bbc-8640-9ed0dd022792",
+                    value: local!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/4690edf7-5623-48c2-ae87-0e89e052fd8f"],
+                    sizeLimit: #"_a-0000ee09-79c9-8000-9bf0-011c48011c48_1477556",
+                    readOnly: true
+                  )
+                },
+                divider: "BELOW"
+              ),
+              #"SYSTEM_SYSRULES_sectionLayout_v1"(
+                label: ri!eventOpinion[#"urn:appian:record-field:v1:d20e13d7-6450-4ab5-8eb8-31b00904e791/b816fde2-3f17-4fae-984d-c99216d6a968"],
+                labelColor: "STANDARD",
+                contents: {
+                  #"SYSTEM_SYSRULES_richTextDisplayField"(
+                    label: #"urn:appian:translation-string:v1:7751d15b-99f7-4029-9f5d-fcd2123beea5",
+                    value: #"SYSTEM_SYSRULES_richTextItem_v1"(
+                      text: ri!eventOpinion[#"urn:appian:record-field:v1:d20e13d7-6450-4ab5-8eb8-31b00904e791/46aa4cc9-8ea1-46cd-a540-003d2657448f"]
+                    )
+                  ),
+                  #"SYSTEM_SYSRULES_styledTextEditorField"(
+                    label: #"urn:appian:translation-string:v1:441c1091-3855-43b0-b14b-488a2296a020",
+                    value: ri!eventOpinion[#"urn:appian:record-field:v1:d20e13d7-6450-4ab5-8eb8-31b00904e791/da2c05ff-925e-4e4e-91e1-775827dd348a"],
+                    saveInto: ri!eventOpinion[#"urn:appian:record-field:v1:d20e13d7-6450-4ab5-8eb8-31b00904e791/da2c05ff-925e-4e4e-91e1-775827dd348a"],
+                    sizeLimit: #"_a-0000ee09-79c9-8000-9bf0-011c48011c48_1477556"
+                    
+                  )
+                },
+                divider: "BELOW"
+              ),
+              #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1605697"(
+                text: {
+                  #"urn:appian:translation-string:v1:6b280f5f-e255-484c-9ec0-baee2389cf85",
+                  #"urn:appian:translation-string:v1:4bfe2554-19ff-4ed7-9c8a-0eaf7d210f72"
+                },
+                label: #"urn:appian:translation-string:v1:7bc77076-ea1b-405f-9e9c-cefd2fcb1fda"
+              )
+            },
+            width: "10X"
+          ),
+          #"SYSTEM_SYSRULES_columnLayout"(contents: {}, width: "1X")
+        }
+      )
+    },
+    showButtonDivider: true,
+    buttons: #"SYSTEM_SYSRULES_ButtonLayout"(
+      primaryButtons: {
+        #"SYSTEM_SYSRULES_buttonWidget_v1"(
+          label: #"urn:appian:translation-string:v1:d545b4d7-64e0-47d0-9e5c-c33324eed3d3",
+          saveInto: {
+            a!save(ri!eventOpinion[#"urn:appian:record-field:v1:d20e13d7-6450-4ab5-8eb8-31b00904e791/f93feb56-bb2e-4a03-b3a1-31b9a940d33a"],loggedInUser()),
+            a!save(ri!eventOpinion[#"urn:appian:record-field:v1:d20e13d7-6450-4ab5-8eb8-31b00904e791/f1bc89b5-b291-4943-ac60-e4776e994dec"],now())
+          },
+          submit: true,
+          style: "SOLID",
+          loadingIndicator: true
+        )
+      }
+    )
+  )
+)</definition>
+        <namedTypedValue>
+            <name>eventId</name>
+            <type>
+                <name>int</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>eventOpinion</name>
+            <type>
+                <name>d20e13d7-6450-4ab5-8eb8-31b00904e791</name>
+                <namespace>urn:com:appian:recordtype:datatype</namespace>
+            </type>
+        </namedTypedValue>
+        <preferredEditor>interface</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+        <isCustom>false</isCustom>
+    </interface>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <typedValue>
+        <type>
+            <name>RuleTestConfig?list</name>
+            <namespace>http://www.appian.com/ae/types/2009</namespace>
+        </type>
+        <value>
+            <el>
+                <a:name/>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">#"SYSTEM_SYSRULES_queryRecordType_v2"(
+  recordType: #"urn:appian:record-type:v1:fa952da3-a305-45ce-924b-89ca2dab3222",
+  pagingInfo: #"SYSTEM_SYSRULES_pagingInfo"(startIndex: 1,batchSize: 1,sort: #"SYSTEM_SYSRULES_sortInfo"(field: #"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/8eedcd4f-41f4-4085-889b-efedecf448e2",ascending: false)),
+  fields: #"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/8eedcd4f-41f4-4085-889b-efedecf448e2"
+).data[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/8eedcd4f-41f4-4085-889b-efedecf448e2"]</a:value>
+                    <a:nameRef>eventId</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">#"urn:appian:record-type:v1:d20e13d7-6450-4ab5-8eb8-31b00904e791"(
+  #"urn:appian:record-field:v1:d20e13d7-6450-4ab5-8eb8-31b00904e791/46aa4cc9-8ea1-46cd-a540-003d2657448f": "das ist eine Frage",
+  #"urn:appian:record-field:v1:d20e13d7-6450-4ab5-8eb8-31b00904e791/b816fde2-3f17-4fae-984d-c99216d6a968": #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1545934"[1]
+)</a:value>
+                    <a:nameRef>eventOpinion</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+            </el>
+        </value>
+    </typedValue>
+    <history>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1615027"/>
+        <historyInfo versionUuid="_a-0000ee46-8277-8000-88d4-179188179188_12591"/>
+    </history>
+</contentHaul>

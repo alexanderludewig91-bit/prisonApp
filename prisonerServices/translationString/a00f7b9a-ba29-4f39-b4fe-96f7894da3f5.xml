@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<translationStringHaul xmlns:a="http://www.appian.com/ae/types/2009">
+  <versionUuid>e5936055-3e42-4abc-8613-aee1de8928d9</versionUuid>
+  <translationString a:uuid="a00f7b9a-ba29-4f39-b4fe-96f7894da3f5">
+    <a:translationSetUuid>5f1fccd2-d309-46dc-a451-abf6d078df5a</a:translationSetUuid>
+    <a:description/>
+    <a:translatorNotes/>
+    <translationTexts>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>en-US</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Select House</a:translatedText>
+      </translatedText>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>de</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Haus auswählen</a:translatedText>
+      </translatedText>
+    </translationTexts>
+    <translationStringVariables/>
+  </translationString>
+  <history>
+    <historyInfo versionUuid="e5936055-3e42-4abc-8613-aee1de8928d9"/>
+  </history>
+</translationStringHaul>

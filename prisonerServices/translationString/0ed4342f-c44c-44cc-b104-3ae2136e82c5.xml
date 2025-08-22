@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<translationStringHaul xmlns:a="http://www.appian.com/ae/types/2009">
+  <versionUuid>1a516aaf-aaec-499e-9b0f-db03f95ccafd</versionUuid>
+  <translationString a:uuid="0ed4342f-c44c-44cc-b104-3ae2136e82c5">
+    <a:translationSetUuid>5f1fccd2-d309-46dc-a451-abf6d078df5a</a:translationSetUuid>
+    <a:description/>
+    <a:translatorNotes/>
+    <translationTexts>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>en-US</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Accusation</a:translatedText>
+      </translatedText>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>de</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Tatvorwurf</a:translatedText>
+      </translatedText>
+    </translationTexts>
+    <translationStringVariables/>
+  </translationString>
+  <history>
+    <historyInfo versionUuid="1a516aaf-aaec-499e-9b0f-db03f95ccafd"/>
+  </history>
+</translationStringHaul>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1624599</versionUuid>
+    <interface>
+        <name>PS_C_MailReceivers</name>
+        <uuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1624516</uuid>
+        <description></description>
+        <parentUuid>4e30e89d-6b0d-415f-8a87-1107bebc8692</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>{
+  #"SYSTEM_SYSRULES_multipleDropdownField_v1"(
+    choiceLabels: {"Daniel Schury", "Jens Angele", "Konstantinos Pilpilidis"},
+    choiceValues: {"daniel.schury@pd-g.de", "jens.angele@pd-g.de", "konstantinos.pilpilidis@pd-g.de"},
+    label: #"urn:appian:translation-string:v1:92705165-3991-4560-91ee-4ad781374002",
+    labelPosition: "ABOVE",
+    value: ri!emailReceivers,
+    saveInto: ri!emailReceivers,
+    searchDisplay: "AUTO",
+    validations: {}
+  )
+}</definition>
+        <namedTypedValue>
+            <name>emailReceivers</name>
+            <type>
+                <name>Text?list</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <preferredEditor>interface</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+        <isCustom>false</isCustom>
+    </interface>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <history>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1624599"/>
+    </history>
+</contentHaul>

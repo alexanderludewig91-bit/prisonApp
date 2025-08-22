@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1626621</versionUuid>
+    <interface>
+        <name>PS_F_AskQuestion</name>
+        <uuid>_a-0000ed87-2144-8000-9bee-011c48011c48_1427603</uuid>
+        <description></description>
+        <parentUuid>4e30e89d-6b0d-415f-8a87-1107bebc8692</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>a!localVariables(
+  local!inmate: #"_a-0000ed87-2144-8000-9bee-011c48011c48_1418098"(userName: loggedInUser()),
+  /*local!existingCurrentQuestion: a!queryRecordType(*/
+    /*recordType: 'recordType!{daa79afe-13f5-4c71-a83e-6443e7440710}PS Allowance Question',*/
+    /*filters: a!queryLogicalExpression(*/
+      /*operator: "AND",*/
+      /*filters: {*/
+        /*a!queryFilter(*/
+          /*field: 'recordType!{daa79afe-13f5-4c71-a83e-6443e7440710}PS Allowance Question.fields.{13ad18d7-dee4-470d-b63a-6d9d8b65d3ac}requestid',*/
+          /*operator: "=",*/
+          /*value: ri!request['recordType!{869b0f23-8e42-4780-8dfc-89deb24c798d}PS Request.fields.{ab4316cc-3bee-4bb9-b663-14ee81dc52b3}id']*/
+        /*)*/
+      /*}*/
+    /*),*/
+    /*pagingInfo: a!pagingInfo(1, 1, a!sortInfo('recordType!{daa79afe-13f5-4c71-a83e-6443e7440710}PS Allowance Question.fields.{63c20903-611d-406f-bd1c-f1ca2a2e5084}id', false)),*/
+    /*fetchTotalCount: true*/
+  /*),*/
+  #"SYSTEM_SYSRULES_formLayout_v1"(
+    label: #"urn:appian:translation-string:v1:a88dcd92-0fd2-4256-aff4-dd89ca893dd9",
+    contents: {
+      {
+        #"SYSTEM_SYSRULES_columnsLayout"(
+          columns: {   
+            #"SYSTEM_SYSRULES_columnLayout"(
+              width: "1X"
+            ),
+            #"SYSTEM_SYSRULES_columnLayout"(
+              contents: {
+                #"SYSTEM_SYSRULES_richTextDisplayField"(
+                  labelPosition: "COLLAPSED",
+                  value: {
+                   #"urn:appian:translation-string:v1:ab89426c-4de6-40b1-9f44-23b11c97eb5c"
+                  },
+                  preventWrapping: false,
+                  align: "CENTER",
+                  marginAbove: "MORE",
+                  marginBelow: "MORE"
+                ),
+                #"SYSTEM_SYSRULES_styledTextEditorField"(
+                  label: "Styled Text Editor",
+                  labelPosition: "COLLAPSED",
+                  placeholder: #"urn:appian:translation-string:v1:0bf9684b-9691-4878-8964-236ef88e7516",
+                  saveInto: ri!question[#"urn:appian:record-field:v1:daa79afe-13f5-4c71-a83e-6443e7440710/933549a0-aad8-4d58-843e-9055522b98d6"],
+                  sizeLimit: 4000,
+                  height: "MEDIUM",
+                  validations: {}
+                ),
+                #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1605697"(
+                  text: {
+                    #"urn:appian:translation-string:v1:dd7d20b1-a49f-42d2-84f9-4c1bc062807c",
+                    #"urn:appian:translation-string:v1:d185410b-77e9-4d79-847f-a3a077b4cb2d"
+                  },
+                  label: #"urn:appian:translation-string:v1:7bc77076-ea1b-405f-9e9c-cefd2fcb1fda"
+                )
+              },
+              width: "10X"
+            ),
+            #"SYSTEM_SYSRULES_columnLayout"(
+              width: "1X"
+            )        
+          }
+        )
+      }
+    },
+    buttons: #"SYSTEM_SYSRULES_ButtonLayout"(
+      primaryButtons: {
+        #"SYSTEM_SYSRULES_buttonWidget_v1"(
+          label: #"urn:appian:translation-string:v1:571d6b32-d52a-4ba2-8aa2-b38401a764d8",
+          saveInto: {
+            a!save(
+              target: ri!question[#"urn:appian:record-field:v1:daa79afe-13f5-4c71-a83e-6443e7440710/8c44013b-f7d8-49c4-a6fc-4781518186e1"],
+              value: loggedInUser()
+            ),
+            a!save(
+              target: ri!question[#"urn:appian:record-field:v1:daa79afe-13f5-4c71-a83e-6443e7440710/6f23295c-f3d8-417a-8ff0-dabac3c348c2"],
+              value: now()
+            ),
+            a!save(
+              target: ri!question[#"urn:appian:record-field:v1:daa79afe-13f5-4c71-a83e-6443e7440710/71bef9b3-d0d5-4d01-a371-e05721172ecb"],
+              value: now()
+            ),
+            a!save(
+              target: ri!question[#"urn:appian:record-field:v1:daa79afe-13f5-4c71-a83e-6443e7440710/f6b5646d-23b3-44b4-b827-da29480611e2"],
+              value: loggedInUser()
+            ),
+            a!save(
+              target: ri!question[#"urn:appian:record-field:v1:daa79afe-13f5-4c71-a83e-6443e7440710/36ff6792-1b01-41c9-9bba-87021ee1ff27"],
+              value: now()
+            ),
+            a!save(
+              target: ri!question[#"urn:appian:record-field:v1:daa79afe-13f5-4c71-a83e-6443e7440710/13ad18d7-dee4-470d-b63a-6d9d8b65d3ac"],
+              value: ri!request[#"urn:appian:record-field:v1:869b0f23-8e42-4780-8dfc-89deb24c798d/ab4316cc-3bee-4bb9-b663-14ee81dc52b3"]
+            ),
+            a!save(
+              target: ri!question[#"urn:appian:record-field:v1:daa79afe-13f5-4c71-a83e-6443e7440710/433ac0b1-7743-453c-8099-6ffa215f17f0"],
+              value: local!inmate[#"urn:appian:record-field:v1:b9f2b8a1-aa3c-420e-9856-a362e5c58683/d70d7a0c-0ee6-4949-84d6-2c58d8caffcc"]
+            ),
+            a!save(
+              target: ri!question[#"urn:appian:record-field:v1:daa79afe-13f5-4c71-a83e-6443e7440710/8f04250a-23ba-4438-9ca4-5e7ab5ce495a"],
+              value: #"_a-0000ed87-2144-8000-9bee-011c48011c48_1428731"
+            )
+          },
+          submit: true,
+          style: "SOLID"
+        )
+      },
+      secondaryButtons: {
+        #"SYSTEM_SYSRULES_buttonWidget_v1"(
+          label: #"urn:appian:translation-string:v1:d940fe67-4bc0-43d9-9eca-be0aa0394b8a",
+          value: true,
+          saveInto: ri!cancel,
+          submit: true,
+          style: "OUTLINE",
+          validate: false
+        )
+      }
+    )
+  )
+)</definition>
+        <namedTypedValue>
+            <name>cancel</name>
+            <type>
+                <name>boolean</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>request</name>
+            <type>
+                <name>869b0f23-8e42-4780-8dfc-89deb24c798d</name>
+                <namespace>urn:com:appian:recordtype:datatype</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>question</name>
+            <type>
+                <name>daa79afe-13f5-4c71-a83e-6443e7440710</name>
+                <namespace>urn:com:appian:recordtype:datatype</namespace>
+            </type>
+        </namedTypedValue>
+        <preferredEditor>interface</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+        <isCustom>false</isCustom>
+    </interface>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <history>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1626621"/>
+    </history>
+</contentHaul>

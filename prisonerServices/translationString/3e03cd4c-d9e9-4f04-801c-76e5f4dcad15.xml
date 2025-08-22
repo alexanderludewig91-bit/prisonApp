@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<translationStringHaul xmlns:a="http://www.appian.com/ae/types/2009">
+  <versionUuid>40d3fc81-e338-4def-af84-397537055233</versionUuid>
+  <translationString a:uuid="3e03cd4c-d9e9-4f04-801c-76e5f4dcad15">
+    <a:translationSetUuid>5f1fccd2-d309-46dc-a451-abf6d078df5a</a:translationSetUuid>
+    <a:description/>
+    <a:translatorNotes/>
+    <translationTexts>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>de</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Rückfrage beantworten</a:translatedText>
+      </translatedText>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>en-US</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Answer inquiry</a:translatedText>
+      </translatedText>
+    </translationTexts>
+    <translationStringVariables/>
+  </translationString>
+  <history>
+    <historyInfo versionUuid="40d3fc81-e338-4def-af84-397537055233"/>
+  </history>
+</translationStringHaul>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<translationStringHaul xmlns:a="http://www.appian.com/ae/types/2009">
+  <versionUuid>f055fd61-8035-4b00-ae5b-e75f66c83745</versionUuid>
+  <translationString a:uuid="40f4c7a9-ada6-4755-84d7-49fc6bd6856f">
+    <a:translationSetUuid>5f1fccd2-d309-46dc-a451-abf6d078df5a</a:translationSetUuid>
+    <a:description/>
+    <a:translatorNotes/>
+    <translationTexts>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>de</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Erfassungszeitpunkt</a:translatedText>
+      </translatedText>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>en-US</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Log Date and Time</a:translatedText>
+      </translatedText>
+    </translationTexts>
+    <translationStringVariables/>
+  </translationString>
+  <history>
+    <historyInfo versionUuid="f055fd61-8035-4b00-ae5b-e75f66c83745"/>
+  </history>
+</translationStringHaul>

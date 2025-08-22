@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1541151</versionUuid>
+    <interface>
+        <name>PS_V_AllRequestsPerPrison</name>
+        <uuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1531074</uuid>
+        <description></description>
+        <parentUuid>4e30e89d-6b0d-415f-8a87-1107bebc8692</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>a!localVariables(
+  local!prison: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1524633"(),
+  
+  #"SYSTEM_SYSRULES_headerContentLayout"(
+    header: #"SYSTEM_SYSRULES_billboardLayout_v1"(
+      backgroundColor: "#f0f0f0",
+      height: "EXTRA_SHORT",
+      marginAbove: "NONE",
+      marginBelow: "NONE",
+      overlay: #"SYSTEM_SYSRULES_fullOverlay"(
+        contents: {
+          #"SYSTEM_SYSRULES_richTextDisplayField"(
+            value: #"SYSTEM_SYSRULES_richTextItem_v1"(
+              text: #"urn:appian:translation-string:v1:a397884b-4f05-41a3-9026-936674afe93f" &amp; " " &amp; local!prison[#"urn:appian:record-field:v1:c035ef79-0201-4600-a2b7-9075b42e1d87/83d6cf30-3b09-4a38-89c5-2de99cf67942"] ,
+              /*&amp; " (" &amp;local!prison['recordType!{c035ef79-0201-4600-a2b7-9075b42e1d87}PS Prison.fields.{2e11c433-6d5a-46e0-8d14-bdc63ec57a31}abbreviation'] &amp; ")",*/
+              size: "LARGE"
+            )
+          )
+        },
+        style: "NONE"
+      )
+    ),
+    isHeaderFixed: true,
+    contents: {
+      #"SYSTEM_SYSRULES_sectionLayout_v1"(
+        contents: {
+          #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1530721"(displayFilters: true)
+        }
+      )
+    },
+    backgroundColor: "TRANSPARENT",
+    contentsPadding: "LESS"
+  )
+)</definition>
+        <preferredEditor>interface</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+        <isCustom>false</isCustom>
+    </interface>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <history>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1541151"/>
+    </history>
+</contentHaul>

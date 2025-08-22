@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<translationStringHaul xmlns:a="http://www.appian.com/ae/types/2009">
+  <versionUuid>1d37c57a-8769-4e2d-af40-88ea94fbccb3</versionUuid>
+  <translationString a:uuid="12ae500d-87d9-4574-8155-ad81de4a2353">
+    <a:translationSetUuid>5f1fccd2-d309-46dc-a451-abf6d078df5a</a:translationSetUuid>
+    <a:description/>
+    <a:translatorNotes/>
+    <translationTexts>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>de</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Bitte prüfen Sie das Anliegen des Insassen zum Eigentum in der Kammer und entscheiden Sie, ob dem Antrag stattgegeben werden kann. Bitte begründen Sie Ihre Entscheidung bei einer Ablehnung.</a:translatedText>
+      </translatedText>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>en-US</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Plase review the inmate's request and approve or reject it. In case of rejection, please describe your decision.</a:translatedText>
+      </translatedText>
+    </translationTexts>
+    <translationStringVariables/>
+  </translationString>
+  <history>
+    <historyInfo versionUuid="1d37c57a-8769-4e2d-af40-88ea94fbccb3"/>
+  </history>
+</translationStringHaul>

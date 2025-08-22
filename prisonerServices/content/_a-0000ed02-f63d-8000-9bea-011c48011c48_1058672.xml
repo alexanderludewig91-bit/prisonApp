@@ -1,0 +1,615 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1623611</versionUuid>
+    <rule>
+        <name>PS_GetCDTFieldDiff</name>
+        <uuid>_a-0000ed02-f63d-8000-9bea-011c48011c48_1058672</uuid>
+        <description>Support rule for creating the details field of an activity CDT, used when the user activity was to create or update a record. Given two CDTs and a field name, returns empty string if the field is the same between the CDTs. Returns the change if they are different. [Activity History]</description>
+        <parentUuid>90d38322-a009-41ca-9890-e4f474c93ac7</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>/* If there's no change, don't add anything to the current string *
+ * If there is a change, add it to the string before returning it */
+if(
+  and( /* To catch lists of values */
+    index(ri!oldCDT, ri!fields[ri!index], {}) =
+    index(ri!newCDT, ri!fields[ri!index], {})
+  ),
+  ri!currentString,
+  concat(
+    ri!currentString,
+    if(
+      or(
+        isnull(index(ri!oldCDT, ri!fields[ri!index], {})),
+        isnull(index(index(ri!oldCDT, ri!fields[ri!index], {}), "value", {}))
+      ),
+      /* If there was no old field, just show current value */ 
+      if(
+        /* Nested CDT lookup fields have "selection" in their field type */
+        search("SELECT", ri!fieldTypes[ri!index]),
+        ri!fieldNames[ri!index] &amp; ": " &amp; joinarray(index(index(ri!newCDT,ri!fields[ri!index],{}), "value", {}) &amp; char(10), ", "),
+
+        if(
+          /* Record fields can't display their title for security reasons */
+          search("record", ri!fieldTypes[ri!index]),
+          ri!fieldNames[ri!index] &amp; ": record value selected" &amp; char(10),
+
+          if(
+            /* Since paragraph fields can contain long values, only show the first 200 chars  */
+            search("paragraph_reference", ri!fieldTypes[ri!index]),
+            ri!fieldNames[ri!index] &amp; ": " &amp; left(index(index(ri!newCDT, ri!fields[ri!index], {}), "value", {}), 200) &amp; char(10),
+
+            if(
+              /* Certain older paragraph fields are direct fields of the main CDT, instead of nested children, *
+               * so we don't have to index into their value field.                                             */
+              search("paragraph", ri!fieldTypes[ri!index]),
+              ri!fieldNames[ri!index] &amp; ": " &amp; left(index(ri!newCDT, ri!fields[ri!index], {}), 200) &amp; char(10),
+
+              /* For primitive fields (text, date, number) just read out the value */
+              ri!fieldNames[ri!index] &amp; ": " &amp; index(ri!newCDT, ri!fields[ri!index], {}) &amp; char(10)
+            )
+          )
+        )
+      ),
+      /* Otherwise, show old and new values */
+      if(
+        /* Nested CDT lookup fields have "selection" in their field type */
+        search("SELECT", ri!fieldTypes[ri!index]),
+        ri!fieldNames[ri!index] &amp; ": " &amp; 
+          joinarray(index(index(ri!oldCDT,ri!fields[ri!index],{}), "value", {}), ", ") &amp; " ➝ " &amp;
+          joinarray(index(index(ri!newCDT,ri!fields[ri!index],{}), "value", {}), ", ") &amp;
+          char(10),
+
+        if(
+          /* Record fields can't display their title for security reasons */
+          search("record", ri!fieldTypes[ri!index]),
+          ri!fieldNames[ri!index] &amp; ": record value changed" &amp; char(10),
+        
+          if(
+            /* Since paragraph fields can contain long values, only show the first 200 chars  */
+            search("paragraph_reference", ri!fieldTypes[ri!index]),
+            ri!fieldNames[ri!index] &amp; ": " &amp;
+              left(index(index(ri!oldCDT, ri!fields[ri!index], {}), "value", {}), 200) &amp; " ➝ " &amp;
+              left(index(index(ri!newCDT, ri!fields[ri!index], {}), "value", {}), 200) &amp;
+              char(10),
+
+            if(
+              /* Certain older paragraph fields are direct fields of the main CDT, instead of nested children, *
+               * so we don't have to index into their value field.                                             */
+              search("paragraph", ri!fieldTypes[ri!index]),
+              ri!fieldNames[ri!index] &amp; ": " &amp;
+                left(index(ri!oldCDT, ri!fields[ri!index], {}), 200) &amp; " ➝ " &amp;
+                left(index(ri!newCDT, ri!fields[ri!index], {}), 200) &amp;
+                char(10),
+
+              /* For primitive fields (text, date, number) just read out the value */
+              ri!fieldNames[ri!index] &amp; ": " &amp;
+                index(ri!oldCDT, ri!fields[ri!index], {}) &amp; " ➝ " &amp;
+                index(ri!newCDT, ri!fields[ri!index], {}) &amp;
+                char(10)
+            )
+          )
+        )
+      )
+    )
+  )
+)
+</definition>
+        <namedTypedValue>
+            <name>currentString</name>
+            <type>
+                <name>string</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+            <value/>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>index</name>
+            <type>
+                <name>int</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>oldCDT</name>
+            <type>
+                <name>Variant</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>newCDT</name>
+            <type>
+                <name>Variant</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>fields</name>
+            <type>
+                <name>Text?list</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>fieldNames</name>
+            <type>
+                <name>Text?list</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>fieldTypes</name>
+            <type>
+                <name>Text?list</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <preferredEditor>legacy</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+    </rule>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <typedValue>
+        <type>
+            <name>RuleTestConfig?list</name>
+            <namespace>http://www.appian.com/ae/types/2009</namespace>
+        </type>
+        <value>
+            <el>
+                <a:name>No change in field value</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">""</a:value>
+                    <a:nameRef>currentString</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">1</a:value>
+                    <a:nameRef>index</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"field1": "value1"}</a:value>
+                    <a:nameRef>oldCDT</a:nameRef>
+                    <a:id>3</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"field1": "value1"}</a:value>
+                    <a:nameRef>newCDT</a:nameRef>
+                    <a:id>4</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"field1"}</a:value>
+                    <a:nameRef>fields</a:nameRef>
+                    <a:id>5</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"Field 1"}</a:value>
+                    <a:nameRef>fieldNames</a:nameRef>
+                    <a:id>6</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"text"}</a:value>
+                    <a:nameRef>fieldTypes</a:nameRef>
+                    <a:id>7</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions>
+                    <a:expectedOutput>
+                        <a:type a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:runtimeType a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string"/>
+                    </a:expectedOutput>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Text field value changed</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">""</a:value>
+                    <a:nameRef>currentString</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">1</a:value>
+                    <a:nameRef>index</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"field1": "oldValue"}</a:value>
+                    <a:nameRef>oldCDT</a:nameRef>
+                    <a:id>3</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"field1": "newValue"}</a:value>
+                    <a:nameRef>newCDT</a:nameRef>
+                    <a:id>4</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"field1"}</a:value>
+                    <a:nameRef>fields</a:nameRef>
+                    <a:id>5</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"Field 1"}</a:value>
+                    <a:nameRef>fieldNames</a:nameRef>
+                    <a:id>6</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"text"}</a:value>
+                    <a:nameRef>fieldTypes</a:nameRef>
+                    <a:id>7</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions>
+                    <a:expectedOutput>
+                        <a:type a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:runtimeType a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string">Field 1: oldValue ➝ newValue
+</a:value>
+                    </a:expectedOutput>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>New field added</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">""</a:value>
+                    <a:nameRef>currentString</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">1</a:value>
+                    <a:nameRef>index</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{}</a:value>
+                    <a:nameRef>oldCDT</a:nameRef>
+                    <a:id>3</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"field1": "newValue"}</a:value>
+                    <a:nameRef>newCDT</a:nameRef>
+                    <a:id>4</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"field1"}</a:value>
+                    <a:nameRef>fields</a:nameRef>
+                    <a:id>5</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"Field 1"}</a:value>
+                    <a:nameRef>fieldNames</a:nameRef>
+                    <a:id>6</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"text"}</a:value>
+                    <a:nameRef>fieldTypes</a:nameRef>
+                    <a:id>7</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions>
+                    <a:expectedOutput>
+                        <a:type a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:runtimeType a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string">Field 1:  ➝ newValue
+</a:value>
+                    </a:expectedOutput>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Selection field changed</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">""</a:value>
+                    <a:nameRef>currentString</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">1</a:value>
+                    <a:nameRef>index</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"field1": {"value": "oldValue"}}</a:value>
+                    <a:nameRef>oldCDT</a:nameRef>
+                    <a:id>3</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"field1": {"value": "newValue"}}</a:value>
+                    <a:nameRef>newCDT</a:nameRef>
+                    <a:id>4</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"field1"}</a:value>
+                    <a:nameRef>fields</a:nameRef>
+                    <a:id>5</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"Field 1"}</a:value>
+                    <a:nameRef>fieldNames</a:nameRef>
+                    <a:id>6</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"SELECT"}</a:value>
+                    <a:nameRef>fieldTypes</a:nameRef>
+                    <a:id>7</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions>
+                    <a:expectedOutput>
+                        <a:type a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:runtimeType a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string">Field 1: oldValue ➝ newValue
+</a:value>
+                    </a:expectedOutput>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Record field changed</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">""</a:value>
+                    <a:nameRef>currentString</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">1</a:value>
+                    <a:nameRef>index</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"field1": {"value": "oldValue"}}</a:value>
+                    <a:nameRef>oldCDT</a:nameRef>
+                    <a:id>3</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"field1": {"value": "newValue"}}</a:value>
+                    <a:nameRef>newCDT</a:nameRef>
+                    <a:id>4</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"field1"}</a:value>
+                    <a:nameRef>fields</a:nameRef>
+                    <a:id>5</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"Field 1"}</a:value>
+                    <a:nameRef>fieldNames</a:nameRef>
+                    <a:id>6</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"record"}</a:value>
+                    <a:nameRef>fieldTypes</a:nameRef>
+                    <a:id>7</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions>
+                    <a:expectedOutput>
+                        <a:type a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:runtimeType a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string">Field 1: record value changed
+</a:value>
+                    </a:expectedOutput>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Paragraph reference field changed</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">""</a:value>
+                    <a:nameRef>currentString</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">1</a:value>
+                    <a:nameRef>index</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"field1": {"value": "old paragraph"}}</a:value>
+                    <a:nameRef>oldCDT</a:nameRef>
+                    <a:id>3</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"field1": {"value": "new paragraph"}}</a:value>
+                    <a:nameRef>newCDT</a:nameRef>
+                    <a:id>4</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"field1"}</a:value>
+                    <a:nameRef>fields</a:nameRef>
+                    <a:id>5</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"Field 1"}</a:value>
+                    <a:nameRef>fieldNames</a:nameRef>
+                    <a:id>6</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"paragraph_reference"}</a:value>
+                    <a:nameRef>fieldTypes</a:nameRef>
+                    <a:id>7</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions>
+                    <a:expectedOutput>
+                        <a:type a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:runtimeType a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string">Field 1: old paragraph ➝ new paragraph
+</a:value>
+                    </a:expectedOutput>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Direct paragraph field changed</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">""</a:value>
+                    <a:nameRef>currentString</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">1</a:value>
+                    <a:nameRef>index</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"field1": "old paragraph"}</a:value>
+                    <a:nameRef>oldCDT</a:nameRef>
+                    <a:id>3</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"field1": "new paragraph"}</a:value>
+                    <a:nameRef>newCDT</a:nameRef>
+                    <a:id>4</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"field1"}</a:value>
+                    <a:nameRef>fields</a:nameRef>
+                    <a:id>5</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"Field 1"}</a:value>
+                    <a:nameRef>fieldNames</a:nameRef>
+                    <a:id>6</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"paragraph"}</a:value>
+                    <a:nameRef>fieldTypes</a:nameRef>
+                    <a:id>7</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions>
+                    <a:expectedOutput>
+                        <a:type a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:runtimeType a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string">Field 1: old paragraph ➝ new paragraph
+</a:value>
+                    </a:expectedOutput>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Multiple field changes</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">"Field 1: oldValue1 ➝ newValue1
+"</a:value>
+                    <a:nameRef>currentString</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">2</a:value>
+                    <a:nameRef>index</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"field1": "oldValue1", "field2": "oldValue2"}</a:value>
+                    <a:nameRef>oldCDT</a:nameRef>
+                    <a:id>3</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"field1": "newValue1", "field2": "newValue2"}</a:value>
+                    <a:nameRef>newCDT</a:nameRef>
+                    <a:id>4</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"field1", "field2"}</a:value>
+                    <a:nameRef>fields</a:nameRef>
+                    <a:id>5</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"Field 1", "Field 2"}</a:value>
+                    <a:nameRef>fieldNames</a:nameRef>
+                    <a:id>6</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"text", "text"}</a:value>
+                    <a:nameRef>fieldTypes</a:nameRef>
+                    <a:id>7</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions>
+                    <a:expectedOutput>
+                        <a:type a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:runtimeType a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string">Field 1: oldValue1 ➝ newValue1
+Field 2: oldValue2 ➝ newValue2
+</a:value>
+                    </a:expectedOutput>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Long paragraph field truncation</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">""</a:value>
+                    <a:nameRef>currentString</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">1</a:value>
+                    <a:nameRef>index</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"field1": {"value": "old paragraph that is very long and exceeds 200 characters. This is just some filler text to make sure we go over the limit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."}}</a:value>
+                    <a:nameRef>oldCDT</a:nameRef>
+                    <a:id>3</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"field1": {"value": "new paragraph that is very long and exceeds 200 characters. This is just some filler text to make sure we go over the limit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."}}</a:value>
+                    <a:nameRef>newCDT</a:nameRef>
+                    <a:id>4</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"field1"}</a:value>
+                    <a:nameRef>fields</a:nameRef>
+                    <a:id>5</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"Field 1"}</a:value>
+                    <a:nameRef>fieldNames</a:nameRef>
+                    <a:id>6</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{"paragraph_reference"}</a:value>
+                    <a:nameRef>fieldTypes</a:nameRef>
+                    <a:id>7</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions>
+                    <a:expectedOutput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                    <a:resultAssertions>length(test!output) &lt;= 421</a:resultAssertions>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+        </value>
+    </typedValue>
+    <history>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1623611"/>
+    </history>
+</contentHaul>

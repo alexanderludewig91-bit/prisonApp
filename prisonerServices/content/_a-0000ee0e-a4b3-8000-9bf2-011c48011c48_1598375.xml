@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1598405</versionUuid>
+    <interface>
+        <name>PS_C_GenericRequestComment</name>
+        <uuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1598375</uuid>
+        <description>Formats a individual PS Comment into a form that can be used either on it's own or in a list view</description>
+        <parentUuid>4e30e89d-6b0d-415f-8a87-1107bebc8692</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>#"SYSTEM_SYSRULES_forEach"(
+  items: ri!comments,
+  expression: {
+    #"SYSTEM_SYSRULES_sectionLayout_v1"(
+      divider: if(
+        fv!isLast,
+        "NONE",
+        "BELOW"
+      ),
+      contents: {
+        #"SYSTEM_SYSRULES_sideBySideLayout"(
+          spacing: "NONE",
+          items: {
+            #"SYSTEM_SYSRULES_sideBySideItem"(
+              width: "MINIMIZE",
+              item: #"SYSTEM_SYSRULES_imageField_v1"(
+                labelPosition: "COLLAPSED",
+                style: "AVATAR",
+                size: "ICON_PLUS",
+                images: #"SYSTEM_SYSRULES_userImage"(
+                  user: fv!item[#"urn:appian:record-field:v1:e7dd6446-ca08-478b-87f4-13d53029cd51/26811561-2831-40af-a865-82958ee17add"]
+                )
+              )
+            ),
+            #"SYSTEM_SYSRULES_sideBySideItem"(
+              item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                align: "LEFT",
+                value: #"SYSTEM_SYSRULES_richTextItem_v1"(
+                  text: "   " &amp; #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1535179"(
+                    userName: fv!item[#"urn:appian:record-field:v1:e7dd6446-ca08-478b-87f4-13d53029cd51/26811561-2831-40af-a865-82958ee17add"]
+                  )
+                )
+              )
+            ),
+            #"SYSTEM_SYSRULES_sideBySideItem"(
+              item: #"SYSTEM_SYSRULES_dateTimeField"(
+                readOnly: true,
+                value: fv!item[#"urn:appian:record-field:v1:e7dd6446-ca08-478b-87f4-13d53029cd51/f9cfbc91-41de-4a62-a383-0b4fcfe623a3"]
+              )
+            )
+          }
+        ),
+        #"SYSTEM_SYSRULES_richTextDisplayField"(
+          label: #"urn:appian:translation-string:v1:a3103c7c-de78-4823-8794-98adec4b25e4",
+          labelPosition: "JUSTIFIED",
+          value: #"SYSTEM_SYSRULES_richTextItem_v1"(
+            text: fv!item[#"urn:appian:record-field:v1:e7dd6446-ca08-478b-87f4-13d53029cd51/dcf2e381-6162-47d6-8ffe-1efa0be4473c"]
+          )
+        ),
+        #"SYSTEM_SYSRULES_richTextDisplayField"(
+          label: #"urn:appian:translation-string:v1:352ab866-8386-4bbc-8640-9ed0dd022792",
+          labelPosition: "JUSTIFIED",
+          value: #"SYSTEM_SYSRULES_richTextItem_v1"(
+            text: fv!item[#"urn:appian:record-field:v1:e7dd6446-ca08-478b-87f4-13d53029cd51/d48d0bc5-bfe0-4e63-937e-fd1302bf356d"]
+          )
+        )
+      }
+    )
+  }
+)</definition>
+        <namedTypedValue>
+            <name>comments</name>
+            <type>
+                <name>e7dd6446-ca08-478b-87f4-13d53029cd51?list</name>
+                <namespace>urn:com:appian:recordtype:datatype</namespace>
+            </type>
+        </namedTypedValue>
+        <preferredEditor>interface</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+        <isCustom>false</isCustom>
+    </interface>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <history>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1598405"/>
+    </history>
+</contentHaul>

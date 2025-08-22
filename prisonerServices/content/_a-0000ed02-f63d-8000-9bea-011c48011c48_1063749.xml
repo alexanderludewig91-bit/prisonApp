@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ed02-f63d-8000-9bea-011c48011c48_1068395</versionUuid>
+    <interface>
+        <name>PS_D_healthDashboard</name>
+        <uuid>_a-0000ed02-f63d-8000-9bea-011c48011c48_1063749</uuid>
+        <description>Health dashboard from landing page</description>
+        <parentUuid>4e30e89d-6b0d-415f-8a87-1107bebc8692</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>a!localVariables(
+  local!healthBookingOptions: property(#"SYSTEM_SYSRULES_queryRecordType_v1"(
+    recordType: #"urn:appian:record-type:v1:bee451d4-0dcb-4706-b938-9a1084b98ff7",
+    pagingInfo: #"SYSTEM_SYSRULES_pagingInfo"(startIndex: 1,batchSize: 50),
+  ),"data",null),
+  local!healthbookingCategory: property(#"SYSTEM_SYSRULES_queryRecordType_v1"(
+    recordType: #"urn:appian:record-type:v1:171b5794-c97f-4c2c-b7f6-af1701ceff62",
+    pagingInfo: #"SYSTEM_SYSRULES_pagingInfo"(startIndex: 1,batchSize: 50),
+    filters: #"SYSTEM_SYSRULES_queryFilter"(
+      field: #"urn:appian:record-field:v1:171b5794-c97f-4c2c-b7f6-af1701ceff62/4d6b6c64-ad8e-4c1b-a7c9-6d529404d791",
+      operator: "in",
+      value: local!healthBookingOptions[#"urn:appian:record-field:v1:bee451d4-0dcb-4706-b938-9a1084b98ff7/fc9e8002-ba9b-4d1f-a6be-a3d59ae8c622"]
+    )
+  ),"data",null),
+  local!upcomingAppointments: property(
+    #"SYSTEM_SYSRULES_queryRecordType_v1"(
+      recordType: #"urn:appian:record-type:v1:1b96054c-af55-4d2a-a907-daf8f6cb05ed",
+      pagingInfo: #"SYSTEM_SYSRULES_pagingInfo"(
+        startIndex: 1,
+        batchSize: 50,
+        sort: #"SYSTEM_SYSRULES_sortInfo"(
+          field: #"urn:appian:record-field:v1:1b96054c-af55-4d2a-a907-daf8f6cb05ed/88976b74-9849-4755-ba2d-84be6b211239",
+          ascending: true
+        )
+      )
+    ),
+    "data",null
+  ),
+  local!diabetisScore: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1064534"(),
+  local!blutdruckScore: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1068350"(),
+  local!showMore: false,
+  #"SYSTEM_SYSRULES_headerContentLayout"(
+    header: #"SYSTEM_SYSRULES_cardLayout"(
+      contents: {
+        #"SYSTEM_SYSRULES_sideBySideLayout"(
+          items: {
+            #"SYSTEM_SYSRULES_sideBySideItem"(
+              item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                labelPosition: "COLLAPSED",
+                value: {
+                  "   ",
+                  #"SYSTEM_SYSRULES_richTextIcon"(
+                    icon: "reply",
+                    link: #"SYSTEM_SYSRULES_dynamicLink"(
+                      value: null,
+                      saveInto: ri!function
+                    ),
+                    linkStyle: "STANDALONE",
+                    color: "#000000",
+                    size: "LARGE_PLUS"
+                  )
+                }
+              )
+            ),
+            #"SYSTEM_SYSRULES_sideBySideItem"(
+              item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                labelPosition: "COLLAPSED",
+                value: {
+                  #"SYSTEM_SYSRULES_richTextItem_v1"(
+                    text: "GESUNDHEIT",
+                    size: "LARGE"
+                  )
+                }
+              ),
+              width: "MINIMIZE"
+            ),
+            #"SYSTEM_SYSRULES_sideBySideItem"(
+              item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                labelPosition: "COLLAPSED",
+                value: {
+                  #"SYSTEM_SYSRULES_richTextIcon"(
+                    icon: "stethoscope",
+                    color: "",
+                    size: "EXTRA_LARGE"
+                  )
+                },
+                align: "RIGHT"
+              ),
+              width: "MINIMIZE"
+            )
+          },
+          alignVertical: "MIDDLE"
+        )
+      },
+      style: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1063213"[5],
+      showBorder: false
+    ),
+    backgroundColor: "#111111",
+    contentsPadding: "NONE",
+    contents: {
+      #"SYSTEM_SYSRULES_paneLayout"(
+        panes: {
+          #"SYSTEM_SYSRULES_pane"(
+            backgroundColor: "TRANSPARENT",
+            contents: {
+              #"SYSTEM_SYSRULES_cardLayout"(
+                style: "TRANSPARENT",
+                shape: "ROUNDED",
+                padding: "EVEN_LESS",
+                showBorder: false,
+                marginBelow: "STANDARD",
+                contents: {
+                  #"SYSTEM_SYSRULES_cardGroupLayout"(
+                    labelPosition: "COLLAPSED",
+                    cards: #"SYSTEM_SYSRULES_forEach"(
+                      items: local!healthBookingOptions,
+                      expression: #"SYSTEM_SYSRULES_cardLayout"(
+                        shape: "ROUNDED",
+                        showBorder: false,
+                        contents: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                          labelPosition: "COLLAPSED",
+                          value: {
+                            #"SYSTEM_SYSRULES_richTextItem_v1"(
+                              text: fv!item[#"urn:appian:record-field:v1:bee451d4-0dcb-4706-b938-9a1084b98ff7/3395909e-62bd-48c8-97e0-478127566586"],
+                              size: "MEDIUM_PLUS"
+                            ),
+                            char(160),
+                            #"SYSTEM_SYSRULES_richTextItem_v1"(
+                              text: "(" &amp; displayvalue(
+                                fv!item[#"urn:appian:record-field:v1:bee451d4-0dcb-4706-b938-9a1084b98ff7/fc9e8002-ba9b-4d1f-a6be-a3d59ae8c622"],
+                                local!healthbookingCategory[#"urn:appian:record-field:v1:171b5794-c97f-4c2c-b7f6-af1701ceff62/4d6b6c64-ad8e-4c1b-a7c9-6d529404d791"],
+                                local!healthbookingCategory[#"urn:appian:record-field:v1:171b5794-c97f-4c2c-b7f6-af1701ceff62/5a0b9e22-6384-436e-98e1-4adb8dcebe72"],
+                                null
+                              ) &amp; ")",
+                              size: "MEDIUM"
+                            ),
+                            char(10),
+                            fv!item[#"urn:appian:record-field:v1:bee451d4-0dcb-4706-b938-9a1084b98ff7/fb111408-d2a3-4902-bd51-bf8fff8ffda6"]
+                          }
+                        )
+                      )
+                    )
+                  )
+                }
+              )
+            }
+          ),
+          #"SYSTEM_SYSRULES_pane"(
+            backgroundColor: "TRANSPARENT",
+            width: "MEDIUM",
+            padding: "LESS",
+            contents: {
+              #"SYSTEM_SYSRULES_cardLayout"(
+                style: "#333333",
+                shape: "ROUNDED",
+                showBorder: false,
+                showShadow: true,
+                marginBelow: "STANDARD",
+                contents: {
+                  #"SYSTEM_SYSRULES_headingField"(
+                    text: "Diabetiswerte",
+                    size: "MEDIUM",
+                    fontWeight: "SEMI_BOLD",
+                  ),
+                  #"SYSTEM_SYSRULES_lineChartField_v1"(
+                    height: "MICRO",
+                    yAxisMax: 180,
+                    yAxisMin: 50,
+                    showLegend: false,
+                    xAxisStyle: "NONE",
+                    yAxisStyle: "NONE",
+                    xAxisTitle: "Datum",
+                    categories: #"SYSTEM_SYSRULES_forEach"(
+                      items: local!diabetisScore,
+                      expression: property(fv!item,"datetime",null)
+                    ),
+                    series: #"SYSTEM_SYSRULES_chartSeries"(
+                      label: "Blutzuckerwert",
+                      data: property(local!diabetisScore,"diabetisscore",null)
+                    )
+                  )
+                }
+              ),
+              #"SYSTEM_SYSRULES_cardLayout"(
+                style: "#333333",
+                shape: "ROUNDED",
+                showBorder: false,
+                showShadow: true,
+                marginBelow: "STANDARD",
+                contents: {
+                  #"SYSTEM_SYSRULES_headingField"(
+                    text: "Blutdruck",
+                    size: "MEDIUM",
+                    fontWeight: "SEMI_BOLD",
+                  ),
+                  #"SYSTEM_SYSRULES_lineChartField_v1"(
+                    height: "MICRO",
+                    yAxisMax: 180,
+                    yAxisMin: 50,
+                    showLegend: false,
+                    xAxisStyle: "NONE",
+                    yAxisStyle: "NONE",
+                    xAxisTitle: "Datum",
+                    categories: #"SYSTEM_SYSRULES_forEach"(
+                      items: local!blutdruckScore,
+                      expression: property(fv!item,"datetime",null)
+                    ),
+                    series: {
+                      #"SYSTEM_SYSRULES_chartSeries"(
+                        label: "Systolischer Wert",
+                        data: property(local!blutdruckScore,"systolischerWert",null),
+                        color: "GOLD"
+                      ),
+                      #"SYSTEM_SYSRULES_chartSeries"(
+                        label: "Diastolischer Wert",
+                        data: property(local!blutdruckScore,"diastolischerWert",null),
+                        color: "PURPLE"
+                      )
+                    }
+                  )
+                }
+              ),
+              #"SYSTEM_SYSRULES_cardLayout"(
+                style: "#333333",
+                shape: "ROUNDED",
+                showBorder: false,
+                showShadow: true,
+                contents: {
+                  #"SYSTEM_SYSRULES_headingField"(
+                    text: "Kommende Termine",
+                    size: "MEDIUM",
+                    fontWeight: "SEMI_BOLD",
+                  ),
+                  #"SYSTEM_SYSRULES_forEach"(
+                    items: if(
+                      local!showMore,
+                      local!upcomingAppointments,
+                      index(local!upcomingAppointments,{1,2,3,4,5},null)
+                    ),
+                    expression: #"SYSTEM_SYSRULES_cardLayout"(
+                      marginBelow: "STANDARD",
+                      showBorder: false,
+                      shape: "ROUNDED",
+                      link: #"SYSTEM_SYSRULES_startProcessLink"(
+                        processModel: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1067898",
+                        processParameters: {
+                          healthAppointmentId: fv!item[#"urn:appian:record-field:v1:1b96054c-af55-4d2a-a907-daf8f6cb05ed/c8262e23-36e5-4fff-ad09-e6dd2e635320"]
+                        },
+                        showWhen: fv!item[#"urn:appian:record-field:v1:1b96054c-af55-4d2a-a907-daf8f6cb05ed/dc1a9af4-55a0-46ed-aef1-f8e0b5710d18"]
+                      ),
+                      contents: {
+                        #"SYSTEM_SYSRULES_sideBySideLayout"(
+                          items: {
+                            #"SYSTEM_SYSRULES_sideBySideItem"(
+                              width: "MINIMIZE",
+                              item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                                align: "LEFT",
+                                label: "Date",
+                                labelPosition: "COLLAPSED",
+                                value: {
+                                  #"SYSTEM_SYSRULES_richTextItem_v1"(
+                                    text: datetext(fv!item[#"urn:appian:record-field:v1:1b96054c-af55-4d2a-a907-daf8f6cb05ed/88976b74-9849-4755-ba2d-84be6b211239"],"EE dd.MM.YYYY HH:MM"),
+                                    style: "STRONG",
+                                    size: "MEDIUM"
+                                  ),
+                                  char(10),
+                                  #"SYSTEM_SYSRULES_richTextItem_v1"(
+                                    text: displayvalue(
+                                      fv!item[#"urn:appian:record-field:v1:1b96054c-af55-4d2a-a907-daf8f6cb05ed/90123e83-5fd9-46fe-86ba-fa35973f05b0"],
+                                      local!healthBookingOptions[#"urn:appian:record-field:v1:bee451d4-0dcb-4706-b938-9a1084b98ff7/059ab318-b3ed-4cc5-9e1d-cc5bf95ae433"],
+                                      local!healthBookingOptions[#"urn:appian:record-field:v1:bee451d4-0dcb-4706-b938-9a1084b98ff7/3395909e-62bd-48c8-97e0-478127566586"],
+                                      "-"
+                                    )
+                                  )
+                                }
+                              )
+                            ),
+                            #"SYSTEM_SYSRULES_sideBySideItem"(
+                              showWhen: fv!item[#"urn:appian:record-field:v1:1b96054c-af55-4d2a-a907-daf8f6cb05ed/dc1a9af4-55a0-46ed-aef1-f8e0b5710d18"],
+                              item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                                align: "RIGHT",
+                                label: "Additional Info Icon",
+                                labelPosition: "COLLAPSED",
+                                value: #"SYSTEM_SYSRULES_richTextIcon"(
+                                  size: "MEDIUM",
+                                  icon: "exclamation-circle",
+                                  caption: "Zusätzliche Informationen Benötigt"
+                                )
+                              )
+                            )
+                          }
+                        )
+                      }
+                    )
+                  ),
+                  #"SYSTEM_SYSRULES_cardLayout"(
+                    showBorder: false,
+                    shape: "ROUNDED",
+                    link: #"SYSTEM_SYSRULES_dynamicLink"(
+                      saveInto: a!save(local!showMore,not(local!showMore))
+                    ),
+                    contents: {
+                      #"SYSTEM_SYSRULES_richTextDisplayField"(
+                        align: "CENTER",
+                        labelPosition: "COLLAPSED",
+                        value: {
+                          #"SYSTEM_SYSRULES_richTextIcon"(
+                            size: "MEDIUM",
+                            icon: if(local!showMore,"angle-double-up", "angle-double-down")
+                          ),
+                          #"SYSTEM_SYSRULES_richTextItem_v1"(
+                            text: if(local!showMore,"Weniger anzeigen", "Mehr anzeigen")
+                          ),
+                          #"SYSTEM_SYSRULES_richTextIcon"(
+                            size: "MEDIUM",
+                            icon: if(local!showMore,"angle-double-up", "angle-double-down")
+                          ),
+                        }
+                      )
+                    }
+                  )
+                }
+              )
+            }
+          )
+        }
+      )
+    }
+  )
+)</definition>
+        <namedTypedValue>
+            <name>function</name>
+            <type>
+                <name>string</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+            <value/>
+        </namedTypedValue>
+        <preferredEditor>interface</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+        <isCustom>false</isCustom>
+    </interface>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <history>
+        <historyInfo versionUuid="_a-0000ed02-f63d-8000-9bea-011c48011c48_1068395"/>
+    </history>
+</contentHaul>

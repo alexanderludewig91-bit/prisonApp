@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1696747</versionUuid>
+    <rule>
+        <name>PS_DR_DateTimeMonthOptionalHour</name>
+        <uuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1647607</uuid>
+        <description>Format 1. Januar 2025 with optional Hour</description>
+        <parentUuid>4e30e89d-6b0d-415f-8a87-1107bebc8692</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>if(
+  a!isNullOrEmpty(ri!dateTime),
+  "--",
+  if(
+    ri!hour,
+    text(ri!dateTime, "hh:mm"),
+    if(
+      ri!month,
+      text(ri!dateTime, "dd mmmm yyyy"),
+      text(ri!dateTime, "dd mmmm yyyy hh:mm")
+    )
+  )
+)</definition>
+        <namedTypedValue>
+            <name>dateTime</name>
+            <type>
+                <name>dateTime</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>hour</name>
+            <type>
+                <name>boolean</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>month</name>
+            <type>
+                <name>boolean</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <preferredEditor>legacy</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+    </rule>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <typedValue>
+        <type>
+            <name>RuleTestConfig?list</name>
+            <namespace>http://www.appian.com/ae/types/2009</namespace>
+        </type>
+        <value>
+            <el>
+                <a:name>Returns '--' for null dateTime</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true" xsi:type="xsd:dateTime"/>
+                    <a:nameRef>dateTime</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">false</a:value>
+                    <a:nameRef>hour</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">false</a:value>
+                    <a:nameRef>month</a:nameRef>
+                    <a:id>3</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions>
+                    <a:expectedOutput>
+                        <a:type a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:runtimeType a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string">--</a:value>
+                    </a:expectedOutput>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Formats with hour and minute when hour is true</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">datetime(2025, 1, 1, 14, 30, 0)</a:value>
+                    <a:nameRef>dateTime</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">true</a:value>
+                    <a:nameRef>hour</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">false</a:value>
+                    <a:nameRef>month</a:nameRef>
+                    <a:id>3</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions>
+                    <a:expectedOutput>
+                        <a:type a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:runtimeType a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string">15:30</a:value>
+                    </a:expectedOutput>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Formats with day, month, and year when month is true</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">datetime(2025, 1, 1, 14, 30, 0)</a:value>
+                    <a:nameRef>dateTime</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">false</a:value>
+                    <a:nameRef>hour</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">true</a:value>
+                    <a:nameRef>month</a:nameRef>
+                    <a:id>3</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions>
+                    <a:expectedOutput>
+                        <a:type a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:runtimeType a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string">01 January 2025</a:value>
+                    </a:expectedOutput>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Formats with day, month, year, hour, and minute when both hour and month are false</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">datetime(2025, 1, 1, 14, 30, 0)</a:value>
+                    <a:nameRef>dateTime</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">false</a:value>
+                    <a:nameRef>hour</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">false</a:value>
+                    <a:nameRef>month</a:nameRef>
+                    <a:id>3</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions>
+                    <a:expectedOutput>
+                        <a:type a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:runtimeType a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string">01 January 2025 15:30</a:value>
+                    </a:expectedOutput>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Handles different month and time</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">datetime(2025, 6, 15, 9, 5, 0)</a:value>
+                    <a:nameRef>dateTime</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">false</a:value>
+                    <a:nameRef>hour</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">true</a:value>
+                    <a:nameRef>month</a:nameRef>
+                    <a:id>3</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions>
+                    <a:expectedOutput>
+                        <a:type a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:runtimeType a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string">15 June 2025</a:value>
+                    </a:expectedOutput>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Prioritizes hour formatting over month when both are true</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">datetime(2025, 12, 31, 23, 59, 59)</a:value>
+                    <a:nameRef>dateTime</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">true</a:value>
+                    <a:nameRef>hour</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">true</a:value>
+                    <a:nameRef>month</a:nameRef>
+                    <a:id>3</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions>
+                    <a:expectedOutput>
+                        <a:type a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:runtimeType a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string">00:59</a:value>
+                    </a:expectedOutput>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Handles midnight correctly</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">datetime(2025, 1, 1, 0, 0, 0)</a:value>
+                    <a:nameRef>dateTime</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">true</a:value>
+                    <a:nameRef>hour</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">false</a:value>
+                    <a:nameRef>month</a:nameRef>
+                    <a:id>3</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions>
+                    <a:expectedOutput>
+                        <a:type a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:runtimeType a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string">01:00</a:value>
+                    </a:expectedOutput>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Formats correctly for last day of year</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">datetime(2025, 12, 31, 23, 59, 59)</a:value>
+                    <a:nameRef>dateTime</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">false</a:value>
+                    <a:nameRef>hour</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">false</a:value>
+                    <a:nameRef>month</a:nameRef>
+                    <a:id>3</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions>
+                    <a:expectedOutput>
+                        <a:type a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:runtimeType a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string">01 January 2026 00:59</a:value>
+                    </a:expectedOutput>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Handles leap year date</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">datetime(2024, 2, 29, 12, 0, 0)</a:value>
+                    <a:nameRef>dateTime</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">false</a:value>
+                    <a:nameRef>hour</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">true</a:value>
+                    <a:nameRef>month</a:nameRef>
+                    <a:id>3</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions>
+                    <a:expectedOutput>
+                        <a:type a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:runtimeType a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string">29 February 2024</a:value>
+                    </a:expectedOutput>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Formats single-digit hour correctly</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">datetime(2025, 1, 1, 9, 5, 0)</a:value>
+                    <a:nameRef>dateTime</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">true</a:value>
+                    <a:nameRef>hour</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">false</a:value>
+                    <a:nameRef>month</a:nameRef>
+                    <a:id>3</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions>
+                    <a:expectedOutput>
+                        <a:type a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:runtimeType a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string">10:05</a:value>
+                    </a:expectedOutput>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+        </value>
+    </typedValue>
+    <history>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1683395"/>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1696747"/>
+    </history>
+</contentHaul>

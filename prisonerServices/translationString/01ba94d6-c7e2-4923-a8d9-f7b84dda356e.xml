@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<translationStringHaul xmlns:a="http://www.appian.com/ae/types/2009">
+  <versionUuid>aea74913-cb33-4f05-a999-2cf199eae2c9</versionUuid>
+  <translationString a:uuid="01ba94d6-c7e2-4923-a8d9-f7b84dda356e">
+    <a:translationSetUuid>5f1fccd2-d309-46dc-a451-abf6d078df5a</a:translationSetUuid>
+    <a:description/>
+    <a:translatorNotes/>
+    <translationTexts>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>en-US</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>The administrative department will forward the decision to the inmate</a:translatedText>
+      </translatedText>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>de</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Die Arbeitsabteilung wird die Entscheidung an den Gefangenen weiterleiten</a:translatedText>
+      </translatedText>
+    </translationTexts>
+    <translationStringVariables/>
+  </translationString>
+  <history>
+    <historyInfo versionUuid="fd9b740e-83e8-4838-a0e0-738d99840c63"/>
+    <historyInfo versionUuid="aea74913-cb33-4f05-a999-2cf199eae2c9"/>
+  </history>
+</translationStringHaul>

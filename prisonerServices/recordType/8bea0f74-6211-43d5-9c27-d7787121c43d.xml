@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<recordTypeHaul xmlns:a="http://www.appian.com/ae/types/2009" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <versionUuid>255bde1a-b940-4ff2-b7ae-a2bb31d5aa7a</versionUuid>
+  <recordType a:uuid="8bea0f74-6211-43d5-9c27-d7787121c43d" name="PS Incident Event Type">
+    <a:pluralName>PS Incident Event Types</a:pluralName>
+    <a:description>Contains the types of business events for Incident</a:description>
+    <a:urlStub>n625LQ</a:urlStub>
+    <a:source xsi:type="a:RecordsReplica"/>
+    <a:listViewTemplateExpr>#"SYSTEM_SYSRULES_recordGridField"(
+    columns: {
+        #"SYSTEM_SYSRULES_gridColumn"(
+          label: "Id",
+          sortField: #"urn:appian:record-field:v1:8bea0f74-6211-43d5-9c27-d7787121c43d/5e44be51-bac5-41dc-b791-8d082fcc6902",
+          value: fv!row[#"urn:appian:record-field:v1:8bea0f74-6211-43d5-9c27-d7787121c43d/5e44be51-bac5-41dc-b791-8d082fcc6902"],
+          align: "END"
+        ),
+        #"SYSTEM_SYSRULES_gridColumn"(
+          label: "Event Name",
+          sortField: #"urn:appian:record-field:v1:8bea0f74-6211-43d5-9c27-d7787121c43d/3c271eca-db27-418e-b0d5-d29477786147",
+          value: #"SYSTEM_SYSRULES_linkField"(
+            links: {
+              #"SYSTEM_SYSRULES_recordLink"(
+                label: fv!row[#"urn:appian:record-field:v1:8bea0f74-6211-43d5-9c27-d7787121c43d/3c271eca-db27-418e-b0d5-d29477786147"],
+                recordType: #"urn:appian:record-type:v1:8bea0f74-6211-43d5-9c27-d7787121c43d",
+                identifier: fv!identifier
+              )
+            }
+          )
+        )
+      },
+      pageSize: 50,
+      shadeAlternateRows: true
+    )</a:listViewTemplateExpr>
+    <a:detailViewCfg>
+      <a:nameExpr>#"SYSTEM_SYSRULES_rtd_getDefaultSummaryViewName"()</a:nameExpr>
+      <a:uiExpr/>
+      <a:visibilityExpr>=true()</a:visibilityExpr>
+      <a:urlStub>summary</a:urlStub>
+      <a:headerExpr/>
+      <a:recordActionLaunchType>DIALOG</a:recordActionLaunchType>
+      <a:recordUiSecurityType>EXPRESSION</a:recordUiSecurityType>
+    </a:detailViewCfg>
+    <a:isSystem>false</a:isSystem>
+    <a:dataSrcExpr/>
+    <a:facetsListExpr/>
+    <a:titleExpr>rv!record[#"urn:appian:record-field:v1:8bea0f74-6211-43d5-9c27-d7787121c43d/3c271eca-db27-418e-b0d5-d29477786147"]</a:titleExpr>
+    <a:defaultFiltersExpr/>
+    <a:layoutType>GRID</a:layoutType>
+    <a:security>16383</a:security>
+    <a:hideLatestNews>false</a:hideLatestNews>
+    <a:hideNewsView>false</a:hideNewsView>
+    <a:hideRelatedActionsView>false</a:hideRelatedActionsView>
+    <a:isExportable>true</a:isExportable>
+    <a:listViewSrcExpr/>
+    <a:recordViewSrcExpr/>
+    <a:recordTypeSearchCfg>
+      <searchFieldsSrc>DEFAULT</searchFieldsSrc>
+      <placeholderSrc>DEFAULT</placeholderSrc>
+      <placeholder/>
+    </a:recordTypeSearchCfg>
+    <a:iconId/>
+    <a:listAutoRefreshInterval>0.0</a:listAutoRefreshInterval>
+    <a:sourceConfiguration>
+      <sourceUuid>PS_INCIDENT_EVENT_TYPE@_a-0000ee18-46a3-8000-88ca-179188179188_7199</sourceUuid>
+      <sourceType>RDBMS_TABLE</sourceType>
+      <sourceSubType>NONE</sourceSubType>
+      <sourceContextExpr/>
+      <friendlyName>PS_INCIDENT_EVENT_TYPE</friendlyName>
+      <sourceFilterExpr/>
+      <field>
+        <uuid>5e44be51-bac5-41dc-b791-8d082fcc6902</uuid>
+        <type>{http://www.appian.com/ae/types/2009}Integer</type>
+        <sourceFieldName>ID</sourceFieldName>
+        <sourceFieldType>INTEGER</sourceFieldType>
+        <fieldName>id</fieldName>
+        <displayName>Id</displayName>
+        <isRecordId>true</isRecordId>
+        <isUnique>true</isUnique>
+        <isCustomField>false</isCustomField>
+        <customFieldExpr/>
+        <fieldCalculationType>NA</fieldCalculationType>
+        <fieldTemplateType>NA</fieldTemplateType>
+        <recordFieldSecurityMembershipFilter/>
+        <fieldFormat/>
+        <isIndexable>false</isIndexable>
+        <subType>NA</subType>
+      </field>
+      <field>
+        <uuid>3c271eca-db27-418e-b0d5-d29477786147</uuid>
+        <type>{http://www.appian.com/ae/types/2009}Text</type>
+        <sourceFieldName>EVENT_NAME</sourceFieldName>
+        <sourceFieldType>VARCHAR(255)</sourceFieldType>
+        <fieldName>eventName</fieldName>
+        <displayName>Event Name</displayName>
+        <isRecordId>false</isRecordId>
+        <isUnique>false</isUnique>
+        <isCustomField>false</isCustomField>
+        <customFieldExpr/>
+        <fieldCalculationType>NA</fieldCalculationType>
+        <fieldTemplateType>NA</fieldTemplateType>
+        <recordFieldSecurityMembershipFilter/>
+        <fieldFormat/>
+        <isIndexable>false</isIndexable>
+        <subType>NA</subType>
+      </field>
+      <uuid>6fd5c450-ad13-44aa-9040-e27ebd3130ef</uuid>
+      <refreshSchedule>
+        <frequency>DAILY</frequency>
+        <value>{"hour":3,"minute":"00","amPM":"AM","timeZone":"Europe/Berlin"}</value>
+        <activated>false</activated>
+      </refreshSchedule>
+      <skipFailureEnabled>true</skipFailureEnabled>
+      <recordIdGeneratorUuid/>
+    </a:sourceConfiguration>
+    <a:enabledFeatures>511</a:enabledFeatures>
+    <a:isVisibleInRecordTypeList>false</a:isVisibleInRecordTypeList>
+    <a:recordActionLaunchType>DIALOG</a:recordActionLaunchType>
+    <a:showSearchBox>true</a:showSearchBox>
+    <a:isVisibleInDataFabric>false</a:isVisibleInDataFabric>
+    <a:usesRollingSyncLimit>false</a:usesRollingSyncLimit>
+    <a:usesRecoverySync>false</a:usesRecoverySync>
+    <a:isScheduledIndexingEnabled>false</a:isScheduledIndexingEnabled>
+  </recordType>
+  <roleMap>
+    <role name="record_type_administrator">
+      <users/>
+      <groups>
+        <groupUuid>_e-0000ed02-f61f-8000-9b37-01075c01075c_5585</groupUuid>
+      </groups>
+    </role>
+    <role name="record_type_viewer">
+      <users/>
+      <groups>
+        <groupUuid>_e-0000ed02-f61f-8000-9b37-01075c01075c_5587</groupUuid>
+      </groups>
+    </role>
+  </roleMap>
+  <history>
+    <historyInfo versionUuid="8bea0f74-6211-43d5-9c27-d7787121c43d"/>
+    <historyInfo versionUuid="53a49690-07fb-4b49-b494-5afa1ae3f4da"/>
+    <historyInfo versionUuid="255bde1a-b940-4ff2-b7ae-a2bb31d5aa7a"/>
+  </history>
+  <migrationVersion>1</migrationVersion>
+</recordTypeHaul>

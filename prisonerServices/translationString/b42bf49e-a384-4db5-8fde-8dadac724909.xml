@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<translationStringHaul xmlns:a="http://www.appian.com/ae/types/2009">
+  <versionUuid>876cd0cb-3475-411e-bcad-0c9ec457d0f6</versionUuid>
+  <translationString a:uuid="b42bf49e-a384-4db5-8fde-8dadac724909">
+    <a:translationSetUuid>5f1fccd2-d309-46dc-a451-abf6d078df5a</a:translationSetUuid>
+    <a:description/>
+    <a:translatorNotes/>
+    <translationTexts>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>en-US</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Inmate ID</a:translatedText>
+      </translatedText>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>de</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Gefangenen ID</a:translatedText>
+      </translatedText>
+    </translationTexts>
+    <translationStringVariables/>
+  </translationString>
+  <history>
+    <historyInfo versionUuid="eedae00d-003b-4453-a6ac-175add251dd9"/>
+    <historyInfo versionUuid="876cd0cb-3475-411e-bcad-0c9ec457d0f6"/>
+  </history>
+</translationStringHaul>

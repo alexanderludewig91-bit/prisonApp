@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1624464</versionUuid>
+    <rule>
+        <name>PS_ConvertEventDataToXML</name>
+        <uuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1548543</uuid>
+        <description></description>
+        <parentUuid>4e30e89d-6b0d-415f-8a87-1107bebc8692</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>if(
+  a!isNullOrEmpty(ri!eventId),
+  toxml("No eventId found"),
+  a!localVariables(
+    local!eventData: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1548562"(eventId: ri!eventId),
+    local!participantsData: concat(
+      #"SYSTEM_SYSRULES_forEach"(
+        items: local!eventData.participants,
+        expression: concat(
+          "
+&lt;tns:beteiligung&gt;
+&lt;tns:rolle&gt;
+&lt;!-- TeT-Comment: Eindeutig innerhalb des Dokuments --&gt;
+&lt;tns:rollennummer&gt;" &amp; fv!item[#"urn:appian:record-field:v1:3854eb39-6a61-48cd-82b6-e4645b2900fe/6e4c5732-924a-42ac-8c76-c8abc7bd517f"] &amp; "&lt;/tns:rollennummer&gt;
+&lt;tns:rollenbezeichnung listVersionID="3.5"&gt;
+&lt;!-- TeT-Comment: ZEUGEN, Beispielhaft nur diese Rolle --&gt;
+&lt;code&gt;202&lt;/code&gt;
+&lt;/tns:rollenbezeichnung&gt;
+&lt;!-- TeT-Comment: Fortlaufend je 202-202 Zeuge, Zeugin --&gt;
+&lt;tns:nr&gt;1&lt;/tns:nr&gt;
+&lt;!-- TeT-Comment: User-ID --&gt;
+&lt;tns:geschaeftszeichen&gt;" &amp; fv!item[#"urn:appian:record-field:v1:3854eb39-6a61-48cd-82b6-e4645b2900fe/5bd820c3-9636-46f6-a807-71831615e1ae"] &amp; "&lt;/tns:geschaeftszeichen&gt;
+&lt;/tns:rolle&gt;
+&lt;tns:beteiligter&gt;
+&lt;tns:auswahl_beteiligter&gt;
+&lt;tns:natuerlichePerson&gt;
+&lt;tns:vollerName&gt;
+&lt;tns:vorname&gt;" &amp; #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1566080"(
+            fv!item[#"urn:appian:record-field:v1:3854eb39-6a61-48cd-82b6-e4645b2900fe/02011db0-86ad-4cf2-bf76-8358c5fd0dc2"]
+          ) &amp; "&lt;/tns:vorname&gt;
+&lt;tns:nachname&gt;" &amp; #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1566103"(
+            fv!item[#"urn:appian:record-field:v1:3854eb39-6a61-48cd-82b6-e4645b2900fe/02011db0-86ad-4cf2-bf76-8358c5fd0dc2"]
+          ) &amp; "&lt;/tns:nachname&gt;
+&lt;/tns:vollerName&gt;
+&lt;tns:geburt&gt;
+&lt;!-- TeT-Comment: \d{4}((-\d{2}){0,1}-\d{2}){0,1} --&gt;
+&lt;tns:geburtsdatum&gt;" &amp; fv!item[#"urn:appian:record-field:v1:3854eb39-6a61-48cd-82b6-e4645b2900fe/bbb02f76-6d20-4cc7-b768-a46ba483418d"] &amp; "&lt;/tns:geburtsdatum&gt;
+&lt;/tns:geburt&gt;
+&lt;/tns:natuerlichePerson&gt;
+&lt;/tns:auswahl_beteiligter&gt;
+&lt;/tns:beteiligter&gt;
+&lt;/tns:beteiligung&gt;"
+        ),
+        
+      )
+    ),
+    local!firstXMLVersion: substitute(
+      substitute(
+        substitute(
+          substitute(
+            substitute(
+              substitute(
+                substitute(
+                  substitute(
+                    #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1548527",
+                    "$AKTENZEICHEN",
+                    local!eventData.event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/7bd3ce80-0696-4abd-a32c-6f6f775a9f5d"]
+                  ),
+                  "$AKTENZEICHEN_EMPFAENGER",
+                  "1234"
+                ),
+                "$NACHRICHTENID",
+                concat(
+                  "Nachricht: " &amp; local!eventData.event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/8eedcd4f-41f4-4085-889b-efedecf448e2"] &amp; "/Intern"
+                )
+              ),
+              "$ERSTELLUNGSZEITPUNKT_MELDUNG",
+              local!eventData.event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/cccb618b-bfdd-44b0-9ad2-73d6ca2f636d"]
+            ),
+            "$FREMDE_NACHRICHTEN_ID",
+            concat(
+              "Nachricht: " &amp; local!eventData.event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/8eedcd4f-41f4-4085-889b-efedecf448e2"] &amp; "/Extern"
+            )
+          ),
+          "$NAME_DES_PRODUKTS",
+          "Prisoner Services"
+        ),
+        "$HERSTELLER",
+        "AV SOFTWARE SOLUTIONS 360°"
+      ),
+      "$SOFTWAREVERSION",
+      "Version 1.0"
+    )toxml(
+      replaceb(
+        local!firstXMLVersion,
+        sum(
+          len(
+            "&lt;?xml version=""1.0"" encoding=""UTF-8""?&gt; &lt;tns:nachricht.gds.basisnachricht.0005006 xmlns:tns=""http://www.xjustiz.de"" xmlns:xoev-code=""http://xoev.de/schemata/code/1_0"" xmlns:xoev-lc=""http://xoev.de/latinchars/1_1/datatypes"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xsi:schemaLocation=""http://www.xjustiz.de xjustiz_0005_nachrichten_3_1.xsd""&gt;    &lt;tns:nachrichtenkopf xjustizVersion=""3.5.1""&gt;       &lt;tns:aktenzeichen.absender&gt;$AKTENZEICHEN&lt;/tns:aktenzeichen.absender&gt;       &lt;tns:aktenzeichen.empfaenger&gt;$AKTENZEICHEN_EMPFAENGER&lt;/tns:aktenzeichen.empfaenger&gt;       &lt;tns:erstellungszeitpunkt&gt;$ERSTELLUNGSZEITPUNKT_MELDUNG&lt;/tns:erstellungszeitpunkt&gt;       &lt;tns:auswahl_absender&gt;          &lt;tns:absender.gericht listVersionID="3.5"&gt;             &lt;code&gt;9K0000&lt;/code&gt;          &lt;/tns:absender.gericht&gt;       &lt;/tns:auswahl_absender&gt;       &lt;tns:auswahl_empfaenger&gt;          &lt;tns:empfaenger.gericht listVersionID="3.5"&gt;             &lt;code&gt;9A0000&lt;/code&gt;          &lt;/tns:empfaenger.gericht&gt;       &lt;/tns:auswahl_empfaenger&gt;       &lt;tns:eigeneNachrichtenID&gt;$NACHRICHTENID&lt;/tns:eigeneNachrichtenID&gt;       &lt;tns:fremdeNachrichtenID&gt;$FREMDE_NACHRICHTEN_ID&lt;/tns:fremdeNachrichtenID&gt;       &lt;tns:ereignis listVersionID="1.10"&gt;          &lt;code&gt;017&lt;/code&gt;       &lt;/tns:ereignis&gt;       &lt;tns:herstellerinformation&gt;          &lt;tns:nameDesProdukts&gt;$NAME_DES_PRODUKTS&lt;/tns:nameDesProdukts&gt;          &lt;tns:herstellerDesProdukts&gt;$HERSTELLER&lt;/tns:herstellerDesProdukts&gt;          &lt;tns:version&gt;$SOFTWAREVERSION&lt;/tns:version&gt;       &lt;/tns:herstellerinformation&gt;    &lt;/tns:nachrichtenkopf&gt;    &lt;tns:grunddaten&gt;       &lt;tns:verfahrensdaten&gt;          "
+          )
+        ) + 1,
+        sum(
+          len(
+            "&lt;?xml version=""1.0"" encoding=""UTF-8""?&gt; &lt;tns:nachricht.gds.basisnachricht.0005006 xmlns:tns=""http://www.xjustiz.de"" xmlns:xoev-code=""http://xoev.de/schemata/code/1_0"" xmlns:xoev-lc=""http://xoev.de/latinchars/1_1/datatypes"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xsi:schemaLocation=""http://www.xjustiz.de xjustiz_0005_nachrichten_3_1.xsd""&gt;    &lt;tns:nachrichtenkopf xjustizVersion=""3.5.1""&gt;       &lt;tns:aktenzeichen.absender&gt;$AKTENZEICHEN&lt;/tns:aktenzeichen.absender&gt;       &lt;tns:aktenzeichen.empfaenger&gt;$AKTENZEICHEN_EMPFAENGER&lt;/tns:aktenzeichen.empfaenger&gt;       &lt;tns:erstellungszeitpunkt&gt;$ERSTELLUNGSZEITPUNKT_MELDUNG&lt;/tns:erstellungszeitpunkt&gt;       &lt;tns:auswahl_absender&gt;          &lt;tns:absender.gericht listVersionID="3.5"&gt;             &lt;code&gt;9K0000&lt;/code&gt;          &lt;/tns:absender.gericht&gt;       &lt;/tns:auswahl_absender&gt;       &lt;tns:auswahl_empfaenger&gt;          &lt;tns:empfaenger.gericht listVersionID="3.5"&gt;             &lt;code&gt;9A0000&lt;/code&gt;          &lt;/tns:empfaenger.gericht&gt;       &lt;/tns:auswahl_empfaenger&gt;       &lt;tns:eigeneNachrichtenID&gt;$NACHRICHTENID&lt;/tns:eigeneNachrichtenID&gt;       &lt;tns:fremdeNachrichtenID&gt;$FREMDE_NACHRICHTEN_ID&lt;/tns:fremdeNachrichtenID&gt;       &lt;tns:ereignis listVersionID="1.10"&gt;          &lt;code&gt;017&lt;/code&gt;       &lt;/tns:ereignis&gt;       &lt;tns:herstellerinformation&gt;          &lt;tns:nameDesProdukts&gt;$NAME_DES_PRODUKTS&lt;/tns:nameDesProdukts&gt;          &lt;tns:herstellerDesProdukts&gt;$HERSTELLER&lt;/tns:herstellerDesProdukts&gt;          &lt;tns:version&gt;$SOFTWAREVERSION&lt;/tns:version&gt;       &lt;/tns:herstellerinformation&gt;    &lt;/tns:nachrichtenkopf&gt;    &lt;tns:grunddaten&gt;       &lt;tns:verfahrensdaten&gt;          &lt;tns:beteiligung&gt;             &lt;tns:rolle&gt;                &lt;!-- TeT-Comment: Eindeutig innerhalb des Dokuments --&gt;                &lt;tns:rollennummer&gt;$ROLLENNUMMER&lt;/tns:rollennummer&gt;                &lt;tns:rollenbezeichnung listVersionID="3.5"&gt;                   &lt;!-- TeT-Comment: ZEUGEN, Beispielhaft nur diese Rolle --&gt;                   &lt;code&gt;202&lt;/code&gt;                &lt;/tns:rollenbezeichnung&gt;                &lt;!-- TeT-Comment: Fortlaufend je 202-202 Zeuge, Zeugin --&gt;                &lt;tns:nr&gt;1&lt;/tns:nr&gt;                &lt;!-- TeT-Comment: User-ID --&gt;                &lt;tns:geschaeftszeichen&gt;$GESCHAEFTSZEICHEN&lt;/tns:geschaeftszeichen&gt;             &lt;/tns:rolle&gt;             &lt;tns:beteiligter&gt;                &lt;tns:auswahl_beteiligter&gt;                   "
+          )
+        ) + len(
+          "&lt;tns:natuerlichePerson&gt;
+&lt;tns:vollerName&gt;
+&lt;tns:vorname&gt;$VORNAME&lt;/tns:vorname&gt;
+&lt;tns:nachname&gt;$NACHNAME&lt;/tns:nachname&gt;
+&lt;/tns:vollerName&gt;
+&lt;tns:geburt&gt;
+&lt;!-- TeT-Comment: \d{4}((-\d{2}){0,1}-\d{2}){0,1} --&gt;
+&lt;tns:geburtsdatum&gt;$GEBURTSDATUM&lt;/tns:geburtsdatum&gt;
+&lt;/tns:geburt&gt;
+&lt;/tns:natuerlichePerson&gt;"
+        ),
+        concat(
+          local!participantsData &amp; "
+&lt;/tns:verfahrensdaten&gt;
+&lt;/tns:grunddaten&gt;
+&lt;/tns:nachricht.gds.basisnachricht.0005006&gt;"
+        )
+      )
+    )
+  )
+)</definition>
+        <namedTypedValue>
+            <name>eventId</name>
+            <type>
+                <name>int</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <preferredEditor>legacy</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+    </rule>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <typedValue>
+        <type>
+            <name>RuleTestConfig?list</name>
+            <namespace>http://www.appian.com/ae/types/2009</namespace>
+        </type>
+        <value>
+            <el>
+                <a:name>Valid eventId</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:int">42</a:value>
+                    <a:nameRef>eventId</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Handles null or empty eventId</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true" xsi:type="xsd:int"/>
+                    <a:nameRef>eventId</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions>
+                    <a:expectedOutput>
+                        <a:type a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:runtimeType a:uuid="{http://www.appian.com/ae/types/2009}Text"/>
+                        <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string">&lt;xsd:string xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;No eventId found&lt;/xsd:string&gt;</a:value>
+                    </a:expectedOutput>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+        </value>
+    </typedValue>
+    <history>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1624464"/>
+    </history>
+</contentHaul>

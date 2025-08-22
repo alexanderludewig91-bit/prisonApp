@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<translationStringHaul xmlns:a="http://www.appian.com/ae/types/2009">
+  <versionUuid>4d33dd31-5044-468b-b211-fdf08ced6550</versionUuid>
+  <translationString a:uuid="6c963fc8-83fd-4f41-9fe4-20a7fcc87f71">
+    <a:translationSetUuid>5f1fccd2-d309-46dc-a451-abf6d078df5a</a:translationSetUuid>
+    <a:description/>
+    <a:translatorNotes/>
+    <translationTexts>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>de</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Gemütszustand des Gefangenen</a:translatedText>
+      </translatedText>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>en-US</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Inmate's Emotional State</a:translatedText>
+      </translatedText>
+    </translationTexts>
+    <translationStringVariables/>
+  </translationString>
+  <history>
+    <historyInfo versionUuid="86e80d63-c70a-4df2-ba0f-581a74414854"/>
+    <historyInfo versionUuid="802d1e8f-099e-443a-80e0-3ce1e9973360"/>
+    <historyInfo versionUuid="4d33dd31-5044-468b-b211-fdf08ced6550"/>
+  </history>
+</translationStringHaul>

@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<recordTypeHaul xmlns:a="http://www.appian.com/ae/types/2009" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <versionUuid>45538d55-2cba-479f-8da8-eca420dc796e</versionUuid>
+  <recordType a:uuid="da53da5e-427c-4440-9f0d-9c2b46349351" name="Service">
+    <a:pluralName>Services</a:pluralName>
+    <a:description>List of entries in the Prisoner Services application</a:description>
+    <a:urlStub>92O_og</a:urlStub>
+    <a:source
+      a:uuid="7b41c4c8-4ed6-4069-863d-3b112748f51b@_a-0000ed02-f63d-8000-9bea-011c48011c48_1058812" xsi:type="a:DataStoreEntity"/>
+    <a:listViewTemplateExpr>#"SYSTEM_SYSRULES_recordGridField"(
+  rowHeader: 1,
+  emptyGridMessage: "No Services available",
+  columns: {
+    #"SYSTEM_SYSRULES_gridColumn"(
+      label: "Title",
+      sortField: #"urn:appian:record-field:v1:da53da5e-427c-4440-9f0d-9c2b46349351/title",
+      width: "7X",
+      value: #"SYSTEM_SYSRULES_linkField"(
+        links: #"SYSTEM_SYSRULES_recordLink"(
+          label: fv!row[#"urn:appian:record-field:v1:da53da5e-427c-4440-9f0d-9c2b46349351/title"],
+          recordType: #"urn:appian:record-type:v1:da53da5e-427c-4440-9f0d-9c2b46349351",
+          identifier: fv!identifier
+        )
+      )
+    ),
+    #"SYSTEM_SYSRULES_gridColumn"(
+      label: "Status",
+      width: "3X",
+      sortField: #"urn:appian:record-field:v1:da53da5e-427c-4440-9f0d-9c2b46349351/status%40order",
+      value: fv!row[#"urn:appian:record-field:v1:da53da5e-427c-4440-9f0d-9c2b46349351/status%40value"]
+    ),
+    #"SYSTEM_SYSRULES_gridColumn"(
+      label: "Priority",
+      width: "2X",
+      sortField: #"urn:appian:record-field:v1:da53da5e-427c-4440-9f0d-9c2b46349351/priority%40order",
+      align: "CENTER",
+      value: #"SYSTEM_SYSRULES_imageField_v1"(
+        images: {
+          a!defaultValue(#"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058732"(fv!row[#"urn:appian:record-field:v1:da53da5e-427c-4440-9f0d-9c2b46349351/priority%40value"]), {})
+        },
+        size: "ICON"
+      )
+    ),
+    #"SYSTEM_SYSRULES_gridColumn"(
+      label: "Created By",
+      sortField: #"urn:appian:record-field:v1:da53da5e-427c-4440-9f0d-9c2b46349351/createdBy",
+      width: "4X",
+      value: #"SYSTEM_SYSRULES_linkField"(
+        links: #"SYSTEM_SYSRULES_userRecordLink"(
+          label: #"28845323-04ee-4e83-9c6c-cd99b14e142b_FORMATNAME"(fv!row[#"urn:appian:record-field:v1:da53da5e-427c-4440-9f0d-9c2b46349351/createdBy"]),
+          user: fv!row[#"urn:appian:record-field:v1:da53da5e-427c-4440-9f0d-9c2b46349351/createdBy"]
+        )
+      )
+    ),
+    #"SYSTEM_SYSRULES_gridColumn"(
+      label: "Updated On",
+      sortField: #"urn:appian:record-field:v1:da53da5e-427c-4440-9f0d-9c2b46349351/updatedOn",
+      width: "2X",
+      align: "END",
+      value: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058684"(fv!row[#"urn:appian:record-field:v1:da53da5e-427c-4440-9f0d-9c2b46349351/updatedOn"])
+    )
+  },
+  pageSize: 50,
+  initialSorts: {
+    #"SYSTEM_SYSRULES_sortInfo"(
+      field: #"urn:appian:record-field:v1:da53da5e-427c-4440-9f0d-9c2b46349351/updatedOn",
+      ascending: false
+    )
+  }
+)</a:listViewTemplateExpr>
+    <a:fieldCfg a:uuid="265b998a-30af-47d1-a989-4d6bac16bf4a" name="Status">
+      <a:isSortable>false</a:isSortable>
+      <a:isSearchable>false</a:isSearchable>
+      <a:isFacet>true</a:isFacet>
+      <a:facetType>EXPRESSION</a:facetType>
+      <a:isExclusiveFacet>true</a:isExclusiveFacet>
+      <a:facetExpr>a!localVariables(
+  local!options: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058841"(),
+  local!statusCounts: #"SYSTEM_SYSRULES_queryEntity_v2"(
+    entity: #"6a0584c4-a10b-4f66-ba97-7ae5b2000a5a_MAINDSECONSTANT",
+    query: #"SYSTEM_SYSRULES_query"(
+      aggregation: #"SYSTEM_SYSRULES_queryAggregation"(
+        aggregationColumns: {
+          #"SYSTEM_SYSRULES_queryAggregationColumn"(field: "status.value", isGrouping: true),
+          #"SYSTEM_SYSRULES_queryAggregationColumn"(field: "id", aggregationFunction: "COUNT")
+        }
+      ),
+      pagingInfo: #"SYSTEM_SYSRULES_pagingInfo"(1, -1, #"SYSTEM_SYSRULES_sortInfo"("status.value", true))
+    ),
+    fetchTotalCount: false
+  ),
+  local!statusCountsOrdered: if(
+    local!statusCounts.totalCount = 0,
+    {},
+    #"SYSTEM_SYSRULES_forEach"(
+      items: local!options.value,
+      expression: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058716"(
+        ids: local!statusCounts.data.id,
+        values: local!statusCounts.data.status.value,
+        value: fv!item
+      )
+    )
+  ),
+  #"SYSTEM_SYSRULES_facet_v1"(
+    name: "Status",
+    options: #"SYSTEM_SYSRULES_forEach"(
+      items: local!options,
+      expression: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058712"(
+        option: fv!item,
+        filterField: #"urn:appian:record-field:v1:da53da5e-427c-4440-9f0d-9c2b46349351/status%40value",
+        count: index(local!statusCountsOrdered, fv!index, null)
+      )
+    )
+  )
+)</a:facetExpr>
+      <a:sortOrderIndex>0</a:sortOrderIndex>
+      <a:facetOrderIndex>0</a:facetOrderIndex>
+      <a:allowMultipleSelections>false</a:allowMultipleSelections>
+      <a:relatedRecordUserFilterSort>UNSORTED</a:relatedRecordUserFilterSort>
+    </a:fieldCfg>
+    <a:fieldCfg a:uuid="f4c996a7-255e-449e-be88-e85a16b2f48a" name="Priority">
+      <a:isSortable>false</a:isSortable>
+      <a:isSearchable>false</a:isSearchable>
+      <a:isFacet>true</a:isFacet>
+      <a:facetType>EXPRESSION</a:facetType>
+      <a:isExclusiveFacet>true</a:isExclusiveFacet>
+      <a:facetExpr>a!localVariables(
+  local!options: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058845"(),
+  local!priorityCounts: #"SYSTEM_SYSRULES_queryEntity_v2"(
+    entity: #"6a0584c4-a10b-4f66-ba97-7ae5b2000a5a_MAINDSECONSTANT",
+    query: #"SYSTEM_SYSRULES_query"(
+      aggregation: #"SYSTEM_SYSRULES_queryAggregation"(
+        aggregationColumns: {
+          #"SYSTEM_SYSRULES_queryAggregationColumn"(field: "priority.value", isGrouping: true),
+          #"SYSTEM_SYSRULES_queryAggregationColumn"(field: "id", aggregationFunction: "COUNT")
+        }
+      ),
+      pagingInfo: #"SYSTEM_SYSRULES_pagingInfo"(1, -1, #"SYSTEM_SYSRULES_sortInfo"("priority.value", true))
+    ),
+    fetchTotalCount: false
+  ),
+  local!priorityCountsOrdered: if(
+    local!priorityCounts.totalCount = 0,
+    {},
+    #"SYSTEM_SYSRULES_forEach"(
+      items: local!options.value,
+      expression: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058716"(
+        ids: local!priorityCounts.data.id,
+        values: local!priorityCounts.data.priority.value,
+        value: fv!item
+      )
+    )
+  ),
+  #"SYSTEM_SYSRULES_facet_v1"(
+    name: "Priority",
+    options: #"SYSTEM_SYSRULES_forEach"(
+      items: local!options,
+      expression: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058712"(
+        option: fv!item,
+        filterField: #"urn:appian:record-field:v1:da53da5e-427c-4440-9f0d-9c2b46349351/priority%40value",
+        count: index(local!priorityCountsOrdered, fv!index, null)
+      )
+    )
+  )
+)</a:facetExpr>
+      <a:sortOrderIndex>1</a:sortOrderIndex>
+      <a:facetOrderIndex>1</a:facetOrderIndex>
+      <a:allowMultipleSelections>false</a:allowMultipleSelections>
+      <a:relatedRecordUserFilterSort>UNSORTED</a:relatedRecordUserFilterSort>
+    </a:fieldCfg>
+    <a:fieldCfg a:uuid="259d2991-12c6-4605-82cb-e49fdabca339" name="Created By">
+      <a:isSortable>false</a:isSortable>
+      <a:isSearchable>false</a:isSearchable>
+      <a:isFacet>true</a:isFacet>
+      <a:facetType>EXPRESSION</a:facetType>
+      <a:isExclusiveFacet>true</a:isExclusiveFacet>
+      <a:facetExpr>a!localVariables(
+  local!creators:#"SYSTEM_SYSRULES_queryEntity_v2"(
+    entity: #"6a0584c4-a10b-4f66-ba97-7ae5b2000a5a_MAINDSECONSTANT",
+    query: #"SYSTEM_SYSRULES_query"(
+      aggregation: #"SYSTEM_SYSRULES_queryAggregation"(
+        aggregationColumns: {
+          #"SYSTEM_SYSRULES_queryAggregationColumn"(field: "createdBy", isGrouping: true),
+          #"SYSTEM_SYSRULES_queryAggregationColumn"(field: "createdBy", alias: "numberCreated", aggregationFunction: "COUNT")
+        }
+      ),
+      pagingInfo: #"SYSTEM_SYSRULES_pagingInfo"(1, -1, #"SYSTEM_SYSRULES_sortInfo"("createdBy", true))
+    ),
+    fetchTotalCount: false
+  ),
+  if(
+    local!creators.totalCount = 0,
+    {},
+    #"SYSTEM_SYSRULES_facet_v1"(
+      name: "Created By",
+      options: #"SYSTEM_SYSRULES_forEach"(
+        items: local!creators,
+        expression: #"SYSTEM_SYSRULES_facetOption"(
+          id: fv!index,
+          name: #"28845323-04ee-4e83-9c6c-cd99b14e142b_FORMATNAME"(fv!item.createdBy),
+          filter: #"SYSTEM_SYSRULES_queryFilter"(
+            field: #"urn:appian:record-field:v1:da53da5e-427c-4440-9f0d-9c2b46349351/createdBy",
+            operator: "=",
+            value: fv!item.createdBy
+          ),
+          dataCount: fv!item.numberCreated
+        )
+      )
+    )
+  )
+)</a:facetExpr>
+      <a:sortOrderIndex>2</a:sortOrderIndex>
+      <a:facetOrderIndex>2</a:facetOrderIndex>
+      <a:visibilityExpr/>
+      <a:defaultOptionExpr/>
+      <a:allowMultipleSelections>false</a:allowMultipleSelections>
+      <a:relatedRecordUserFilterSort>UNSORTED</a:relatedRecordUserFilterSort>
+    </a:fieldCfg>
+    <a:detailViewCfg>
+      <a:nameExpr>#"SYSTEM_SYSRULES_rtd_getDefaultSummaryViewName"()</a:nameExpr>
+      <a:uiExpr>#"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058756"(rv!identifier)</a:uiExpr>
+      <a:visibilityExpr>=true()</a:visibilityExpr>
+      <a:urlStub>summary</a:urlStub>
+      <a:headerExpr/>
+      <a:relatedActionCfg>refId-1b9dce91-8f05-423e-a84e-39fe3085a38c</a:relatedActionCfg>
+      <a:relatedActionCfg>refId-54032864-76f4-4a84-b832-2804dbba2faf</a:relatedActionCfg>
+      <a:relatedActionCfg>refId-aa98170f-05b1-4ffa-8fc9-e5964899c1ed</a:relatedActionCfg>
+      <a:recordActionLaunchType>DIALOG</a:recordActionLaunchType>
+      <a:recordUiSecurityType>EXPRESSION</a:recordUiSecurityType>
+    </a:detailViewCfg>
+    <a:detailViewCfg>
+      <a:nameExpr>"Activity History"</a:nameExpr>
+      <a:uiExpr>#"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058724"(rv!identifier)</a:uiExpr>
+      <a:visibilityExpr>=true()</a:visibilityExpr>
+      <a:urlStub>_OXnKtw</a:urlStub>
+      <a:headerExpr/>
+      <a:relatedActionCfg>refId-1b9dce91-8f05-423e-a84e-39fe3085a38c</a:relatedActionCfg>
+      <a:relatedActionCfg>refId-54032864-76f4-4a84-b832-2804dbba2faf</a:relatedActionCfg>
+      <a:recordActionLaunchType>DIALOG</a:recordActionLaunchType>
+      <a:recordUiSecurityType>EXPRESSION</a:recordUiSecurityType>
+    </a:detailViewCfg>
+    <a:relatedActionCfg a:uuid="1b9dce91-8f05-423e-a84e-39fe3085a38c">
+      <a:target a:uuid="f2660168-e687-4402-be6c-c45836bd94c2" xsi:type="a:ProcessModel"/>
+      <a:contextExpr>a!localVariables(
+  local!record: #"137f0be1-bc49-4d22-a8cc-0fda837a4dd7_GETONERECORD"(rv!identifier),
+  {
+    record: local!record,
+    documents: folder(local!record.folderId, "documentChildren"),
+  }
+)</a:contextExpr>
+      <a:visibilityExpr>=true()</a:visibilityExpr>
+      <a:iconId>f044</a:iconId>
+      <a:refId>refId-1b9dce91-8f05-423e-a84e-39fe3085a38c</a:refId>
+      <a:referenceKey>updateRecord</a:referenceKey>
+      <a:dialogSize>FIT$FIT</a:dialogSize>
+      <a:showInRecordList>false</a:showInRecordList>
+      <a:recordUiSecurityType>EXPRESSION</a:recordUiSecurityType>
+      <a:dialogWidth>FIT</a:dialogWidth>
+      <a:dialogHeight>FIT</a:dialogHeight>
+    </a:relatedActionCfg>
+    <a:relatedActionCfg a:uuid="54032864-76f4-4a84-b832-2804dbba2faf">
+      <a:target a:uuid="6cf60a15-0f11-45dd-bda0-b1d1af9f86f8" xsi:type="a:ProcessModel"/>
+      <a:contextExpr>{
+  recordId: rv!identifier
+}</a:contextExpr>
+      <a:visibilityExpr>=true()</a:visibilityExpr>
+      <a:iconId>f046</a:iconId>
+      <a:refId>refId-54032864-76f4-4a84-b832-2804dbba2faf</a:refId>
+      <a:referenceKey>sendTask</a:referenceKey>
+      <a:dialogSize>FIT$FIT</a:dialogSize>
+      <a:showInRecordList>false</a:showInRecordList>
+      <a:recordUiSecurityType>EXPRESSION</a:recordUiSecurityType>
+      <a:dialogWidth>FIT</a:dialogWidth>
+      <a:dialogHeight>FIT</a:dialogHeight>
+    </a:relatedActionCfg>
+    <a:relatedActionCfg a:uuid="aa98170f-05b1-4ffa-8fc9-e5964899c1ed">
+      <a:target a:uuid="2196f44c-a3d4-4619-8674-ddda6d6225b7" xsi:type="a:ProcessModel"/>
+      <a:contextExpr>{
+  record: #"137f0be1-bc49-4d22-a8cc-0fda837a4dd7_GETONERECORD"(rv!identifier)
+}</a:contextExpr>
+      <a:visibilityExpr>=true()</a:visibilityExpr>
+      <a:iconId>f014</a:iconId>
+      <a:refId>refId-aa98170f-05b1-4ffa-8fc9-e5964899c1ed</a:refId>
+      <a:referenceKey>deleteService</a:referenceKey>
+      <a:dialogSize>FIT$FIT</a:dialogSize>
+      <a:showInRecordList>false</a:showInRecordList>
+      <a:recordUiSecurityType>EXPRESSION</a:recordUiSecurityType>
+      <a:dialogWidth>FIT</a:dialogWidth>
+      <a:dialogHeight>FIT</a:dialogHeight>
+    </a:relatedActionCfg>
+    <a:isSystem>false</a:isSystem>
+    <a:dataSrcExpr/>
+    <a:facetsListExpr/>
+    <a:titleExpr>rv!record[#"urn:appian:record-field:v1:da53da5e-427c-4440-9f0d-9c2b46349351/title"]</a:titleExpr>
+    <a:defaultFiltersExpr/>
+    <a:layoutType>GRID</a:layoutType>
+    <a:security>16383</a:security>
+    <a:hideLatestNews>false</a:hideLatestNews>
+    <a:hideNewsView>false</a:hideNewsView>
+    <a:hideRelatedActionsView>false</a:hideRelatedActionsView>
+    <a:isExportable>true</a:isExportable>
+    <a:recordListActionCfg a:uuid="6102adc7-a7eb-4414-bd2b-349e68a740f5">
+      <a:staticTitle>New Service</a:staticTitle>
+      <a:staticDescription>Create a new Service</a:staticDescription>
+      <a:iconId>f067</a:iconId>
+      <a:target a:uuid="697aba99-57bc-4767-a26f-0f4225962748" xsi:type="a:ProcessModel"/>
+      <a:visibilityExpr>=true()</a:visibilityExpr>
+      <a:referenceKey>newService</a:referenceKey>
+      <a:dialogSize>FIT$FIT</a:dialogSize>
+      <a:showInRecordList>true</a:showInRecordList>
+      <a:recordUiSecurityType>EXPRESSION</a:recordUiSecurityType>
+      <a:dialogWidth>FIT</a:dialogWidth>
+      <a:dialogHeight>FIT</a:dialogHeight>
+    </a:recordListActionCfg>
+    <a:listAutoRefreshInterval>0.0</a:listAutoRefreshInterval>
+    <a:enabledFeatures>511</a:enabledFeatures>
+    <a:isVisibleInRecordTypeList>true</a:isVisibleInRecordTypeList>
+    <a:recordActionLaunchType>DIALOG</a:recordActionLaunchType>
+    <a:showSearchBox>true</a:showSearchBox>
+    <a:isVisibleInDataFabric>false</a:isVisibleInDataFabric>
+    <a:usesRollingSyncLimit>false</a:usesRollingSyncLimit>
+    <a:usesRecoverySync>false</a:usesRecoverySync>
+    <a:isScheduledIndexingEnabled>false</a:isScheduledIndexingEnabled>
+  </recordType>
+  <roleMap>
+    <role name="record_type_administrator">
+      <users/>
+      <groups>
+        <groupUuid>_e-0000ed02-f61f-8000-9b37-01075c01075c_5585</groupUuid>
+      </groups>
+    </role>
+    <role name="record_type_viewer">
+      <users/>
+      <groups>
+        <groupUuid>_e-0000ed02-f61f-8000-9b37-01075c01075c_5587</groupUuid>
+      </groups>
+    </role>
+  </roleMap>
+  <history>
+    <historyInfo versionUuid="45538d55-2cba-479f-8da8-eca420dc796e"/>
+  </history>
+  <migrationVersion>1</migrationVersion>
+</recordTypeHaul>

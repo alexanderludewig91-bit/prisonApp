@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<translationStringHaul xmlns:a="http://www.appian.com/ae/types/2009">
+  <versionUuid>a3b7e806-2789-488c-a89e-951f2249a702</versionUuid>
+  <translationString a:uuid="e9c888fc-c193-4592-91e9-2b9432ffc501">
+    <a:translationSetUuid>5f1fccd2-d309-46dc-a451-abf6d078df5a</a:translationSetUuid>
+    <a:description/>
+    <a:translatorNotes/>
+    <translationTexts>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>de</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Es wird folgende Vorgangsnummer generiert</a:translatedText>
+      </translatedText>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>en-US</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>The system will generate following file number</a:translatedText>
+      </translatedText>
+    </translationTexts>
+    <translationStringVariables/>
+  </translationString>
+  <history>
+    <historyInfo versionUuid="5f77c4c1-e82f-43b3-b185-3472190bcdfd"/>
+    <historyInfo versionUuid="a3b7e806-2789-488c-a89e-951f2249a702"/>
+  </history>
+</translationStringHaul>

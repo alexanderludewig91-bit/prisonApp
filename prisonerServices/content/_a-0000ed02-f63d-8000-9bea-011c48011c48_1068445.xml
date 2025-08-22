@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ed87-2144-8000-9bee-011c48011c48_1450861</versionUuid>
+    <interface>
+        <name>PS_G_inmateOverview</name>
+        <uuid>_a-0000ed02-f63d-8000-9bea-011c48011c48_1068445</uuid>
+        <description>Grid for overview over inmates</description>
+        <parentUuid>4e30e89d-6b0d-415f-8a87-1107bebc8692</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>a!localVariables(
+  #"SYSTEM_SYSRULES_gridField_v3"(
+    data: #"SYSTEM_SYSRULES_recordData"(
+      recordType: #"urn:appian:record-type:v1:b9f2b8a1-aa3c-420e-9856-a362e5c58683"
+    ),
+    shadeAlternateRows: true,
+    selectable: true,
+    selectionStyle: "ROW_HIGHLIGHT",
+    maxSelections: 1,
+    selectionSaveInto: a!save(ri!selectedInmate,fv!selectedRows),
+    columns: {
+      #"SYSTEM_SYSRULES_gridColumn"(
+        label: "Vorname",
+        sortField: #"urn:appian:record-field:v1:b9f2b8a1-aa3c-420e-9856-a362e5c58683/7daa88ab-46be-4aa0-8fd9-53cf52511478",
+        value: fv!row[#"urn:appian:record-field:v1:b9f2b8a1-aa3c-420e-9856-a362e5c58683/7daa88ab-46be-4aa0-8fd9-53cf52511478"]
+      ),
+      #"SYSTEM_SYSRULES_gridColumn"(
+        label: "Nachname",
+        sortField: #"urn:appian:record-field:v1:b9f2b8a1-aa3c-420e-9856-a362e5c58683/897606a4-d50b-4a42-bcd0-e4d68bbb2856",
+        value: fv!row[#"urn:appian:record-field:v1:b9f2b8a1-aa3c-420e-9856-a362e5c58683/897606a4-d50b-4a42-bcd0-e4d68bbb2856"]
+      ),
+      #"SYSTEM_SYSRULES_gridColumn"(
+        label: "Sektor",
+        sortField: #"urn:appian:record-field:v1:b9f2b8a1-aa3c-420e-9856-a362e5c58683/5fd06b1d-3eee-439d-8128-6f16b38d955e/5cd0e531-bede-4d76-8761-65c73515a8d5",
+        value: fv!row[#"urn:appian:record-field:v1:b9f2b8a1-aa3c-420e-9856-a362e5c58683/5fd06b1d-3eee-439d-8128-6f16b38d955e/5cd0e531-bede-4d76-8761-65c73515a8d5"]
+      ),
+      #"SYSTEM_SYSRULES_gridColumn"(
+        label: "Zelle",
+        sortField: #"urn:appian:record-field:v1:b9f2b8a1-aa3c-420e-9856-a362e5c58683/f978081b-dcdd-443e-a6d2-c9b7d8755b6a",
+        value: fv!row[#"urn:appian:record-field:v1:b9f2b8a1-aa3c-420e-9856-a362e5c58683/f978081b-dcdd-443e-a6d2-c9b7d8755b6a"]
+      ),
+      #"SYSTEM_SYSRULES_gridColumn"(
+        /*label: "Lebenslang",*/
+        width: "ICON",
+        sortField: #"urn:appian:record-field:v1:b9f2b8a1-aa3c-420e-9856-a362e5c58683/3855ee10-e9c5-4d3f-86ce-3d140949d2e1",
+        value: #"SYSTEM_SYSRULES_richTextDisplayField"(
+          value: #"SYSTEM_SYSRULES_richTextIcon"(
+            caption: "Lebenslang",
+            icon: if(
+              fv!row[#"urn:appian:record-field:v1:b9f2b8a1-aa3c-420e-9856-a362e5c58683/3855ee10-e9c5-4d3f-86ce-3d140949d2e1"],
+              "dungeon",
+              ""
+            )
+          )
+        )
+      ),
+    }
+  )
+)</definition>
+        <namedTypedValue>
+            <name>selectedInmate</name>
+            <type>
+                <name>b9f2b8a1-aa3c-420e-9856-a362e5c58683</name>
+                <namespace>urn:com:appian:recordtype:datatype</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>showWhen</name>
+            <type>
+                <name>boolean</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <preferredEditor>interface</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+        <isCustom>false</isCustom>
+    </interface>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <history>
+        <historyInfo versionUuid="_a-0000ed87-2144-8000-9bee-011c48011c48_1450861"/>
+    </history>
+</contentHaul>

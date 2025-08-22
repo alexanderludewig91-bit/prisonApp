@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1647202</versionUuid>
+    <rule>
+        <name>PS_MapParticipantIdsToEventOpinion</name>
+        <uuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1545948</uuid>
+        <description></description>
+        <parentUuid>4e30e89d-6b0d-415f-8a87-1107bebc8692</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>a!localVariables(
+  local!participants: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1527068"(
+    ids: ri!participantIds,
+    fields: {
+      #"urn:appian:record-field:v1:3854eb39-6a61-48cd-82b6-e4645b2900fe/02011db0-86ad-4cf2-bf76-8358c5fd0dc2"
+    }
+  ).data,
+  #"SYSTEM_SYSRULES_forEach"(
+    items: local!participants,
+    expression: #"urn:appian:record-type:v1:d20e13d7-6450-4ab5-8eb8-31b00904e791"(
+      #"urn:appian:record-field:v1:d20e13d7-6450-4ab5-8eb8-31b00904e791/80d59003-45f5-4439-ba3b-56108d2077a6": fv!item[#"urn:appian:record-field:v1:3854eb39-6a61-48cd-82b6-e4645b2900fe/02011db0-86ad-4cf2-bf76-8358c5fd0dc2"],
+      #"urn:appian:record-field:v1:d20e13d7-6450-4ab5-8eb8-31b00904e791/b816fde2-3f17-4fae-984d-c99216d6a968": #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1545934"[2], /*Zeugenaussage*/
+      #"urn:appian:record-field:v1:d20e13d7-6450-4ab5-8eb8-31b00904e791/46aa4cc9-8ea1-46cd-a540-003d2657448f": #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1545960",
+      #"urn:appian:record-field:v1:d20e13d7-6450-4ab5-8eb8-31b00904e791/53e8d1bb-6a88-475a-8058-88fda50c4d3b": ri!eventID,
+      #"urn:appian:record-field:v1:d20e13d7-6450-4ab5-8eb8-31b00904e791/cdd7d87c-c6ee-47c0-9d13-c208ef1552ef": loggedInUser(),
+      #"urn:appian:record-field:v1:d20e13d7-6450-4ab5-8eb8-31b00904e791/7a40d312-440e-4abc-b6ed-1c02db722889": now()
+    )
+  )
+)</definition>
+        <namedTypedValue>
+            <name>participantIds</name>
+            <type>
+                <name>Integer?list</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>eventID</name>
+            <type>
+                <name>int</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <preferredEditor>legacy</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+    </rule>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <typedValue>
+        <type>
+            <name>RuleTestConfig?list</name>
+            <namespace>http://www.appian.com/ae/types/2009</namespace>
+        </type>
+        <value>
+            <el>
+                <a:name>Happy path with single participant</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{1}</a:value>
+                    <a:nameRef>participantIds</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">100</a:value>
+                    <a:nameRef>eventID</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Multiple participants</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{1,2,3}</a:value>
+                    <a:nameRef>participantIds</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">100</a:value>
+                    <a:nameRef>eventID</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Empty participant list</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{}</a:value>
+                    <a:nameRef>participantIds</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">100</a:value>
+                    <a:nameRef>eventID</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Null or empty inputs</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">null</a:value>
+                    <a:nameRef>participantIds</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">null</a:value>
+                    <a:nameRef>eventID</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Large number of participants</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{1,2,3,4,5,6,7,8,9,10}</a:value>
+                    <a:nameRef>participantIds</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">100</a:value>
+                    <a:nameRef>eventID</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Verify output structure</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">{1}</a:value>
+                    <a:nameRef>participantIds</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">100</a:value>
+                    <a:nameRef>eventID</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions>
+                    <a:expectedOutput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                    <a:resultAssertions>length(test!output) = 1 and typeOf(test!output[1]) = #"urn:appian:record-type:v1:d20e13d7-6450-4ab5-8eb8-31b00904e791"</a:resultAssertions>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+        </value>
+    </typedValue>
+    <history>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1545972"/>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1647202"/>
+    </history>
+</contentHaul>

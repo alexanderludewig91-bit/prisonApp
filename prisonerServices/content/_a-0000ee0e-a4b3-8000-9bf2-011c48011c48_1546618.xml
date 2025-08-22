@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1623777</versionUuid>
+    <rule>
+        <name>PS_AuthorityLetterGeneratorData</name>
+        <uuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1546618</uuid>
+        <description>The list of maps representing the example data sets.</description>
+        <parentUuid>4e30e89d-6b0d-415f-8a87-1107bebc8692</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>a!map(
+  mode: "EDIT",
+  logo: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1555479",
+  from: "Bundesverwaltungsamt, 50728 Köln",
+  houseAddress: "Eupener Straße 125, 50933 Köln",
+  mailAddress: "50728 Köln",
+  phone: "022899358- oder 0221 758-",
+  fax: "02289910358-4233",
+  contact: "",
+  email: "@bva.bund.de",
+  internet: "www.bundesverwaltungsamt.de",
+  yourIdentifier: "Antrag vom {applicant.createdOn}",
+  ourIdentifier: "ZMI4-2524JP" &amp; tointeger(rand() * 1000),
+  date: today(),
+  subject: "Zuwendung aus Bundesmitteln zu {applicant.projectName}",
+  attachments: null,
+  to: concat(
+    "&lt;p&gt;", "{applicant.firstName}", " ", "{applicant.lastName}", "&lt;/p&gt;",
+    "&lt;p&gt;", "{applicant.mailingStreet}", " ", "{applicant.mailingHouseNumber}", "&lt;/p&gt;",
+    "&lt;p&gt;", "{applicant.mailingPostalCode}", " ", "{applicant.mailingCity}", "&lt;/p&gt;",
+  ),
+  caseManager: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1535179"(loggedInUser()),
+  body: concat(
+    "&lt;p&gt;Anlagen (werden ausschließlich elektronisch per Emailanhang zur Verfügung gestellt):&lt;/p&gt;",
+    "&lt;ul&gt;",
+    "&lt;li&gt;", "Rechtsbehelfsverzichtserklärung", "&lt;/li&gt;",
+    "&lt;li&gt;", "Mittelanforderung", "&lt;/li&gt;",
+    "&lt;li&gt;", "Allgemeine Nebenbestimmungen für Zuwendungen zur Projektförderung (ANBest-P), gültig
+ab 28.06.2024", "&lt;/li&gt;",
+"&lt;li&gt;", "zusammenfassende Fördervoraussetzungen Anti-Doping; Stand: 08.01.2021", "&lt;/li&gt;",
+"&lt;li&gt;", "Allgemeine Grundsätze zur Förder- und Zuwendungsfähigkeit im Förderbereich Jahresplanung der OV und VOV (GrdsZuwendung OV+VOV) (Gültig ab: 01.01.2023)
+", "&lt;/li&gt;",
+"&lt;li&gt;", "Hinweise zum Vergaberecht für Zuwendungsempfänger; Stand: 07.08.2018", "&lt;/li&gt;",
+"&lt;li&gt;", "Verhaltensstandards zur Korruptionsprävention; Stand: 09.02.2012", "&lt;/li&gt;",
+    "&lt;/ul&gt;",
+    "&lt;p style=""margin-bottom: 3mm""&gt;Sehr geehrte Damen und Herren,&lt;/p&gt;",
+    "&lt;p&gt;auf Ihren Antrag vom {applicant.createdOn} sowie aufgrund der Förderentscheidung des Bundesministeriums des Innern und für Heimat (BMI) unter Zugrundelegung des Leistungssportprogramms
+vom 28.09.2005 und der Förderrichtlinie Verbände in der zuletzt geänderten Fassung vom
+19.03.2015 (GMBl. 2015, S. 302f.) sowie unter Berücksichtigung des sportfachlichen Votums
+des DOSB gewähre ich Ihnen für das Haushaltsjahr 2024 als Anteilfinanzierung zur Projektförderung eine nicht rückzahlbare Bundeszuwendung bis zur Höhe von
+&lt;/p&gt;",
+    "&lt;div style=""border: 1px solid black; text-align:center; font-size: 12pt; padding: 3mm; margin-top: 3mm; margin-bottom: 3mm""&gt;",
+    "&lt;STRONG&gt;", "{applicant.fundingTotalAmountSum}", "&lt;/STRONG&gt;",
+    "&lt;/div&gt;",
+    "&lt;p&gt;&lt;STRONG&gt;", "Abweichend zu den Bestimmungen der ANBest-P Nr.8.5, beträgt die Frist zur alsbaldigen Verwendung der Mittel {fundingProgrammeConfiguration.verwendungsfristMittelanforderung} Wochen.", "&lt;/STRONG&gt;&lt;/p&gt;",
+    "&lt;p&gt;Ich weise darauf hin, dass aus der gewährten Zuwendung nicht auf eine künftige Förderung
+im bisherigen Umfang und in der Sache geschlossen werden kann.&lt;/p&gt;",
+    "&lt;p&gt;Die gewährte Zuwendung steht unter dem Vorbehalt:&lt;/p&gt;",
+    "&lt;ul&gt;",
+    "&lt;li&gt;", "der im Haushaltsvollzug bereitgestellten Mittel,
+", "&lt;/li&gt;",
+"&lt;li&gt;", "der Änderung des Bundesanteils und gegebenenfalls des (Teil-)Widerrufs der Zuwendung aufgrund einer Überprüfung und Neufestsetzung der von Ihnen eingeplanten Eigenmittel und", "&lt;/li&gt;",
+"&lt;li&gt;", "der nachträglichen Aufnahme, Änderung oder Ergänzung einer Auflage (§ 36 Abs. 2 Nr.
+5 Verwaltungsverfahrensgesetz)", "&lt;/li&gt;",
+    "&lt;/ul&gt;",
+    "&lt;p&gt;Der Bewilligungszeitraum für die mit diesem Bescheid gewährte Zuwendung beginnt am
+01.01.2024 und endet am 31.12.2024.&lt;/p&gt;",
+    "&lt;p&gt;Die Allgemeinen Nebenbestimmungen für Zuwendungen zur Projektförderung (ANBest-P) und
+die Allgemeinen Grundsätze zur Förder- und Zuwendungsfähigkeit im Förderbereich Jahresplanung der OV und VOV (GrdsZuwendung OV+VOV) erkläre ich in der jeweils aktuellen Fassung zum verbindlichen Bestandteil des Bewilligungsbescheides.&lt;/p&gt;",
+    "&lt;p&gt;&lt;strong&gt;Die mit diesem Bescheid gewährte Zuwendung ist zweckgebunden und gemäß den mit
+dem DOSB abgestimmten Planungsunterlagen bestimmt als Zuschuss zur Finanzierung folgender Projekte, deren Finanzierung sich wie folgt darstellt:&lt;/strong&gt;&lt;/p&gt;"
+  ),
+)
+</definition>
+        <preferredEditor>legacy</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+    </rule>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <typedValue>
+        <type>
+            <name>RuleTestConfig?list</name>
+            <namespace>http://www.appian.com/ae/types/2009</namespace>
+        </type>
+        <value>
+            <el>
+                <a:name>Verify basic map structure</a:name>
+                <a:assertions>
+                    <a:expectedOutput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                    <a:resultAssertions>a!isNotNullOrEmpty(test!output) and typeof(test!output) = "type!{http://www.appian.com/ae/types/2009}Map"</a:resultAssertions>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Validate presence of required fields</a:name>
+                <a:assertions>
+                    <a:expectedOutput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                    <a:resultAssertions>all(a!isNotNullOrEmpty(_), {test!output.mode, test!output.logo, test!output.from, test!output.houseAddress, test!output.mailAddress, test!output.phone, test!output.fax, test!output.email, test!output.internet, test!output.yourIdentifier, test!output.ourIdentifier, test!output.date, test!output.subject, test!output.to, test!output.caseManager, test!output.body})</a:resultAssertions>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Validate date is set to today</a:name>
+                <a:assertions>
+                    <a:expectedOutput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                    <a:resultAssertions>test!output.date = today()</a:resultAssertions>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Verify caseManager is not empty</a:name>
+                <a:assertions>
+                    <a:expectedOutput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                    <a:resultAssertions>a!isNotNullOrEmpty(test!output.caseManager)</a:resultAssertions>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Verify attachments is null</a:name>
+                <a:assertions>
+                    <a:expectedOutput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                    <a:resultAssertions>isnull(test!output.attachments)</a:resultAssertions>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+        </value>
+    </typedValue>
+    <history>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1623777"/>
+    </history>
+</contentHaul>

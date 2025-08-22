@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1536723</versionUuid>
+    <interface>
+        <name>PS_C_SiteFooter</name>
+        <uuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1531272</uuid>
+        <description></description>
+        <parentUuid>4e30e89d-6b0d-415f-8a87-1107bebc8692</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>#"SYSTEM_SYSRULES_sectionLayout_v1"(
+  divider: "ABOVE",
+  contents: {
+    #"SYSTEM_SYSRULES_sideBySideLayout"(
+      alignVertical: "BOTTOM",
+      items: {
+        #"SYSTEM_SYSRULES_sideBySideItem"(
+          item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+            align: "LEFT",
+            value: {
+              #"SYSTEM_SYSRULES_richTextItem_v1"(
+                text: "Prisoner Services v0.2"
+              )
+            }
+          )
+        ),
+        #"SYSTEM_SYSRULES_sideBySideItem"(
+          item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+            align: "CENTER",
+            value: {
+              #"SYSTEM_SYSRULES_richTextItem_v1"(
+                text: #"urn:appian:translation-string:v1:621b3a0d-68ac-4789-91e6-601c4b9288a9",
+                linkStyle: "STANDALONE",
+                link: #"SYSTEM_SYSRULES_dynamicLink"()
+              ),
+              if(
+                ri!showContact,
+                {
+                  "     ",
+                  #"SYSTEM_SYSRULES_richTextItem_v1"(
+                    text: #"urn:appian:translation-string:v1:cde26b47-2690-4e04-ba93-4aea159c499c",
+                    linkStyle: "STANDALONE",
+                    link: #"SYSTEM_SYSRULES_dynamicLink"()
+                  ),
+                  "     "
+                },
+                "     "
+              ),
+              #"SYSTEM_SYSRULES_richTextItem_v1"(
+                text: #"urn:appian:translation-string:v1:b9a997ab-3802-4d02-8b3f-2bd6159a038c",
+                linkStyle: "STANDALONE",
+                link: #"SYSTEM_SYSRULES_dynamicLink"()
+              )
+            }
+          )
+        ),
+        #"SYSTEM_SYSRULES_sideBySideItem"(
+          item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+            align: "RIGHT",
+            value: {
+              #"SYSTEM_SYSRULES_richTextItem_v1"(
+                text: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1531278" &amp; " " &amp; year(today()) &amp; " AV Software Solutions 360° &amp; PD"
+              )
+            }
+          )
+        )
+      }
+    )
+  }
+)</definition>
+        <namedTypedValue>
+            <name>showContact</name>
+            <type>
+                <name>boolean</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <preferredEditor>interface</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+        <isCustom>false</isCustom>
+    </interface>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <history>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1536723"/>
+    </history>
+</contentHaul>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<translationStringHaul xmlns:a="http://www.appian.com/ae/types/2009">
+  <versionUuid>15e3ba3d-46ed-4ebf-818b-83c9497057f9</versionUuid>
+  <translationString a:uuid="19a8cbab-0518-44f6-b355-16b36d2918db">
+    <a:translationSetUuid>5f1fccd2-d309-46dc-a451-abf6d078df5a</a:translationSetUuid>
+    <a:description/>
+    <a:translatorNotes/>
+    <translationTexts>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>de</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Wenn Sie Rückfragen hierzu haben, wenden Sie sich bitte an den Allgemeinen Vollzugsdienst (AVD).</a:translatedText>
+      </translatedText>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>en-US</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>If you have further questions, please contact the prison officer (AVD).</a:translatedText>
+      </translatedText>
+    </translationTexts>
+    <translationStringVariables/>
+  </translationString>
+  <history>
+    <historyInfo versionUuid="15e3ba3d-46ed-4ebf-818b-83c9497057f9"/>
+  </history>
+</translationStringHaul>

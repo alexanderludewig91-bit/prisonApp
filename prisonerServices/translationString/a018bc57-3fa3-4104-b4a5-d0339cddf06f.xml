@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<translationStringHaul xmlns:a="http://www.appian.com/ae/types/2009">
+  <versionUuid>2a96b888-e0ce-4abb-9a9a-5f28ce1d2e4c</versionUuid>
+  <translationString a:uuid="a018bc57-3fa3-4104-b4a5-d0339cddf06f">
+    <a:translationSetUuid>5f1fccd2-d309-46dc-a451-abf6d078df5a</a:translationSetUuid>
+    <a:description/>
+    <a:translatorNotes/>
+    <translationTexts>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>en-US</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>The result will be announced in person by the prison officer.</a:translatedText>
+      </translatedText>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>de</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Das Ergebnis wird dem Gefangenen durch den Allgemeinen Vollzugsdienst (AVD) persönlich eröffnet.</a:translatedText>
+      </translatedText>
+    </translationTexts>
+    <translationStringVariables/>
+  </translationString>
+  <history>
+    <historyInfo versionUuid="6c32a1c6-de9c-4cf1-b016-cc82018c206d"/>
+    <historyInfo versionUuid="2a96b888-e0ce-4abb-9a9a-5f28ce1d2e4c"/>
+  </history>
+</translationStringHaul>

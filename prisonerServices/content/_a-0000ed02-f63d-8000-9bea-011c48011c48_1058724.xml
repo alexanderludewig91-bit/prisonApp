@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ed02-f63d-8000-9bea-011c48011c48_1059151</versionUuid>
+    <interface>
+        <name>PS_ActivityHistoryGrid</name>
+        <uuid>_a-0000ed02-f63d-8000-9bea-011c48011c48_1058724</uuid>
+        <description>Dashboard interface showing a Service record's activity history in a grid [Activity History] [Records]</description>
+        <parentUuid>bb69cd5d-2b14-4fb7-b9d0-11ebd5815cda</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>a!localVariables(
+  local!searchTerm,
+  local!userFilter,
+  {
+    #"SYSTEM_SYSRULES_sectionLayout_v1"(
+      label: "Activity History",
+      contents: #"SYSTEM_SYSRULES_columnsLayout"(
+        columns: {
+          #"SYSTEM_SYSRULES_columnLayout"(
+            contents: {
+              #"SYSTEM_SYSRULES_pickerFieldUsers"(
+                labelPosition: "COLLAPSED",
+                placeholder: "Select a user to filter on their activity",
+                groupFilter: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058640",
+                maxSelections: 1,
+                value: local!userFilter,
+                saveInto: local!userFilter
+              )
+            }
+          ),
+          #"SYSTEM_SYSRULES_columnLayout"(
+            contents: {
+              #"SYSTEM_SYSRULES_textField"(
+                labelPosition: "COLLAPSED",
+                placeholder: "Search activity history actions and details",
+                refreshAfter: "KEYPRESS",
+                value: local!searchTerm,
+                saveInto: local!searchTerm
+              )
+            }
+          )
+        }
+      )
+    ),
+    #"SYSTEM_SYSRULES_sectionLayout_v1"(
+      contents: {
+        #"SYSTEM_SYSRULES_gridField_v3"(
+          labelPosition: "COLLAPSED",
+          emptyGridMessage: "No activity entries available",
+          data: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058849"(
+            recordId: ri!id,
+            searchTerm: local!searchTerm,
+            userFilter: local!userFilter,
+            pagingInfo: fv!pagingInfo
+          ),
+          columns: {
+            #"SYSTEM_SYSRULES_gridColumn"(
+              label: "User",
+              sortField: "who",
+              value: #"SYSTEM_SYSRULES_linkField"(links: { #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058760"(label: fv!row.who, username: fv!row.who) })
+            ),
+            #"SYSTEM_SYSRULES_gridColumn"(
+              label: "Action",
+              sortField: "action",
+              value: fv!row.action
+            ),
+            #"SYSTEM_SYSRULES_gridColumn"(
+              label: "Details",
+              sortField: "details",
+              value: fv!row.details
+            ),
+            #"SYSTEM_SYSRULES_gridColumn"(
+              label: "On",
+              sortField: "when",
+              value: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058684"(fv!row.when),
+              align: "END"
+            )
+          },
+          pageSize: 25,
+          initialSorts: { #"SYSTEM_SYSRULES_sortInfo"("when", false) }
+        )
+      }
+    )
+  }
+)</definition>
+        <namedTypedValue>
+            <name>id</name>
+            <type>
+                <name>int</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <preferredEditor>interface</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+        <isCustom>false</isCustom>
+    </interface>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <history>
+        <historyInfo versionUuid="_a-0000ed02-f63d-8000-9bea-011c48011c48_1059151"/>
+    </history>
+</contentHaul>

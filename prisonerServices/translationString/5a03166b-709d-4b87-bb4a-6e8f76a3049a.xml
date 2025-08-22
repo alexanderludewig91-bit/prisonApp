@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<translationStringHaul xmlns:a="http://www.appian.com/ae/types/2009">
+  <versionUuid>cb3441e5-7517-4c11-9bc0-f7f5abf47a40</versionUuid>
+  <translationString a:uuid="5a03166b-709d-4b87-bb4a-6e8f76a3049a">
+    <a:translationSetUuid>5f1fccd2-d309-46dc-a451-abf6d078df5a</a:translationSetUuid>
+    <a:description/>
+    <a:translatorNotes/>
+    <translationTexts>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>de</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>{event} überarbeiten</a:translatedText>
+      </translatedText>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>en-US</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Rework for {event}</a:translatedText>
+      </translatedText>
+    </translationTexts>
+    <translationStringVariables>
+      <translationStringVariable a:uuid="75d7dfbb-40c9-4f68-9bd5-be6bbdb926d6">
+        <a:name>event</a:name>
+      </translationStringVariable>
+    </translationStringVariables>
+  </translationString>
+  <history>
+    <historyInfo versionUuid="cb3441e5-7517-4c11-9bc0-f7f5abf47a40"/>
+  </history>
+</translationStringHaul>

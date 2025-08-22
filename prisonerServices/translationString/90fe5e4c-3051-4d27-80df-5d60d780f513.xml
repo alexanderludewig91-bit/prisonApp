@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<translationStringHaul xmlns:a="http://www.appian.com/ae/types/2009">
+  <versionUuid>8cd23a89-8944-430d-b7ea-da414a7874be</versionUuid>
+  <translationString a:uuid="90fe5e4c-3051-4d27-80df-5d60d780f513">
+    <a:translationSetUuid>5f1fccd2-d309-46dc-a451-abf6d078df5a</a:translationSetUuid>
+    <a:description/>
+    <a:translatorNotes/>
+    <translationTexts>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>en-US</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>The inmate will receive all relevant information and documentation related to their application and the decision issued.</a:translatedText>
+      </translatedText>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>de</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Der Gefangene erhält alle Informationen und Unterlagen, die mit dem gestellten Antrag sowie der eröffneten Entscheidung zusammenhängen.</a:translatedText>
+      </translatedText>
+    </translationTexts>
+    <translationStringVariables/>
+  </translationString>
+  <history>
+    <historyInfo versionUuid="6bd3e79e-9fb9-4c67-96ce-4b8321b15048"/>
+    <historyInfo versionUuid="8cd23a89-8944-430d-b7ea-da414a7874be"/>
+  </history>
+</translationStringHaul>

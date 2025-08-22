@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1646831</versionUuid>
+    <interface>
+        <name>PS_TV_Messaging</name>
+        <uuid>_a-0000ed02-f63d-8000-9bea-011c48011c48_1063219</uuid>
+        <description></description>
+        <parentUuid>bb69cd5d-2b14-4fb7-b9d0-11ebd5815cda</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>a!localVariables(
+  local!messages: {
+    {
+      role: "user",
+      content: "Hi Jack, wie hat dir das Fu" &amp; fn!char(223) &amp; "ballspiel heute abend gefallen? Der Schiri hat mal wieder so schlecht gepfiffen!"
+    },
+    {
+      role: "assistant",
+      content: "Na, also ich find, dass die Schiris sowieso alles vermasseln. Aber wenn ich ehrlich bin, fand ich das Spiel selbst nicht schlecht. Die Moves auf dem Feld zu beobachten ist immer ein Statement. Aber ja, der Schiri hat vielleicht mal wieder ein paar Fehleins" &amp; fn!char(228) &amp; "tzne gemacht. Das kennen wir doch. Was fandest du so besonders an dem Spiel?"
+    }
+  },
+  local!evaluation: a!map(violenceLevel: 0, reason: ""),
+  local!temp,
+  #"SYSTEM_SYSRULES_headerContentLayout"(
+    header: #"SYSTEM_SYSRULES_cardLayout"(
+      contents: {
+        #"SYSTEM_SYSRULES_sideBySideLayout"(
+          items: {
+            #"SYSTEM_SYSRULES_sideBySideItem"(
+              item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                labelPosition: "COLLAPSED",
+                value: {
+                  "   ",
+                  #"SYSTEM_SYSRULES_richTextIcon"(
+                    icon: "reply",
+                    link: #"SYSTEM_SYSRULES_dynamicLink"(
+                      value: null,
+                      saveInto: ri!function
+                    ),
+                    linkStyle: "STANDALONE",
+                    color: "#000000",
+                    size: "LARGE_PLUS"
+                  )
+                }
+              )
+            ),
+            #"SYSTEM_SYSRULES_sideBySideItem"(
+              item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                labelPosition: "COLLAPSED",
+                value: {
+                  #"SYSTEM_SYSRULES_richTextItem_v1"(
+                    text: "CHAT",
+                    size: "LARGE"
+                  )
+                }
+              ),
+              width: "MINIMIZE"
+            ),
+            #"SYSTEM_SYSRULES_sideBySideItem"(
+              item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                labelPosition: "COLLAPSED",
+                value: {
+                  #"SYSTEM_SYSRULES_richTextIcon"(
+                    icon: "comments-o",
+                    color: "",
+                    size: "EXTRA_LARGE"
+                  )
+                },
+                align: "RIGHT"
+              ),
+              width: "MINIMIZE"
+            )
+          },
+          alignVertical: "MIDDLE"
+        )
+      },
+      style: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1063213"[4],
+      showBorder: false
+    ),
+    isHeaderFixed: true,
+    contents: #"SYSTEM_SYSRULES_paneLayout"(
+      panes: {
+        #"SYSTEM_SYSRULES_pane"(
+          contents: {
+            {
+              #"SYSTEM_SYSRULES_headingField"(
+                text: "Unterhaltung mit Jack",
+                size: "LARGE"
+              ),
+              #"SYSTEM_SYSRULES_cardLayout"(
+                contents: {
+                  #"SYSTEM_SYSRULES_richTextDisplayField"(
+                    labelPosition: "COLLAPSED",
+                    value: {
+                      #"SYSTEM_SYSRULES_richTextItem_v1"(
+                        text: "Gewalt erkannt",
+                        size: "LARGE_PLUS"
+                      ),
+                      char(10),
+                      #"SYSTEM_SYSRULES_richTextItem_v1"(
+                        text: "Dein Sozialarbeiter ist eingeschaltet und wird auf dich zugehen. Bis dahin ist dein Chat gesperrt.",
+                        size: "LARGE"
+                      )
+                    }
+                  )
+                },
+                showWhen: tointeger(local!evaluation.violenceLevel) &gt; 6,
+                style: "#ff0000",
+                shape: "ROUNDED",
+                marginBelow: "STANDARD",
+                showBorder: false
+              ),
+              #"SYSTEM_SYSRULES_sideBySideLayout"(
+                items: {
+                  #"SYSTEM_SYSRULES_sideBySideItem"(
+                    item: #"SYSTEM_SYSRULES_paragraphField"(
+                      labelPosition: "COLLAPSED",
+                      saveInto: {
+                        a!save(
+                          target: local!messages,
+                          value: append(
+                            local!messages,
+                            {
+                              role: "user",
+                              content: save!value
+                            }
+                          )
+                        ),
+                        /*Quick fix for deployment. PS_ChatWithAiSphere has been deleted*/
+                        /*a!save(*/
+                          /*target: local!temp,*/
+                          /*value: rule!PS_ChatWithAiSphere(*/
+                            /*messages: local!messages*/
+                          /*)*/
+                        /*),*/
+                        a!save(
+                          target: local!messages,
+                          value: append(
+                            local!messages,
+                            {
+                              role: "assistant",
+                              content: local!temp.response.content
+                            }
+                          )
+                        ),
+                        a!save(
+                          target: local!evaluation,
+                          value: local!temp.evaluation
+                        )
+                      }
+                    )
+                  ),
+                  #"SYSTEM_SYSRULES_sideBySideItem"(
+                    item: #"SYSTEM_SYSRULES_ButtonArrayLayout"(
+                      buttons: {
+                        #"SYSTEM_SYSRULES_buttonWidget_v1"(
+                          icon: "paper-plane",
+                          style: "SOLID",
+                          size: "LARGE",
+                          color: "#dddddd"
+                        )
+                      }
+                    ),
+                    width: "MINIMIZE"
+                  )
+                },
+                showWhen: tointeger(local!evaluation.violenceLevel) &lt; 7
+              ),
+              #"SYSTEM_SYSRULES_forEach"(
+                items: reverse(local!messages),
+                expression: #"SYSTEM_SYSRULES_columnsLayout"(
+                  columns: {
+                    #"SYSTEM_SYSRULES_columnLayout"(
+                      width: "NARROW",
+                      showWhen: fv!item.role = "user"
+                    ),
+                    #"SYSTEM_SYSRULES_columnLayout"(
+                      contents: {
+                        #"SYSTEM_SYSRULES_cardLayout"(
+                          contents: {
+                            #"SYSTEM_SYSRULES_richTextDisplayField"(
+                              labelPosition: "COLLAPSED",
+                              value: #"SYSTEM_SYSRULES_richTextItem_v1"(
+                                text: fv!item.content,
+                                size: "MEDIUM"
+                              )
+                            )
+                          },
+                          style: if(fv!item.role = "user", "STANDARD", "TRANSPARENT"),
+                          shape: "ROUNDED",
+                          marginBelow: "STANDARD",
+                          showBorder: false,
+                          showShadow: true
+                        )
+                      }
+                    )
+                  }
+                )
+              )
+            }
+          },
+          backgroundColor: "TRANSPARENT"
+        ),
+        #"SYSTEM_SYSRULES_pane"(
+          contents: {
+            #"SYSTEM_SYSRULES_richTextDisplayField"(
+              labelPosition: "COLLAPSED",
+              value: #"SYSTEM_SYSRULES_richTextIcon"(
+                icon: "user-nurse",
+                size: "EXTRA_LARGE"
+              ),
+              align: "CENTER"
+            ),
+            #"SYSTEM_SYSRULES_headingField"(
+              text: "Gesprächsbewertung"
+            ),
+            #"SYSTEM_SYSRULES_progressBarField"(
+              label: "Aggression",
+              labelPosition: "COLLAPSED",
+              percentage: tointeger(local!evaluation.violenceLevel) * 10,
+              color: a!match(
+                value: tointeger(local!evaluation.violenceLevel),
+                whenTrue: fv!value &gt; 7,
+                then: "NEGATIVE",
+
+                whenTrue: fv!value &gt; 3,
+                then: "WARN",
+
+                default: "POSITIVE"
+              ),
+              style: "THICK"
+            ),
+            #"SYSTEM_SYSRULES_richTextDisplayField"(
+              label: "Psychologische Bewertung",
+              labelPosition: "COLLAPSED",
+              value: #"SYSTEM_SYSRULES_richTextItem_v1"(
+                text: local!evaluation.reason,
+                size: "MEDIUM"
+              )
+            )
+          },
+          width: "MEDIUM",
+          backgroundColor: "TRANSPARENT"
+        )
+      }
+    ),
+    backgroundColor: "#111111"
+  )
+)</definition>
+        <namedTypedValue>
+            <name>function</name>
+            <type>
+                <name>string</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+            <value/>
+        </namedTypedValue>
+        <preferredEditor>interface</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+        <isCustom>false</isCustom>
+    </interface>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <history>
+        <historyInfo versionUuid="_a-0000ed02-f63d-8000-9bea-011c48011c48_1067559"/>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1646831"/>
+    </history>
+</contentHaul>

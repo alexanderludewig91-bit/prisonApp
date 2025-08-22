@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<translationStringHaul xmlns:a="http://www.appian.com/ae/types/2009">
+  <versionUuid>cc482a0a-c970-4f4a-8bef-ba78d552c5df</versionUuid>
+  <translationString a:uuid="5eca5e69-0cb5-4a79-8b7c-28ac88f850cc">
+    <a:translationSetUuid>5f1fccd2-d309-46dc-a451-abf6d078df5a</a:translationSetUuid>
+    <a:description/>
+    <a:translatorNotes>This is a REQUEST TYPE. The naming here must not be changed on it's own. Only if the whole request type is being renamed. Make sure to search for other translation items containing the word 'generic' before making changes.</a:translatorNotes>
+    <translationTexts>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>de</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Sonstiges Anliegen</a:translatedText>
+      </translatedText>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>en-US</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Generic</a:translatedText>
+      </translatedText>
+    </translationTexts>
+    <translationStringVariables/>
+  </translationString>
+  <history>
+    <historyInfo versionUuid="32b0b028-31e5-4bbf-bb09-42d14fff745b"/>
+    <historyInfo versionUuid="cc482a0a-c970-4f4a-8bef-ba78d552c5df"/>
+  </history>
+</translationStringHaul>

@@ -1,0 +1,795 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1605832</versionUuid>
+    <interface>
+        <name>PS_TV</name>
+        <uuid>_a-0000ed02-f63d-8000-9bea-011c48011c48_1060678</uuid>
+        <description></description>
+        <parentUuid>4e30e89d-6b0d-415f-8a87-1107bebc8692</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>a!localVariables(
+  local!function,
+  local!tasks: a!queryProcessAnalytics(
+    report: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1061067",
+    query: #"SYSTEM_SYSRULES_query"(
+      pagingInfo: #"SYSTEM_SYSRULES_pagingInfo"(1, 5),
+      filter: #"SYSTEM_SYSRULES_queryFilter"(
+        field: "c9",
+        operator: "=",
+        value: "PRISONER"
+      )
+    )
+  ),
+  local!notifications: #"SYSTEM_SYSRULES_queryRecordType_v2"(
+    recordType: #"urn:appian:record-type:v1:2e4db39a-2f38-4769-b11e-8ad8441f993a",
+    pagingInfo: #"SYSTEM_SYSRULES_pagingInfo"(
+      startIndex: 1,
+      batchSize: 3,
+      sort: #"SYSTEM_SYSRULES_sortInfo"(
+        field: #"urn:appian:record-field:v1:2e4db39a-2f38-4769-b11e-8ad8441f993a/f51c6f76-9293-444e-91b7-3287f0bd53b9",
+        ascending: false
+      )
+    ),
+    filters: {
+      #"SYSTEM_SYSRULES_queryFilter"(
+        field: #"urn:appian:record-field:v1:2e4db39a-2f38-4769-b11e-8ad8441f993a/3ae6d220-0450-4065-b61f-4b136d605959",
+        operator: "=",
+        value: loggedInUser()
+      ),
+      /*
+      a!queryFilter(
+        field: 'recordType!{2e4db39a-2f38-4769-b11e-8ad8441f993a}PS Service Visit.fields.{df425fdb-0f35-4150-a497-dbf371bc0c0f}status',
+        operator: "in",
+        value: {cons!PS_VISIT_STATUS_ACCEPTED, cons!PS_VISIT_STATUS_REJECTED}
+      ),
+      */
+      #"SYSTEM_SYSRULES_queryFilter"(
+        field: #"urn:appian:record-field:v1:2e4db39a-2f38-4769-b11e-8ad8441f993a/f51c6f76-9293-444e-91b7-3287f0bd53b9",
+        operator: "&gt;",
+        value: now() - hour() * 2
+      ),
+    }
+  ),
+  if(
+    a!isNullOrEmpty(local!function),
+    #"SYSTEM_SYSRULES_headerContentLayout"(
+      header: {
+        #"SYSTEM_SYSRULES_billboardLayout_v1"(
+          backgroundMedia: #"SYSTEM_SYSRULES_webImage"(
+            source: "https://images.unsplash.com/photo-1739582767008-faa274e18ac2"
+          ),
+          backgroundColor: "#f0f0f0",
+          height: "MEDIUM",
+          marginBelow: "NONE",
+          overlay: #"SYSTEM_SYSRULES_fullOverlay"(
+            contents: {
+              #"SYSTEM_SYSRULES_columnsLayout"(
+                columns: {
+                  #"SYSTEM_SYSRULES_columnLayout"(
+                    contents: {
+                      #"SYSTEM_SYSRULES_sideBySideLayout"(
+                        items: {
+                          #"SYSTEM_SYSRULES_sideBySideItem"(
+                            item: #"SYSTEM_SYSRULES_stampField"(
+                              labelPosition: "COLLAPSED",
+                              text: "42",
+                              backgroundcolor: "#eeeeee",
+                              size: "SMALL"
+                            ),
+                            width: "MINIMIZE"
+                          ),
+                          #"SYSTEM_SYSRULES_sideBySideItem"(
+                            item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                              labelPosition: "COLLAPSED",
+                              value: {
+                                #"SYSTEM_SYSRULES_richTextItem_v1"(
+                                  text: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1546843"(user: loggedInUser()),
+                                  size: "LARGE"
+                                )
+                              }
+                            )
+                          )
+                        },
+                        alignVertical: "MIDDLE"
+                      )
+                    }
+                  ),
+                  #"SYSTEM_SYSRULES_columnLayout"(
+                    contents: {
+                      #"SYSTEM_SYSRULES_richTextDisplayField"(
+                        labelPosition: "COLLAPSED",
+                        value: {
+                          #"SYSTEM_SYSRULES_richTextItem_v1"(
+                            text: text(now(), "dddd ddd mmmm yyyy hh:mm"),
+                            size: "LARGE"
+                          )
+                        },
+                        align: "RIGHT"
+                      )
+                    }
+                  )
+                },
+                alignVertical: "MIDDLE",
+                marginBelow: "EVEN_MORE"
+              ),
+              #"SYSTEM_SYSRULES_cardGroupLayout"(
+                marginBelow: "NONE",
+                cards: {
+                  #"SYSTEM_SYSRULES_cardLayout"(
+                    contents: {
+                      #"SYSTEM_SYSRULES_richTextDisplayField"(
+                        labelPosition: "COLLAPSED",
+                        value: {
+                          #"SYSTEM_SYSRULES_richTextIcon"(
+                            icon: "television",
+                            color: "",
+                            size: "EXTRA_LARGE"
+                          ),
+                          char(10),
+                          #"SYSTEM_SYSRULES_richTextItem_v1"(
+                            text: "MEDIEN",
+                            size: "LARGE"
+                          )
+                        },
+                        align: "CENTER"
+                      )
+                    },
+                    link: #"SYSTEM_SYSRULES_dynamicLink"(
+                      value: "MEDIA",
+                      saveInto: local!function
+                    ),
+                    height: "AUTO",
+                    style: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1063213"[1],
+                    shape: "ROUNDED",
+                    showBorder: false,
+                    showShadow: true
+                  ),
+                  #"SYSTEM_SYSRULES_cardLayout"(
+                    contents: {
+                      #"SYSTEM_SYSRULES_richTextDisplayField"(
+                        labelPosition: "COLLAPSED",
+                        value: {
+                          #"SYSTEM_SYSRULES_richTextIcon"(
+                            icon: "shopping-cart",
+                            size: "EXTRA_LARGE"
+                          ),
+                          char(10),
+                          #"SYSTEM_SYSRULES_richTextItem_v1"(
+                            text: "SERVICE",
+                            size: "LARGE"
+                          )
+                        },
+                        align: "CENTER"
+                      )
+                    },
+                    link: #"SYSTEM_SYSRULES_dynamicLink"(
+                      value: "SERVICES",
+                      saveInto: local!function
+                    ),
+                    height: "AUTO",
+                    style: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1063213"[2],
+                    shape: "ROUNDED",
+                    showBorder: false,
+                    showShadow: true
+                  ),
+                  #"SYSTEM_SYSRULES_cardLayout"(
+                    contents: {
+                      #"SYSTEM_SYSRULES_richTextDisplayField"(
+                        labelPosition: "COLLAPSED",
+                        value: {
+                          #"SYSTEM_SYSRULES_richTextIcon"(
+                            icon: "phone",
+                            size: "EXTRA_LARGE"
+                          ),
+                          char(10),
+                          #"SYSTEM_SYSRULES_richTextItem_v1"(
+                            text: "TELEFON",
+                            size: "LARGE"
+                          )
+                        },
+                        align: "CENTER"
+                      )
+                    },
+                    link: #"SYSTEM_SYSRULES_dynamicLink"(
+                      value: "PHONE",
+                      saveInto: local!function
+                    ),
+                    height: "AUTO",
+                    style: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1063213"[3],
+                    shape: "ROUNDED",
+                    showBorder: false,
+                    showShadow: true
+                  ),
+                  #"SYSTEM_SYSRULES_cardLayout"(
+                    contents: {
+                      #"SYSTEM_SYSRULES_richTextDisplayField"(
+                        labelPosition: "COLLAPSED",
+                        value: {
+                          #"SYSTEM_SYSRULES_richTextIcon"(
+                            icon: "comments-o",
+                            size: "EXTRA_LARGE"
+                          ),
+                          char(10),
+                          #"SYSTEM_SYSRULES_richTextItem_v1"(
+                            text: "CHAT",
+                            size: "LARGE"
+                          )
+                        },
+                        align: "CENTER"
+                      )
+                    },
+                    link: #"SYSTEM_SYSRULES_dynamicLink"(
+                      value: "MESSAGING",
+                      saveInto: local!function
+                    ),
+                    height: "AUTO",
+                    style: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1063213"[4],
+                    shape: "ROUNDED",
+                    showBorder: false,
+                    showShadow: true
+                  ),
+                  #"SYSTEM_SYSRULES_cardLayout"(
+                    contents: {
+                      #"SYSTEM_SYSRULES_richTextDisplayField"(
+                        labelPosition: "COLLAPSED",
+                        value: {
+                          #"SYSTEM_SYSRULES_richTextIcon"(
+                            icon: "stethoscope",
+                            size: "EXTRA_LARGE"
+                          ),
+                          char(10),
+                          #"SYSTEM_SYSRULES_richTextItem_v1"(
+                            text: "GESUNDHEIT",
+                            size: "LARGE"
+                          )
+                        },
+                        align: "CENTER"
+                      )
+                    },
+                    link: #"SYSTEM_SYSRULES_dynamicLink"(
+                      value: "HEALTH",
+                      saveInto: local!function
+                    ),
+                    height: "AUTO",
+                    style: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1063213"[5],
+                    shape: "ROUNDED",
+                    showBorder: false,
+                    showShadow: true
+                  )
+                },
+                cardWidth: "NARROW",
+                cardHeight: "AUTO"
+              )
+            },
+            style: "SEMI_DARK"
+          )
+        )
+      },
+      isHeaderFixed: true,
+      contents: {
+        #"SYSTEM_SYSRULES_cardLayout"(
+          contents: {
+            #"SYSTEM_SYSRULES_columnsLayout"(
+              columns: {
+                #"SYSTEM_SYSRULES_columnLayout"(
+                  contents: {
+                    #"SYSTEM_SYSRULES_cardLayout"(
+                      contents: {
+                        #"SYSTEM_SYSRULES_sectionLayout_v1"(
+                          label: "Aufgaben",
+                          labelIcon: "tasks-alt",
+                          labelSize: "MEDIUM_PLUS",
+                          contents: {
+                            #"SYSTEM_SYSRULES_forEach"(
+                              items: local!tasks.data,
+                              expression: #"SYSTEM_SYSRULES_cardLayout"(
+                                contents: {
+                                  #"SYSTEM_SYSRULES_richTextDisplayField"(
+                                    labelPosition: "COLLAPSED",
+                                    value: {
+                                      #"SYSTEM_SYSRULES_richTextItem_v1"(
+                                        text: fv!item.c3,
+                                        size: "MEDIUM",
+                                        style: "STRONG"
+                                      )
+                                    },
+                                    preventWrapping: true
+                                  ),
+                                  #"SYSTEM_SYSRULES_richTextDisplayField"(
+                                    labelPosition: "COLLAPSED",
+                                    value: {
+                                      #"SYSTEM_SYSRULES_richTextItem_v1"(
+                                        text: fv!item.c0,
+                                        size: "MEDIUM"
+                                      )
+                                    },
+                                    preventWrapping: true
+                                  )
+                                },
+                                link: #"SYSTEM_SYSRULES_processTaskLink"(
+                                  task: fv!item.dp0
+                                ),
+                                shape: "ROUNDED",
+                                marginBelow: "STANDARD",
+                                showBorder: false
+                              )
+                            ),
+                            #"SYSTEM_SYSRULES_cardLayout"(
+                              contents: {
+                                #"SYSTEM_SYSRULES_richTextDisplayField"(
+                                  labelPosition: "COLLAPSED",
+                                  value: {
+                                    #"SYSTEM_SYSRULES_richTextIcon"(
+                                      icon: "angle-double-down",
+                                      size: "MEDIUM"
+                                    ),
+                                    " ",
+                                    #"SYSTEM_SYSRULES_richTextItem_v1"(
+                                      text: "Mehr anzeigen",
+                                      size: "MEDIUM"
+                                    ),
+                                    " ",
+                                    #"SYSTEM_SYSRULES_richTextIcon"(
+                                      icon: "angle-double-down",
+                                      size: "MEDIUM"
+                                    )
+                                  },
+                                  align: "CENTER"
+                                )
+                              },
+                              showWhen: local!tasks.totalCount &gt; 0,
+                              shape: "ROUNDED",
+                              showBorder: false
+                            )
+                          }
+                        )
+                      },
+                      height: "AUTO",
+                      style: "#333333",
+                      shape: "ROUNDED",
+                      marginBelow: "STANDARD",
+                      showBorder: false,
+                      showShadow: true
+                    )
+                  }
+                ),
+                #"SYSTEM_SYSRULES_columnLayout"(
+                  contents: {
+                    #"SYSTEM_SYSRULES_cardLayout"(
+                      contents: {
+                        #"SYSTEM_SYSRULES_sectionLayout_v1"(
+                          label: "Jetzt Wichtig für Dich",
+                          labelIcon: "bell",
+                          labelSize: "MEDIUM_PLUS",
+                          contents: {
+                            #"SYSTEM_SYSRULES_forEach"(
+                              items: local!notifications.data,
+                              expression: #"SYSTEM_SYSRULES_cardLayout"(
+                                contents: {
+                                  #"SYSTEM_SYSRULES_sideBySideLayout"(
+                                    items: {
+                                      #"SYSTEM_SYSRULES_sideBySideItem"(
+                                        item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                                          labelPosition: "COLLAPSED",
+                                          value: {
+                                            #"SYSTEM_SYSRULES_richTextIcon"(
+                                              icon: "shopping-cart",
+                                              size: "LARGE_PLUS"
+                                            )
+                                          }
+                                        ),
+                                        width: "MINIMIZE"
+                                      ),
+                                      #"SYSTEM_SYSRULES_sideBySideItem"(
+                                        item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                                          labelPosition: "COLLAPSED",
+                                          value: {
+                                            #"SYSTEM_SYSRULES_richTextItem_v1"(
+                                              text: concat(
+                                                upper(#"_a-0000ed87-2144-8000-9bee-011c48011c48_1076136"(status: fv!item[#"urn:appian:record-field:v1:2e4db39a-2f38-4769-b11e-8ad8441f993a/df425fdb-0f35-4150-a497-dbf371bc0c0f"])),
+                                                ": ",
+                                                "Besuch ",
+                                                joinarray(split(fv!item[#"urn:appian:record-field:v1:2e4db39a-2f38-4769-b11e-8ad8441f993a/3bc83589-99d7-4e39-9aab-a543720daca7"], ";"), ", "),
+                                                " am ",
+                                                text(fv!item[#"urn:appian:record-field:v1:2e4db39a-2f38-4769-b11e-8ad8441f993a/1248a4bf-108e-4870-8db8-2816b7cd4bea"], "ddd mmmm")
+                                              ),
+                                              size: "MEDIUM"
+                                            )
+                                          },
+                                          align: "RIGHT"
+                                        )
+                                      )
+                                    },
+                                    alignVertical: "MIDDLE"
+                                  )
+                                },
+                                style: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1063213"[2],
+                                shape: "ROUNDED",
+                                marginBelow: "STANDARD",
+                                showBorder: false
+                              )
+                            ),
+                            #"SYSTEM_SYSRULES_cardLayout"(
+                              contents: {
+                                #"SYSTEM_SYSRULES_sideBySideLayout"(
+                                  items: {
+                                    #"SYSTEM_SYSRULES_sideBySideItem"(
+                                      item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                                        labelPosition: "COLLAPSED",
+                                        value: {
+                                          #"SYSTEM_SYSRULES_richTextIcon"(
+                                            icon: "television",
+                                            size: "LARGE_PLUS"
+                                          )
+                                        }
+                                      ),
+                                      width: "MINIMIZE"
+                                    ),
+                                    #"SYSTEM_SYSRULES_sideBySideItem"(
+                                      item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                                        labelPosition: "COLLAPSED",
+                                        value: {
+                                          #"SYSTEM_SYSRULES_richTextItem_v1"(
+                                            text: "Nächste Folge ""Prison Break""",
+                                            size: "MEDIUM"
+                                          )
+                                        },
+                                        align: "RIGHT"
+                                      )
+                                    )
+                                  },
+                                  alignVertical: "MIDDLE"
+                                )
+                              },
+                              style: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1063213"[1],
+                              shape: "ROUNDED",
+                              marginBelow: "STANDARD",
+                              showBorder: false
+                            ),
+                            #"SYSTEM_SYSRULES_cardLayout"(
+                              contents: {
+                                #"SYSTEM_SYSRULES_sideBySideLayout"(
+                                  items: {
+                                    #"SYSTEM_SYSRULES_sideBySideItem"(
+                                      item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                                        labelPosition: "COLLAPSED",
+                                        value: {
+                                          #"SYSTEM_SYSRULES_richTextIcon"(
+                                            icon: "stethoscope",
+                                            size: "LARGE_PLUS"
+                                          )
+                                        }
+                                      ),
+                                      width: "MINIMIZE"
+                                    ),
+                                    #"SYSTEM_SYSRULES_sideBySideItem"(
+                                      item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                                        labelPosition: "COLLAPSED",
+                                        value: {
+                                          #"SYSTEM_SYSRULES_richTextItem_v1"(
+                                            text: concat(
+                                              "Blutuntersuchung am ",
+                                              text(today() + (2 + rand() * 5), "ddd mmmm")
+                                            ),
+                                            size: "MEDIUM"
+                                          )
+                                        },
+                                        align: "RIGHT"
+                                      )
+                                    )
+                                  },
+                                  alignVertical: "MIDDLE"
+                                )
+                              },
+                              style: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1063213"[5],
+                              shape: "ROUNDED",
+                              marginBelow: "STANDARD",
+                              showBorder: false
+                            ),
+                            #"SYSTEM_SYSRULES_cardLayout"(
+                              contents: {
+                                #"SYSTEM_SYSRULES_sideBySideLayout"(
+                                  items: {
+                                    #"SYSTEM_SYSRULES_sideBySideItem"(
+                                      item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                                        labelPosition: "COLLAPSED",
+                                        value: {
+                                          #"SYSTEM_SYSRULES_richTextIcon"(
+                                            icon: "shopping-cart",
+                                            size: "LARGE_PLUS"
+                                          )
+                                        }
+                                      ),
+                                      width: "MINIMIZE"
+                                    ),
+                                    #"SYSTEM_SYSRULES_sideBySideItem"(
+                                      item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                                        labelPosition: "COLLAPSED",
+                                        value: {
+                                          #"SYSTEM_SYSRULES_richTextItem_v1"(
+                                            text: concat(
+                                              "Deine Arbeit in der Druckerei beginnt am ",
+                                              text(today() + (7 + rand() * 5), "ddd mmmm")
+                                            ),
+                                            size: "MEDIUM"
+                                          )
+                                        },
+                                        align: "RIGHT"
+                                      )
+                                    )
+                                  },
+                                  alignVertical: "MIDDLE"
+                                )
+                              },
+                              style: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1063213"[2],
+                              shape: "ROUNDED",
+                              marginBelow: "STANDARD",
+                              showBorder: false
+                            ),
+                            #"SYSTEM_SYSRULES_cardLayout"(
+                              contents: {
+                                #"SYSTEM_SYSRULES_richTextDisplayField"(
+                                  labelPosition: "COLLAPSED",
+                                  value: {
+                                    #"SYSTEM_SYSRULES_richTextIcon"(
+                                      icon: "angle-double-down",
+                                      size: "MEDIUM"
+                                    ),
+                                    " ",
+                                    #"SYSTEM_SYSRULES_richTextItem_v1"(
+                                      text: "Mehr anzeigen",
+                                      size: "MEDIUM"
+                                    ),
+                                    " ",
+                                    #"SYSTEM_SYSRULES_richTextIcon"(
+                                      icon: "angle-double-down",
+                                      size: "MEDIUM"
+                                    )
+                                  },
+                                  align: "CENTER"
+                                )
+                              },
+                              shape: "ROUNDED",
+                              showBorder: false
+                            )
+                          }
+                        )
+                      },
+                      height: "AUTO",
+                      style: "#333333",
+                      shape: "ROUNDED",
+                      marginBelow: "STANDARD",
+                      showBorder: false,
+                      showShadow: true
+                    )
+                  }
+                ),
+                #"SYSTEM_SYSRULES_columnLayout"(
+                  contents: {
+                    #"SYSTEM_SYSRULES_cardLayout"(
+                      contents: {
+                        #"SYSTEM_SYSRULES_sectionLayout_v1"(
+                          label: "Letzte Aktivitäten",
+                          labelIcon: "check-double",
+                          labelSize: "MEDIUM_PLUS",
+                          contents: {
+                            #"SYSTEM_SYSRULES_cardLayout"(
+                              contents: {
+                                #"SYSTEM_SYSRULES_sideBySideLayout"(
+                                  items: {
+                                    #"SYSTEM_SYSRULES_sideBySideItem"(
+                                      item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                                        labelPosition: "COLLAPSED",
+                                        value: {
+                                          #"SYSTEM_SYSRULES_richTextIcon"(
+                                            icon: "user-injured",
+                                            size: "LARGE_PLUS"
+                                          )
+                                        }
+                                      ),
+                                      width: "MINIMIZE"
+                                    ),
+                                    #"SYSTEM_SYSRULES_sideBySideItem"(
+                                      item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                                        labelPosition: "COLLAPSED",
+                                        value: {
+                                          #"SYSTEM_SYSRULES_richTextItem_v1"(
+                                            text: "Aufenthalt Krankenstation nach Treppensturz",
+                                            size: "MEDIUM"
+                                          )
+                                        }
+                                      )
+                                    )
+                                  }
+                                )
+                              },
+                              style: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1063213"[5],
+                              shape: "ROUNDED",
+                              marginBelow: "STANDARD",
+                              showBorder: false
+                            ),
+                            #"SYSTEM_SYSRULES_cardLayout"(
+                              contents: {
+                                #"SYSTEM_SYSRULES_sideBySideLayout"(
+                                  items: {
+                                    #"SYSTEM_SYSRULES_sideBySideItem"(
+                                      item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                                        labelPosition: "COLLAPSED",
+                                        value: {
+                                          #"SYSTEM_SYSRULES_richTextIcon"(
+                                            icon: "shopping-cart",
+                                            size: "LARGE_PLUS"
+                                          )
+                                        }
+                                      ),
+                                      width: "MINIMIZE"
+                                    ),
+                                    #"SYSTEM_SYSRULES_sideBySideItem"(
+                                      item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                                        labelPosition: "COLLAPSED",
+                                        value: {
+                                          #"SYSTEM_SYSRULES_richTextItem_v1"(
+                                            text: "Bestellung Toilettenpapier",
+                                            size: "MEDIUM"
+                                          )
+                                        }
+                                      )
+                                    )
+                                  }
+                                )
+                              },
+                              style: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1063213"[2],
+                              shape: "ROUNDED",
+                              marginBelow: "STANDARD",
+                              showBorder: false
+                            ),
+                            #"SYSTEM_SYSRULES_cardLayout"(
+                              contents: {
+                                #"SYSTEM_SYSRULES_sideBySideLayout"(
+                                  items: {
+                                    #"SYSTEM_SYSRULES_sideBySideItem"(
+                                      item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                                        labelPosition: "COLLAPSED",
+                                        value: {
+                                          #"SYSTEM_SYSRULES_richTextIcon"(
+                                            icon: "phone",
+                                            size: "LARGE_PLUS"
+                                          )
+                                        }
+                                      ),
+                                      width: "MINIMIZE"
+                                    ),
+                                    #"SYSTEM_SYSRULES_sideBySideItem"(
+                                      item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                                        labelPosition: "COLLAPSED",
+                                        value: {
+                                          #"SYSTEM_SYSRULES_richTextItem_v1"(
+                                            text: "Anruf bei Anwalt",
+                                            size: "MEDIUM"
+                                          )
+                                        }
+                                      )
+                                    )
+                                  }
+                                )
+                              },
+                              style: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1063213"[3],
+                              shape: "ROUNDED",
+                              marginBelow: "STANDARD",
+                              showBorder: false
+                            ),
+                            #"SYSTEM_SYSRULES_cardLayout"(
+                              contents: {
+                                #"SYSTEM_SYSRULES_richTextDisplayField"(
+                                  labelPosition: "COLLAPSED",
+                                  value: {
+                                    #"SYSTEM_SYSRULES_richTextIcon"(
+                                      icon: "angle-double-down",
+                                      size: "MEDIUM"
+                                    ),
+                                    " ",
+                                    #"SYSTEM_SYSRULES_richTextItem_v1"(
+                                      text: "Mehr anzeigen",
+                                      size: "MEDIUM"
+                                    ),
+                                    " ",
+                                    #"SYSTEM_SYSRULES_richTextIcon"(
+                                      icon: "angle-double-down",
+                                      size: "MEDIUM"
+                                    )
+                                  },
+                                  align: "CENTER"
+                                )
+                              },
+                              shape: "ROUNDED",
+                              showBorder: false
+                            )
+                          }
+                        )
+                      },
+                      height: "AUTO",
+                      style: "#333333",
+                      shape: "ROUNDED",
+                      marginBelow: "STANDARD",
+                      showBorder: false,
+                      showShadow: true
+                    )
+                  }
+                )
+              }
+            )
+          },
+          height: "AUTO",
+          style: "TRANSPARENT",
+          marginBelow: "STANDARD",
+          showBorder: false
+        )
+      },
+      backgroundColor: "#111111",
+      contentsPadding: "LESS"
+    ),
+    if(
+      local!function = "MEDIA",
+      #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1064692"(function: local!function),
+      if(
+        local!function = "SERVICES",
+        #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1065522"(function: local!function),
+        if(
+          local!function = "PHONE",
+          #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1071500"(function: local!function),
+          if(
+            local!function = "MESSAGING",
+            #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1063219"(function: local!function),
+            if(
+              local!function = "HEALTH",
+              #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1063749"(function: local!function),
+              {}
+            )
+          )
+        )
+      )
+    )
+  )
+)</definition>
+        <preferredEditor>interface</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+        <isCustom>false</isCustom>
+    </interface>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <history>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1605832"/>
+    </history>
+</contentHaul>

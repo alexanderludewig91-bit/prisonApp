@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1627005</versionUuid>
+    <rule>
+        <name>PS_Q_GetAllPSInmatesPerPrison</name>
+        <uuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1530831</uuid>
+        <description>Requires a prison ID. Returns a list of PS Inmates.</description>
+        <parentUuid>4e30e89d-6b0d-415f-8a87-1107bebc8692</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>if(
+  a!isNullOrEmpty(ri!prisonId),
+  #"urn:appian:record-type:v1:c035ef79-0201-4600-a2b7-9075b42e1d87"(),
+  #"SYSTEM_SYSRULES_queryRecordType_v2"(
+    recordType: #"urn:appian:record-type:v1:b9f2b8a1-aa3c-420e-9856-a362e5c58683",
+    filters: #"SYSTEM_SYSRULES_queryLogicalExpression"(
+      operator: "AND",
+      filters: {
+        #"SYSTEM_SYSRULES_queryFilter"(
+          field: #"urn:appian:record-field:v1:b9f2b8a1-aa3c-420e-9856-a362e5c58683/fc3d08af-a253-434c-b9c7-16ff16d2c803",
+          operator: "=",
+          value: ri!prisonId
+        )
+      }
+    ),
+    fetchTotalCount: true,
+    pagingInfo: #"SYSTEM_SYSRULES_pagingInfo"(1, 5000, #"SYSTEM_SYSRULES_sortInfo"(#"urn:appian:record-field:v1:b9f2b8a1-aa3c-420e-9856-a362e5c58683/d70d7a0c-0ee6-4949-84d6-2c58d8caffcc", true))
+  )
+)</definition>
+        <namedTypedValue>
+            <name>prisonId</name>
+            <type>
+                <name>int</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <preferredEditor>legacy</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+    </rule>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <typedValue>
+        <type>
+            <name>RuleTestConfig?list</name>
+            <namespace>http://www.appian.com/ae/types/2009</namespace>
+        </type>
+        <value>
+            <el>
+                <a:name>NULL</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true" xsi:type="xsd:int"/>
+                    <a:nameRef>prisonId</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                <a:isDefault>true</a:isDefault>
+            </el>
+        </value>
+    </typedValue>
+    <history>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1627005"/>
+    </history>
+</contentHaul>

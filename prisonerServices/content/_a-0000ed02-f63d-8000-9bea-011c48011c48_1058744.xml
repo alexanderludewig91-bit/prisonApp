@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ed02-f63d-8000-9bea-011c48011c48_1059075</versionUuid>
+    <interface>
+        <name>PS_ServiceDetails</name>
+        <uuid>_a-0000ed02-f63d-8000-9bea-011c48011c48_1058744</uuid>
+        <description>Section interface showing the base Service interface module. Contains all the basic fields of the record. Used by the summary record view, create and update forms, as well as task forms. [Base] [Records]</description>
+        <parentUuid>bb69cd5d-2b14-4fb7-b9d0-11ebd5815cda</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>a!localVariables(
+  /* The local variables store the options for the Pick Single / Multiple from List fields    *
+   * We only show the active options, plus any inactive options already stored on this record */
+  local!statusOptions: a!refreshVariable(
+    value: if(ri!record.status.active,#"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058700"(options: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058841"(), selections: null),#"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058700"(options: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058841"(), selections: ri!record.status.id)),
+    /* Ensures this is only calculated on initial load and not each time you update ri!record */
+    refreshOnReferencedVarChange: false
+  ),
+  local!priorityOptions: a!refreshVariable(
+    value: if(ri!record.priority.active,#"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058700"(options: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058845"(), selections: null),#"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058700"(options: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058845"(), selections: ri!record.priority.id)),
+    /* Ensures this is only calculated on initial load and not each time you update ri!record */
+    refreshOnReferencedVarChange: false
+  ),
+  {
+    #"SYSTEM_SYSRULES_sectionLayout_v1"(
+      label: ri!label,
+      contents: #"SYSTEM_SYSRULES_columnsLayout"(
+        columns: {
+          #"SYSTEM_SYSRULES_columnLayout"(
+            contents: {
+              #"SYSTEM_SYSRULES_textField"(
+                label: "Title",
+                labelPosition: if(ri!readOnly, "ADJACENT", "ABOVE"),
+                instructions: if(ri!readOnly, "", ""),
+                helpTooltip: if(ri!readOnly, "", ""),
+                placeholder: if(ri!readOnly, "", ""),
+                required: not(ri!readOnly),
+                value: ri!record.title,
+                saveInto: ri!record.title,
+                readOnly: ri!readOnly,
+                validations: if(
+                  len(ri!record.title) &lt;= 200,
+                  "",
+                  "Value may not be longer than 200 characters. You have entered " &amp; len(ri!record.title) &amp; " characters."
+                )
+              ),
+              if(
+                ri!readOnly,
+                #"SYSTEM_SYSRULES_textField"(
+                  label: "Status",
+                  labelPosition: "ADJACENT",
+                  value: ri!record.status.value,
+                  readOnly: true
+                ),
+                #"SYSTEM_SYSRULES_dropdownField_v1"(
+                  label: "Status",
+                  labelPosition: "ABOVE",
+                  instructions: "",
+                  helpTooltip: "",
+                  placeholder: "--- Select a Value ---",
+                  choiceLabels: local!statusOptions.value,
+                  choiceValues: local!statusOptions,
+                  required: not(ri!readOnly),
+                  value: ri!record.status,
+                  saveInto: ri!record.status
+                )
+              ),
+              if(
+                ri!readOnly,
+                #"SYSTEM_SYSRULES_imageField"(
+                  label: "Priority",
+                  labelPosition: "ADJACENT",
+                  images: a!defaultValue(#"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058732"(ri!record.priority.value), {}),
+                  size: "ICON"
+                ),
+                #"SYSTEM_SYSRULES_dropdownField_v1"(
+                  label: "Priority",
+                  labelPosition: "ABOVE",
+                  instructions: "",
+                  helpTooltip: "",
+                  placeholder: "--- Select a Value ---",
+                  choiceLabels: local!priorityOptions.value,
+                  choiceValues: local!priorityOptions,
+                  required: not(ri!readOnly),
+                  value: ri!record.priority,
+                  saveInto: ri!record.priority
+                )
+              ),
+              if(
+                ri!creating,
+                {},
+                {
+                  #"SYSTEM_SYSRULES_linkField"(
+                    label: "Created By",
+                    labelPosition: if(ri!readOnly, "ADJACENT", "ABOVE"),
+                    links: #"SYSTEM_SYSRULES_userRecordLink"(
+                      label: #"28845323-04ee-4e83-9c6c-cd99b14e142b_FORMATNAME"(ri!record.createdBy),
+                      user: ri!record.createdBy
+                    )
+                  ),
+                  #"SYSTEM_SYSRULES_textField"(
+                    label: "Created On",
+                    labelPosition: if(ri!readOnly, "ADJACENT", "ABOVE"),
+                    value: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058684"(ri!record.createdOn),
+                    readOnly: true
+                  )
+                }
+              )
+            }
+          ),
+          #"SYSTEM_SYSRULES_columnLayout"(
+            contents: {
+              #"SYSTEM_SYSRULES_paragraphField"(
+                label: "description",
+                labelPosition: if(ri!readOnly, "ADJACENT", "ABOVE"),
+                instructions: if(ri!readOnly, "", ""),
+                helpTooltip: if(ri!readOnly, "", ""),
+                placeholder: if(ri!readOnly, "", ""),
+                required: false,
+                value: ri!record.description.value,
+                saveInto: ri!record.description.value,
+                readOnly: ri!readOnly,
+                height: "SHORT",
+                validations: if(
+                  len(ri!record.description.value) &lt;= 4000,
+                  "",
+                  "Value may not be longer than 4000 characters. You have entered " &amp; len(ri!record.description.value) &amp; " characters."
+                )
+              ),
+              #"SYSTEM_SYSRULES_floatingPointField"(
+                label: "number",
+                labelPosition: if(ri!readOnly, "ADJACENT", "ABOVE"),
+                instructions: if(ri!readOnly, "", ""),
+                helpTooltip: if(ri!readOnly, "", ""),
+                placeholder: if(ri!readOnly, "", ""),
+                required: false,
+                value: ri!record.number,
+                saveInto: ri!record.number,
+                readOnly: ri!readOnly
+              ),
+              if(
+                ri!creating,
+                {},
+                {
+                  #"SYSTEM_SYSRULES_linkField"(
+                    label: "Updated By",
+                    labelPosition: if(ri!readOnly, "ADJACENT", "ABOVE"),
+                    links: #"SYSTEM_SYSRULES_userRecordLink"(
+                      label: #"28845323-04ee-4e83-9c6c-cd99b14e142b_FORMATNAME"(ri!record.updatedBy),
+                      user: ri!record.updatedBy
+                    )
+                  ),
+                  #"SYSTEM_SYSRULES_textField"(
+                    label: "Updated On",
+                    labelPosition: if(ri!readOnly, "ADJACENT", "ABOVE"),
+                    value: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058684"(ri!record.updatedOn),
+                    readOnly: true
+                  )
+                }
+              )
+            }
+          )
+        }
+      )
+    ),
+    #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058728"(
+      documents: ri!documents,
+      deletedDocuments: ri!deletedDocuments,
+      readOnly: ri!readOnly,
+      target: if(ri!creating,
+        #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058656",
+        ri!record.folderId
+      )
+    )
+  }
+)</definition>
+        <namedTypedValue>
+            <name>record</name>
+            <type>
+                <name>PS_Service</name>
+                <namespace>urn:com:appian:types:PS</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>creating</name>
+            <type>
+                <name>boolean</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>readOnly</name>
+            <type>
+                <name>boolean</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>documents</name>
+            <type>
+                <name>CollaborationDocument?list</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>label</name>
+            <type>
+                <name>string</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+            <value/>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>deletedDocuments</name>
+            <type>
+                <name>CollaborationDocument?list</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <preferredEditor>interface</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+        <isCustom>false</isCustom>
+    </interface>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <history>
+        <historyInfo versionUuid="_a-0000ed02-f63d-8000-9bea-011c48011c48_1059075"/>
+    </history>
+</contentHaul>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1543651</versionUuid>
+    <rule>
+        <name>PS_DR_MonthNamesTranslations</name>
+        <uuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1543632</uuid>
+        <description>Requires the number of month as an integer input and returns the translated name of the month</description>
+        <parentUuid>4e30e89d-6b0d-415f-8a87-1107bebc8692</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>a!match(
+  value: ri!month,
+  equals: 1,
+  then: #"urn:appian:translation-string:v1:13f86dd9-f208-4ff1-8e3d-e6534a79c81b",
+  equals: 2,
+  then: #"urn:appian:translation-string:v1:cc283bd6-8d9e-4212-ad27-dba1589ee622",
+  equals: 3,
+  then: #"urn:appian:translation-string:v1:2f09f000-4006-44f2-80d7-a35d9a5cd8fe",
+  equals: 4,
+  then: #"urn:appian:translation-string:v1:76926efd-a88f-4341-afd8-ea23bd5bc77a",
+  equals: 5,
+  then: #"urn:appian:translation-string:v1:1cd08c61-7532-4f85-ad2c-8d2a7cdd610f",
+  equals: 6,
+  then: #"urn:appian:translation-string:v1:b6c4fb4d-56ea-453c-957c-5cdf9a4d7015",
+  equals: 7,
+  then: #"urn:appian:translation-string:v1:cd88698a-5e20-4173-963a-66c5c580544f",
+  equals: 8,
+  then: #"urn:appian:translation-string:v1:92d36036-e8a8-4578-90be-355444a19ecd",
+  equals: 9,
+  then: #"urn:appian:translation-string:v1:2c2abb38-be0e-4576-9b96-d7950428a64e",
+  equals: 10,
+  then: #"urn:appian:translation-string:v1:b1b1bea1-824d-44d7-9b66-fa36a9a2237f",
+  equals: 11,
+  then: #"urn:appian:translation-string:v1:c59cf260-59fe-40a7-9f08-1c5d42abd938",
+  equals: 12,
+  then: #"urn:appian:translation-string:v1:ebf8f298-9eae-45f8-b6ff-d70b45e36e70",
+  default: #"urn:appian:translation-string:v1:0382ff62-3f06-454d-ba9f-8b04e7d7cb34"
+)</definition>
+        <namedTypedValue>
+            <name>month</name>
+            <type>
+                <name>int</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <preferredEditor>legacy</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+    </rule>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <typedValue>
+        <type>
+            <name>RuleTestConfig?list</name>
+            <namespace>http://www.appian.com/ae/types/2009</namespace>
+        </type>
+        <value>
+            <el>
+                <a:name>NULL</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true" xsi:type="xsd:int"/>
+                    <a:nameRef>month</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                <a:isDefault>true</a:isDefault>
+            </el>
+        </value>
+    </typedValue>
+    <history>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1543651"/>
+    </history>
+</contentHaul>

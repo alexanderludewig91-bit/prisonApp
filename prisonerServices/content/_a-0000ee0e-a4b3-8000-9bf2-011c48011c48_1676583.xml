@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee50-153e-8000-88de-179188179188_20000</versionUuid>
+    <interface>
+        <name>PS_C_AuthorityLetterGeneratorDamageAssessmentSection</name>
+        <uuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1676583</uuid>
+        <description></description>
+        <parentUuid>4e30e89d-6b0d-415f-8a87-1107bebc8692</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>#"SYSTEM_SYSRULES_cardLayout"(
+  contents: {
+    #"SYSTEM_SYSRULES_checkboxField_v1"(
+      choiceLabels: {
+        #"urn:appian:translation-string:v1:de7bf95d-96d9-4c04-92d2-78dd08f274a8",
+        #"urn:appian:translation-string:v1:e281eeaa-2cdf-4108-84a4-e4156fe626ab",
+        #"urn:appian:translation-string:v1:3710cc32-b107-4ad6-a014-2947a61318d2",
+        #"urn:appian:translation-string:v1:de41ba60-72e0-49f8-97d4-bbaaf68c095b"
+      },
+      choiceValues: {
+        #"urn:appian:translation-string:v1:de7bf95d-96d9-4c04-92d2-78dd08f274a8",
+        #"urn:appian:translation-string:v1:e281eeaa-2cdf-4108-84a4-e4156fe626ab",
+        #"urn:appian:translation-string:v1:3710cc32-b107-4ad6-a014-2947a61318d2",
+        #"urn:appian:translation-string:v1:de41ba60-72e0-49f8-97d4-bbaaf68c095b"
+      },
+      label: #"urn:appian:translation-string:v1:ea0f7060-d5a1-4041-8b2e-fe42166e4929",
+      labelPosition: "ABOVE",
+      value: ri!selectedDamage,
+      saveInto: ri!selectedDamage,
+      validations: {},
+      marginBelow: "NONE"
+    ),
+  },
+  height: "AUTO",
+  style: "TRANSPARENT",
+  marginBelow: "STANDARD"
+)</definition>
+        <namedTypedValue>
+            <name>eventId</name>
+            <type>
+                <name>int</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>selectedDamage</name>
+            <type>
+                <name>Text?list</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>showWhen</name>
+            <type>
+                <name>boolean</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <preferredEditor>interface</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+        <isCustom>false</isCustom>
+    </interface>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <typedValue>
+        <type>
+            <name>RuleTestConfig?list</name>
+            <namespace>http://www.appian.com/ae/types/2009</namespace>
+        </type>
+        <value>
+            <el>
+                <a:name/>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">52</a:value>
+                    <a:nameRef>eventId</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">null</a:value>
+                    <a:nameRef>selectedDamage</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true" xsi:type="xsd:boolean"/>
+                    <a:nameRef>showWhen</a:nameRef>
+                    <a:id>4</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+            </el>
+        </value>
+    </typedValue>
+    <history>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1676754"/>
+        <historyInfo versionUuid="_a-0000ee50-153e-8000-88de-179188179188_20000"/>
+    </history>
+</contentHaul>

@@ -1,0 +1,376 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1616186</versionUuid>
+    <interface>
+        <name>PS_CreateIncident</name>
+        <uuid>bca12007-849d-4863-8d11-325e868d3925</uuid>
+        <description>Form interface for creating new Incidents as an action</description>
+        <parentUuid>4e30e89d-6b0d-415f-8a87-1107bebc8692</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>#"SYSTEM_SYSRULES_formLayout_v1"(
+  backgroundColor: "#fbfbfb",
+  label: "Übergriff Melden",
+  isHeaderFixed: true,
+  contents: {
+    #"SYSTEM_SYSRULES_columnsLayout"(
+      showDividers: true,
+      columns: {
+        #"SYSTEM_SYSRULES_columnLayout"(
+          width: "NARROW_PLUS",
+          showWhen: #"SYSTEM_SYSRULES_isPageWidth"(
+            {
+              "DESKTOP_WIDE",
+              "DESKTOP",
+              "DESKTOP_NARROW",
+              "TABLET_LANDSCAPE"
+            }
+          ),
+          contents: {
+            #"SYSTEM_SYSRULES_imageField_v1"(
+              marginAbove: "EVEN_MORE",
+              align: "CENTER",
+              images: #"SYSTEM_SYSRULES_documentImage"(
+                document: #"_a-0000ed87-2144-8000-9bee-011c48011c48_1093793"
+              )
+            ),
+            #"SYSTEM_SYSRULES_richTextDisplayField"(
+              labelPosition: "COLLAPSED",
+              marginAbove: "MORE",
+              value: #"SYSTEM_SYSRULES_richTextItem_v1"(
+                text: "Berichte im Detail von dem Übergriff um die passenden Sanktionsmaßnahmen zu ergreifen.",
+                size: "MEDIUM"
+              )
+            )
+          }
+        ),
+        #"SYSTEM_SYSRULES_columnLayout"(
+          contents: {
+            #"SYSTEM_SYSRULES_columnsLayout"(
+              columns: {
+                #"SYSTEM_SYSRULES_columnLayout"(
+                  showWhen: #"SYSTEM_SYSRULES_isPageWidth"(
+                    {
+                      "DESKTOP_WIDE",
+                      "DESKTOP",
+                      "DESKTOP_NARROW",
+                      "TABLET_LANDSCAPE"
+                    }
+                  )
+                ),
+                #"SYSTEM_SYSRULES_columnLayout"(
+                  contents: {
+                    #"SYSTEM_SYSRULES_sectionLayout_v1"(
+                      contents: {
+                        #"SYSTEM_SYSRULES_sideBySideLayout"(
+                          items: {
+                            #"SYSTEM_SYSRULES_sideBySideItem"(
+                              item: #"SYSTEM_SYSRULES_pickerFieldUsers"(
+                                label: "Täter",
+                                labelPosition: "ABOVE",
+                                saveInto: {},
+                                required: true,
+                                validations: {}
+                              )
+                            ),
+                            #"SYSTEM_SYSRULES_sideBySideItem"(
+                              item: #"SYSTEM_SYSRULES_dateTimeField"(
+                                label: "Tatzeit",
+                                labelPosition: "ABOVE",
+                                value: ri!record[#"urn:appian:record-field:v1:9d771100-21bf-4d45-97a7-3432619ca540/fe9f8cd2-6a7b-41ee-a692-7cde57c22708"],
+                                saveInto: ri!record[#"urn:appian:record-field:v1:9d771100-21bf-4d45-97a7-3432619ca540/fe9f8cd2-6a7b-41ee-a692-7cde57c22708"],
+                                required: true,
+                                marginAbove: "LESS"
+                              ),
+                              width: "MINIMIZE"
+                            )
+                          },
+                          alignVertical: "BOTTOM"
+                        ),
+                        #"SYSTEM_SYSRULES_sectionLayout_v1"(
+                          label: "Ort",
+                          labelIcon: "map-signs",
+                          labelSize: "SMALL",
+                          contents: {
+                            #"SYSTEM_SYSRULES_sideBySideLayout"(
+                              items: {
+                                #"SYSTEM_SYSRULES_sideBySideItem"(
+                                  item: #"SYSTEM_SYSRULES_dropdownField_v1"(
+                                    choiceLabels: {
+                                      "Option 1",
+                                      "Option 2",
+                                      "Option 3",
+                                      "Option 4",
+                                      "Option 5",
+                                      "Option 6",
+                                      "Option 7",
+                                      "Option 8",
+                                      "Option 9",
+                                      "Option 10",
+                                      "Option 11",
+                                      "Option 12"
+                                    },
+                                    choiceValues: {
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5,
+                                      6,
+                                      7,
+                                      8,
+                                      9,
+                                      10,
+                                      11,
+                                      12
+                                    },
+                                    label: "Gebäude",
+                                    labelPosition: "ABOVE",
+                                    placeholder: "--- Select a Value ---",
+                                    saveInto: {},
+                                    searchDisplay: "AUTO",
+                                    required: true,
+                                    validations: {}
+                                  )
+                                ),
+                                #"SYSTEM_SYSRULES_sideBySideItem"(
+                                  item: #"SYSTEM_SYSRULES_dropdownField_v1"(
+                                    choiceLabels: {
+                                      "Option 1",
+                                      "Option 2",
+                                      "Option 3",
+                                      "Option 4",
+                                      "Option 5",
+                                      "Option 6",
+                                      "Option 7",
+                                      "Option 8",
+                                      "Option 9",
+                                      "Option 10",
+                                      "Option 11",
+                                      "Option 12"
+                                    },
+                                    choiceValues: {
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5,
+                                      6,
+                                      7,
+                                      8,
+                                      9,
+                                      10,
+                                      11,
+                                      12
+                                    },
+                                    label: "Stock",
+                                    labelPosition: "ABOVE",
+                                    placeholder: "--- Select a Value ---",
+                                    saveInto: {},
+                                    searchDisplay: "AUTO",
+                                    required: true,
+                                    validations: {}
+                                  )
+                                ),
+                                #"SYSTEM_SYSRULES_sideBySideItem"(
+                                  item: #"SYSTEM_SYSRULES_dropdownField_v1"(
+                                    choiceLabels: {
+                                      "Option 1",
+                                      "Option 2",
+                                      "Option 3",
+                                      "Option 4",
+                                      "Option 5",
+                                      "Option 6",
+                                      "Option 7",
+                                      "Option 8",
+                                      "Option 9",
+                                      "Option 10",
+                                      "Option 11",
+                                      "Option 12"
+                                    },
+                                    choiceValues: {
+                                      1,
+                                      2,
+                                      3,
+                                      4,
+                                      5,
+                                      6,
+                                      7,
+                                      8,
+                                      9,
+                                      10,
+                                      11,
+                                      12
+                                    },
+                                    label: "Raum",
+                                    labelPosition: "ABOVE",
+                                    placeholder: "--- Select a Value ---",
+                                    saveInto: {},
+                                    searchDisplay: "AUTO",
+                                    required: true,
+                                    validations: {}
+                                  )
+                                )
+                              }
+                            )
+                          }
+                        ),
+                        #"SYSTEM_SYSRULES_cardChoiceField"(
+                          label: "Art des Übergriffs",
+                          data: {
+                            a!map(id: 1, icon: "money", primaryText: "Bestechungsversuch", secondaryText: "Bevorzugung gegen Geld"),
+                            a!map(id: 2, icon: "comment", primaryText: "Verbal", secondaryText: "Bedrohung, Streit"),
+                            a!map(id: 3, icon: "hand-rock", primaryText: "Körperlich", secondaryText: "Festhalten, Würgen, Schlagen"),
+                            a!map(id: 4, icon: "pen", primaryText: "Bewaffnet", secondaryText: "Drohung mit, oder Einsatz einer Waffe")
+                          },
+                          cardTemplate: #"SYSTEM_SYSRULES_cardTemplateBarTextStacked"(
+                            id: fv!data.id,
+                            primaryText: fv!data.primaryText,
+                            secondaryText: fv!data.secondaryText,
+                            icon: fv!data.icon
+                          ),
+                          saveInto: {},
+                          maxSelections: 1,
+                          validations: {}
+                        ),
+                        #"SYSTEM_SYSRULES_paragraphField"(
+                          label: "Beschreibung",
+                          labelPosition: "ABOVE",
+                          value: ri!record[#"urn:appian:record-field:v1:9d771100-21bf-4d45-97a7-3432619ca540/4888bc38-e3ca-402d-87b9-f5c45b07fbc7"],
+                          saveInto: ri!record[#"urn:appian:record-field:v1:9d771100-21bf-4d45-97a7-3432619ca540/4888bc38-e3ca-402d-87b9-f5c45b07fbc7"],
+                          characterLimit: 4000,
+                          height: "MEDIUM",
+                          required: true,
+                          marginAbove: "LESS"
+                        ),
+                        #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1605697"(
+                          text: {
+                            "Der Übergriff wird dem zuständigen Sozialarbeiter zur Prüfung vorgelegt.",
+                            "Eventuelle Rückfragen beantwortest du über deine Aufgabe.",
+                            "Falls nötig erhälst du eine Einladung zur Anhörung."
+                          },
+                          style: null,
+                          label: null,
+                          showwhen: null,
+                          backgroundcolor: null,
+                          shape: null,
+                          showborder: null,
+                          showshadow: null,
+                          align: null,
+                          textsize: null,
+                          labelsize: null
+                        )
+                      },
+                      marginBelow: "MORE"
+                    )
+
+                  },
+                  width: "WIDE_PLUS"
+                ),
+                #"SYSTEM_SYSRULES_columnLayout"(
+                  showWhen: #"SYSTEM_SYSRULES_isPageWidth"(
+                    {
+                      "DESKTOP_WIDE",
+                      "DESKTOP",
+                      "DESKTOP_NARROW",
+                      "TABLET_LANDSCAPE"
+                    }
+                  )
+                )
+              }
+            )
+          },
+        ),
+      }
+    )
+  },
+  buttons: #"SYSTEM_SYSRULES_ButtonLayout"(
+    primaryButtons: {
+      #"SYSTEM_SYSRULES_buttonWidget_v1"(
+        label: "Übergriff Melden",
+        icon: "bullhorn",
+        iconPosition: "END",
+        saveInto: {
+          a!save(
+            target: ri!record[#"urn:appian:record-field:v1:9d771100-21bf-4d45-97a7-3432619ca540/0edde5b7-1678-4481-9cf1-39871bfae0d6"],
+            value: loggedInUser()
+          ),
+          a!save(
+            target: ri!record[#"urn:appian:record-field:v1:9d771100-21bf-4d45-97a7-3432619ca540/1bc13b93-3f25-42e6-99ae-2b85a10f8067"],
+            value: now()
+          )
+        },
+        submit: true,
+        style: "SOLID",
+        validate: true
+      )
+    },
+    secondaryButtons: {
+      #"SYSTEM_SYSRULES_buttonWidget_v1"(
+        label: "Abbrechen",
+        icon: "times",
+        value: true,
+        saveInto: ri!cancel,
+        submit: true,
+        style: "OUTLINE",
+        validate: false
+      )
+    }
+  )
+)</definition>
+        <namedTypedValue>
+            <name>record</name>
+            <type>
+                <name>9d771100-21bf-4d45-97a7-3432619ca540</name>
+                <namespace>urn:com:appian:recordtype:datatype</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>cancel</name>
+            <type>
+                <name>boolean</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <preferredEditor>interface</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+        <isCustom>false</isCustom>
+    </interface>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <history>
+        <historyInfo versionUuid="28acc3e3-b8d5-496d-8789-9e4667696a23"/>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1616186"/>
+    </history>
+</contentHaul>

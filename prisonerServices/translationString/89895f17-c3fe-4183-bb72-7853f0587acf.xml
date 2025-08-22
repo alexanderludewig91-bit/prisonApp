@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<translationStringHaul xmlns:a="http://www.appian.com/ae/types/2009">
+  <versionUuid>b12282f9-e9b7-4fb7-a20d-d5e91430b3bf</versionUuid>
+  <translationString a:uuid="89895f17-c3fe-4183-bb72-7853f0587acf">
+    <a:translationSetUuid>5f1fccd2-d309-46dc-a451-abf6d078df5a</a:translationSetUuid>
+    <a:description/>
+    <a:translatorNotes/>
+    <translationTexts>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>en-US</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>The prison officer will personally inform the inmate of your decision. Afterwards the decision will be visible for the inmate.</a:translatedText>
+      </translatedText>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>de</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Der Allgemeine Vollzugsdienst (AVD) eröffnet dem Gefangenen persönlich Ihre Entscheidung. Anschließend erhält der Gefangene die Information zu Ihrer Entscheidung in der Antragsübersicht.</a:translatedText>
+      </translatedText>
+    </translationTexts>
+    <translationStringVariables/>
+  </translationString>
+  <history>
+    <historyInfo versionUuid="26cb4673-7588-4c4f-891e-7c71242f7a62"/>
+    <historyInfo versionUuid="b12282f9-e9b7-4fb7-a20d-d5e91430b3bf"/>
+  </history>
+</translationStringHaul>

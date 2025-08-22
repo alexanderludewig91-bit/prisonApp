@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ed02-f63d-8000-9bea-011c48011c48_1059013</versionUuid>
+    <interface>
+        <name>PS_GetIconForPriority</name>
+        <uuid>_a-0000ed02-f63d-8000-9bea-011c48011c48_1058732</uuid>
+        <description>Component interface that returns the appropriate icon for display, given a particular priority value [Base] [Records]</description>
+        <parentUuid>90d38322-a009-41ca-9890-e4f474c93ac7</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>if(
+  ri!priority = "Low",
+  #"SYSTEM_SYSRULES_documentImage"(
+    document: #"SYSTEM_SYSRULES_iconIndicator"(icon: "PRIORITY_LOW"),
+    altText: ri!priority,
+    caption: ri!priority
+  ),
+  if(
+    ri!priority = "Medium",
+    #"SYSTEM_SYSRULES_documentImage"(
+      document: #"SYSTEM_SYSRULES_iconIndicator"(icon: "HARVEY_0"),
+      altText: ri!priority,
+      caption: ri!priority
+    ),
+    if(
+      ri!priority = "High",
+      #"SYSTEM_SYSRULES_documentImage"(
+        document: #"SYSTEM_SYSRULES_iconIndicator"(icon: "PRIORITY_HIGH"),
+        altText: ri!priority,
+        caption: ri!priority
+      ),
+      if(
+        ri!priority = "Critical",
+        #"SYSTEM_SYSRULES_documentImage"(
+          document: #"SYSTEM_SYSRULES_iconIndicator"(icon: "STATUS_WARN"),
+          altText: ri!priority,
+          caption: ri!priority
+        ),
+        fn!cast('type!{http://www.appian.com/ae/types/2009}SafeImage', fn!null())
+      )
+    )
+  )
+)
+</definition>
+        <namedTypedValue>
+            <name>priority</name>
+            <type>
+                <name>string</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+            <value/>
+        </namedTypedValue>
+        <preferredEditor>interface</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+        <isCustom>false</isCustom>
+    </interface>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <history>
+        <historyInfo versionUuid="_a-0000ed02-f63d-8000-9bea-011c48011c48_1059013"/>
+    </history>
+</contentHaul>

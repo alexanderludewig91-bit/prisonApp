@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee46-8277-8000-88d4-179188179188_13464</versionUuid>
+    <rule>
+        <name>PS_DR_EventHistoryTranslations</name>
+        <uuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1625007</uuid>
+        <description></description>
+        <parentUuid>4e30e89d-6b0d-415f-8a87-1107bebc8692</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>/*See a full list of all Event Statuses in rule 'PS_AllEventStatuses'*/
+
+a!match(
+  value: ri!eventHistory,
+  equals: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1624977",
+  then: a!map(
+    type: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1624977",
+    translation: #"urn:appian:translation-string:v1:95cb23e5-9808-408f-83ec-981c8b5a7d90",
+  ),
+  equals: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1624983",
+  then: a!map(
+    type: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1624983",
+    translation: #"urn:appian:translation-string:v1:d70c38ee-69ad-4f43-a6a2-d8ea0f3834b4",
+  ),
+  equals: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1624989",
+  then: a!map(
+    type: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1624989",
+    translation: #"urn:appian:translation-string:v1:52ef7810-fcd0-49eb-9838-d7646d7868e7",
+  ),
+  equals: null,
+  then: a!map(
+    type: null,
+    translation: null
+  ),
+  default: a!map(
+    type: "UNKNOWN",
+    translation: "-- " &amp; #"urn:appian:translation-string:v1:c2775eb6-e086-431a-90bc-c5de35e6d734" &amp; " --"
+  )
+)</definition>
+        <namedTypedValue>
+            <name>eventHistory</name>
+            <type>
+                <name>string</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+            <value/>
+        </namedTypedValue>
+        <preferredEditor>legacy</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+    </rule>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <typedValue>
+        <type>
+            <name>RuleTestConfig?list</name>
+            <namespace>http://www.appian.com/ae/types/2009</namespace>
+        </type>
+        <value>
+            <el>
+                <a:name>NULL</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string"/>
+                    <a:nameRef>eventHistory</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                <a:isDefault>true</a:isDefault>
+            </el>
+            <el>
+                <a:name>create</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">"Created Event"</a:value>
+                    <a:nameRef>eventHistory</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>unknown</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">"Test"</a:value>
+                    <a:nameRef>eventHistory</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                <a:isDefault>false</a:isDefault>
+            </el>
+        </value>
+    </typedValue>
+    <history>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1627091"/>
+        <historyInfo versionUuid="_a-0000ee46-8277-8000-88d4-179188179188_13464"/>
+    </history>
+</contentHaul>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1626948</versionUuid>
+    <rule>
+        <name>PS_RemoveInactiveValues</name>
+        <uuid>_a-0000ed02-f63d-8000-9bea-011c48011c48_1058700</uuid>
+        <description>Rule that takes a list of CDTs and removes all of the inactive values except the ones selected, as well as removing any active, unselected values that exactly duplicate inactive, selected values. [Base]</description>
+        <parentUuid>90d38322-a009-41ca-9890-e4f474c93ac7</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>if(
+  or(
+    a!isNullOrEmpty(ri!options),
+    a!isNullOrEmpty(ri!selections)
+  ),
+  null,
+  a!localVariables(
+    /* All local variables used here are lists of indices for options */
+    local!selections: wherecontains(ri!selections, ri!options.id),
+    /* These are the inactive options to keep, because this record  *
+     * record has them stored and so they should be displayed.      */
+    local!inactiveSelections: intersection(
+      local!selections,
+      /* All the inactive options to remove by default                */
+      where(not(ri!options.active), {})
+    ),
+    local!activeOptions: where(ri!options.active, null),
+    /* Find the values of all unselected, active options that have    *
+   * the same values as a selected, inactive option.                */
+    local!activeOptionsToRemove: if(
+      or(isnull(local!inactiveSelections), length(local!inactiveSelections) = 0),
+      {},
+      intersection(
+        /* Find the values of the unselected, active options          */
+        difference(local!activeOptions, local!selections),
+        /* Find the values of the selected, inactive options          */
+        wherecontains(
+          index(ri!options.value,local!inactiveSelections),
+          ri!options.value
+        )
+      )
+    ),
+    local!optionIndices: if(
+      or(isnull(local!activeOptionsToRemove), length(local!activeOptionsToRemove) = 0),
+      union(local!selections, local!activeOptions),
+      union(
+        local!selections,
+        difference(
+          local!activeOptions,
+          local!activeOptionsToRemove
+        )
+      )
+    ),
+    /* If there are no selections, just show the active values.       *
+   * Otherwise, show all selected and active values, minus any      *
+   * active unselected values that duplicate selected values.       */
+    if(
+      or(isnull(ri!selections), length(ri!selections) = 0),
+      index(ri!options, local!activeOptions, {}),
+      difference(ri!options, remove(ri!options, local!optionIndices))
+    )
+  )
+)</definition>
+        <namedTypedValue>
+            <name>options</name>
+            <type>
+                <name>Variant</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>selections</name>
+            <type>
+                <name>Integer?list</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <preferredEditor>legacy</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+    </rule>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <typedValue>
+        <type>
+            <name>RuleTestConfig?list</name>
+            <namespace>http://www.appian.com/ae/types/2009</namespace>
+        </type>
+        <value>
+            <el>
+                <a:name>NULL</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">null</a:value>
+                    <a:nameRef>options</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">null</a:value>
+                    <a:nameRef>selections</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                <a:isDefault>true</a:isDefault>
+            </el>
+        </value>
+    </typedValue>
+    <history>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1626948"/>
+    </history>
+</contentHaul>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<translationStringHaul xmlns:a="http://www.appian.com/ae/types/2009">
+  <versionUuid>d1582b64-c56f-494d-90f5-c2f994d17f03</versionUuid>
+  <translationString a:uuid="49193d97-489d-4fe0-a10f-ae77a9953509">
+    <a:translationSetUuid>5f1fccd2-d309-46dc-a451-abf6d078df5a</a:translationSetUuid>
+    <a:description/>
+    <a:translatorNotes/>
+    <translationTexts>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>en-US</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>You are currently preparing a report on the event {eventType}, {fileNumber}</a:translatedText>
+      </translatedText>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>de</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Sie erstellen gerade eine Meldung zu Ereignis {eventType}, {fileNumber}</a:translatedText>
+      </translatedText>
+    </translationTexts>
+    <translationStringVariables>
+      <translationStringVariable a:uuid="5e666483-bcac-4110-a233-b6cee7d1767d">
+        <a:name>fileNumber</a:name>
+      </translationStringVariable>
+      <translationStringVariable a:uuid="c53413fa-2572-4c1b-bfc9-98c3ec45f098">
+        <a:name>eventType</a:name>
+      </translationStringVariable>
+    </translationStringVariables>
+  </translationString>
+  <history>
+    <historyInfo versionUuid="d1582b64-c56f-494d-90f5-c2f994d17f03"/>
+  </history>
+</translationStringHaul>

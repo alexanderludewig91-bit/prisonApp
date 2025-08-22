@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<dataStoreHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1647106</versionUuid>
+    <dataStore>
+        <uuid>_a-0000ed02-f63d-8000-9bea-011c48011c48_1058812</uuid>
+        <name>PS Services</name>
+        <description>Data store containing all application's data store entities. [Data]</description>
+        <dataSourceKey>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1642755</dataSourceKey>
+        <adaptingExplicitSqlNames>false</adaptingExplicitSqlNames>
+        <autoUpdateSchema>false</autoUpdateSchema>
+        <entities>
+            <entity>
+                <uuid>c4f56575-771f-4074-ad96-9f10d5b3365e</uuid>
+                <name>PS_Status</name>
+                <type>{urn:com:appian:types:PS}PS_Status</type>
+            </entity>
+            <entity>
+                <uuid>05e87bb3-30b7-4598-86f7-45c4a8384e25</uuid>
+                <name>PS_Priority</name>
+                <type>{urn:com:appian:types:PS}PS_Priority</type>
+            </entity>
+            <entity>
+                <uuid>204d9753-9719-46be-9fa6-f9eff4600e97</uuid>
+                <name>PS_Paragraph</name>
+                <type>{urn:com:appian:types:PS}PS_Paragraph</type>
+            </entity>
+            <entity>
+                <uuid>f752a691-e71f-49c4-adaf-b249305e9d2e</uuid>
+                <name>PS_Activity</name>
+                <type>{urn:com:appian:types:PS}PS_Activity</type>
+            </entity>
+            <entity>
+                <uuid>7b41c4c8-4ed6-4069-863d-3b112748f51b</uuid>
+                <name>PS_Service</name>
+                <type>{urn:com:appian:types:PS}PS_Service</type>
+            </entity>
+        </entities>
+    </dataStore>
+    <isPublished>true</isPublished>
+    <roleMap>
+        <role inherit="false" allowForAll="false" name="administrators">
+            <users/>
+            <groups>
+                <groupUuid>_e-0000ed02-f61f-8000-9b37-01075c01075c_5585</groupUuid>
+            </groups>
+        </role>
+        <role inherit="false" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="readers">
+            <users/>
+            <groups>
+                <groupUuid>_e-0000ed02-f61f-8000-9b37-01075c01075c_5587</groupUuid>
+            </groups>
+        </role>
+    </roleMap>
+    <history>
+        <historyInfo versionUuid="_a-0000ed02-f63d-8000-9bea-011c48011c48_1058824"/>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1647106"/>
+    </history>
+</dataStoreHaul>

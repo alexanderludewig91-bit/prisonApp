@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1615155</versionUuid>
+    <rule>
+        <name>PS_Q_GetAllPrisons</name>
+        <uuid>_a-0000ed87-2144-8000-9bee-011c48011c48_1453966</uuid>
+        <description></description>
+        <parentUuid>4e30e89d-6b0d-415f-8a87-1107bebc8692</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>a!localVariables(
+  local!pagingInfo: if(
+    a!isNullOrEmpty(
+      ri!pagingInfo
+    ),
+    #"SYSTEM_SYSRULES_pagingInfo"(
+      1,
+      500,
+      #"SYSTEM_SYSRULES_sortInfo"(
+        #"urn:appian:record-field:v1:c035ef79-0201-4600-a2b7-9075b42e1d87/18523cc9-885d-4706-a91b-efc4cc8eda99",
+        false()
+      )
+    ),
+    ri!pagingInfo
+  ),
+  #"SYSTEM_SYSRULES_queryRecordType_v2"(
+    recordType: #"urn:appian:record-type:v1:c035ef79-0201-4600-a2b7-9075b42e1d87",
+    fields: {
+      #"urn:appian:record-field:v1:c035ef79-0201-4600-a2b7-9075b42e1d87/83d6cf30-3b09-4a38-89c5-2de99cf67942"
+    },
+    pagingInfo: local!pagingInfo
+  )
+)</definition>
+        <namedTypedValue>
+            <name>pagingInfo</name>
+            <type>
+                <name>PagingInfo</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <preferredEditor>legacy</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+    </rule>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <typedValue>
+        <type>
+            <name>RuleTestConfig?list</name>
+            <namespace>http://www.appian.com/ae/types/2009</namespace>
+        </type>
+        <value>
+            <el>
+                <a:name>Applies custom paging info</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">#"SYSTEM_SYSRULES_pagingInfo"(startIndex: 1, batchSize: 10)</a:value>
+                    <a:nameRef>pagingInfo</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions>
+                    <a:expectedOutput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                    <a:resultAssertions>length(test!output.data) &lt;= 10</a:resultAssertions>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Handles empty result set</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">#"SYSTEM_SYSRULES_pagingInfo"(startIndex: 999999, batchSize: 10)</a:value>
+                    <a:nameRef>pagingInfo</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions>
+                    <a:expectedOutput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                    <a:resultAssertions>length(test!output.data) = 0</a:resultAssertions>
+                </a:assertions>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Applies custom sorting</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">#"SYSTEM_SYSRULES_pagingInfo"(startIndex: 1, batchSize: 10, sort: #"SYSTEM_SYSRULES_sortInfo"(field: #"urn:appian:record-field:v1:c035ef79-0201-4600-a2b7-9075b42e1d87/83d6cf30-3b09-4a38-89c5-2de99cf67942", ascending: true))</a:value>
+                    <a:nameRef>pagingInfo</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                <a:isDefault>false</a:isDefault>
+            </el>
+            <el>
+                <a:name>Handles null paging info</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">null</a:value>
+                    <a:nameRef>pagingInfo</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                <a:isDefault>false</a:isDefault>
+            </el>
+        </value>
+    </typedValue>
+    <history>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1615155"/>
+    </history>
+</contentHaul>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<groupHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_e-0000ed87-210d-8000-9b3b-01075c01075c_6562</versionUuid>
+    <group>
+        <name>PS All Users</name>
+        <securityMap>SECURITYMAP_TEAM</securityMap>
+        <uuid>_e-0000ed87-210d-8000-9b3b-01075c01075c_6561</uuid>
+        <groupTypeUuid>SYSTEM_GROUP_TYPE_CUSTOM</groupTypeUuid>
+        <description></description>
+        <delegatedCreation>false</delegatedCreation>
+        <memberPolicy>MEMBERPOLICY_CLOSED</memberPolicy>
+        <viewingPolicy>VIEWINGPOLICY_LOW</viewingPolicy>
+        <attributes/>
+    </group>
+    <members>
+        <users/>
+        <groups>
+            <groupUuid>_e-0000ed87-210d-8000-9b3b-01075c01075c_6619</groupUuid>
+            <groupUuid>_e-0000ed87-210d-8000-9b3b-01075c01075c_6565</groupUuid>
+            <groupUuid>_e-0000ed87-210d-8000-9b3b-01075c01075c_6563</groupUuid>
+            <groupUuid>_e-0000ed87-210d-8000-9b3b-01075c01075c_6621</groupUuid>
+            <groupUuid>_e-0000ee0e-a485-8000-9b3f-01075c01075c_6845</groupUuid>
+            <groupUuid>_e-0000ee0e-a485-8000-9b3f-01075c01075c_6843</groupUuid>
+        </groups>
+    </members>
+    <admins>
+        <users/>
+        <groups/>
+    </admins>
+    <ruleSet/>
+    <history>
+        <historyInfo versionUuid="_e-0000ed87-210d-8000-9b3b-01075c01075c_6562"/>
+    </history>
+</groupHaul>

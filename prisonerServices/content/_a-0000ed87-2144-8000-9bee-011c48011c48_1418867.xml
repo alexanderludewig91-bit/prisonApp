@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1598363</versionUuid>
+    <interface>
+        <name>PS_C_StyledCardLayout</name>
+        <uuid>_a-0000ed87-2144-8000-9bee-011c48011c48_1418867</uuid>
+        <description>Use always to display content in cards</description>
+        <parentUuid>4e30e89d-6b0d-415f-8a87-1107bebc8692</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>#"SYSTEM_SYSRULES_cardLayout"(
+  contents: ri!contents,
+  shape: a!defaultValue(ri!shape, "ROUNDED"),
+  padding: a!defaultValue(ri!padding, "LESS"),
+  marginAbove: a!defaultValue(ri!marginAbove, "LESS"),
+  marginBelow: a!defaultValue(ri!marginBelow, "LESS"),
+  showBorder: a!defaultValue(ri!showBorder, false),
+  borderColor: a!defaultValue(ri!borderColor, #"_a-0000ed87-2144-8000-9bee-011c48011c48_1418913"),
+  showShadow: a!defaultValue(ri!showShadow, true),
+  height: a!defaultValue(ri!height, "AUTO"),
+  style: ri!style,
+  link: ri!link
+  /*decorativeBarPosition: "START",*/
+  /*decorativeBarColor: "#0077B6"*/
+)</definition>
+        <namedTypedValue>
+            <name>contents</name>
+            <description>Components and layouts to display within the card.</description>
+            <type>
+                <name>Variant</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>shape</name>
+            <description>Determines the card shape. Valid values: "SQUARED", "SEMI_ROUNDED", "ROUNDED" (default).</description>
+            <type>
+                <name>string</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+            <value/>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>padding</name>
+            <description>Determines the space between the card edges and its contents. Valid values: "NONE", "EVEN_LESS", "LESS" (default), "STANDARD", "MORE", "EVEN_MORE".</description>
+            <type>
+                <name>string</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+            <value/>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>marginAbove</name>
+            <description>Determines how much space is added above the layout. Valid values: "NONE", "EVEN_LESS", "LESS" (default), "STANDARD", "MORE", "EVEN_MORE".</description>
+            <type>
+                <name>string</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+            <value/>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>marginBelow</name>
+            <description>Determines how much space is added below the layout. Valid values: "NONE", "EVEN_LESS", "LESS" (default), "STANDARD", "MORE", "EVEN_MORE".</description>
+            <type>
+                <name>string</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+            <value/>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>borderColor</name>
+            <description>Determines the border color. Valid values: Any valid hex color or "STANDARD", "ACCENT", "POSITIVE", "WARN", "NEGATIVE".</description>
+            <type>
+                <name>string</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+            <value/>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>showBorder</name>
+            <type>
+                <name>boolean</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>showShadow</name>
+            <type>
+                <name>string</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+            <value/>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>style</name>
+            <description>Determines the card background color. Valid values: Any valid hex color or "NONE" (default), "TRANSPARENT", "STANDARD", "ACCENT", "SUCCESS", "INFO", "WARN", "ERROR", "CHARCOAL_SCHEME", "NAVY_SCHEME", "PLUM_SCHEME".</description>
+            <type>
+                <name>string</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+            <value/>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>link</name>
+            <description>Link to apply to the card. Create a link with a!documentDownloadLink(), a!dynamicLink(), a!newsEntryLink(), a!processTaskLink(), a!recordLink(), a!reportLink(), a!safeLink(), a!startProcessLink(), a!submitLink(), a!userRecordLink(), or a!authorizationLink().</description>
+            <type>
+                <name>Variant</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>height</name>
+            <description>Determines the card height. Valid values: "EXTRA_SHORT", "SHORT", "SHORT_PLUS", "MEDIUM", "MEDIUM_PLUS", "TALL", "TALL_PLUS", "EXTRA_TALL", "AUTO" (default).</description>
+            <type>
+                <name>string</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+            <value/>
+        </namedTypedValue>
+        <preferredEditor>interface</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+        <isCustom>false</isCustom>
+    </interface>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <history>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1598363"/>
+    </history>
+</contentHaul>

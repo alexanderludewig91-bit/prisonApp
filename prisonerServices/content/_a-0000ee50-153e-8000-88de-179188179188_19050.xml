@@ -1,0 +1,577 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee50-153e-8000-88de-179188179188_42042</versionUuid>
+    <interface>
+        <name>PS_F_ReviewPossessionsRequest</name>
+        <uuid>_a-0000ee50-153e-8000-88de-179188179188_19050</uuid>
+        <description></description>
+        <parentUuid>4e30e89d-6b0d-415f-8a87-1107bebc8692</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>a!localVariables(
+  local!inmate: #"SYSTEM_SYSRULES_queryRecordByIdentifier"(
+    recordType: #"urn:appian:record-type:v1:b9f2b8a1-aa3c-420e-9856-a362e5c58683",
+    identifier: ri!request[#"urn:appian:record-field:v1:869b0f23-8e42-4780-8dfc-89deb24c798d/a2e6a1a3-9952-4aee-a7d5-c5077d3fb9be"]
+  ),
+  local!notificationGiven: false,
+  local!feedbackEvaluation: 0,
+  local!feedbackComment,
+  local!tableRows: {
+    {
+      label: #"urn:appian:translation-string:v1:86739f5f-2384-4f86-a1d6-ef6df2ae6eb5",
+      value: #"_a-0000ed87-2144-8000-9bee-011c48011c48_1418207"(requestType:  ri!request[#"urn:appian:record-field:v1:869b0f23-8e42-4780-8dfc-89deb24c798d/8f6e62d6-f646-45a8-a038-e356580cbf87"]).translation
+    },
+    {
+      label: #"urn:appian:translation-string:v1:05420528-ea75-4c8e-acbc-d251f2edbdf7",
+      value: text(ri!request[#"urn:appian:record-field:v1:869b0f23-8e42-4780-8dfc-89deb24c798d/a2219542-a8b5-464d-9306-5654dce49a83"], "dd.MM.yyyy HH:mm")
+    },   
+    {
+      label: #"urn:appian:translation-string:v1:219a7569-7e92-429e-8645-ea21b6b87b32",
+      value: ri!request[#"urn:appian:record-field:v1:869b0f23-8e42-4780-8dfc-89deb24c798d/d9cb8b40-d6f9-4aca-a407-079db88fa5aa"]
+    },
+    {
+      label: #"urn:appian:translation-string:v1:b9698afe-08a7-4de7-b471-ab586d031a40",
+      value: ri!request[#"urn:appian:record-field:v1:869b0f23-8e42-4780-8dfc-89deb24c798d/f8dcda47-3bef-4211-990e-586f5ea7080b"]
+    },
+    {
+      label: #"urn:appian:translation-string:v1:f9a9d26e-8c0c-4234-b20c-8e2bb9104621",
+      value: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1535179"(userName: local!inmate[#"urn:appian:record-field:v1:b9f2b8a1-aa3c-420e-9856-a362e5c58683/1ae3465f-b22e-4ab3-8656-a047e5f9c3e7"])
+    },
+    {
+      label: #"urn:appian:translation-string:v1:fc0c1b61-cf15-4170-a14f-fdd6ef67c893",
+      value: local!inmate[#"urn:appian:record-field:v1:b9f2b8a1-aa3c-420e-9856-a362e5c58683/1ae3465f-b22e-4ab3-8656-a047e5f9c3e7"]
+    }
+  },
+  
+  #"SYSTEM_SYSRULES_formLayout_v1"(
+    label: #"urn:appian:translation-string:v1:10641f03-fde0-475f-b328-7f39e5d8168d",
+    contents: {
+      #"SYSTEM_SYSRULES_sectionLayout_v1"(
+        label: "",
+        contents: {
+          #"SYSTEM_SYSRULES_columnsLayout"(
+            columns: { 
+              #"SYSTEM_SYSRULES_columnLayout"(
+                width: "1X"
+              ),
+              #"SYSTEM_SYSRULES_columnLayout"(
+                contents: {
+                  #"SYSTEM_SYSRULES_richTextDisplayField"(
+                    labelPosition: "COLLAPSED",
+                    value: {
+                      #"urn:appian:translation-string:v1:12ae500d-87d9-4574-8155-ad81de4a2353"
+                    },
+                    align: "CENTER",
+                    marginAbove: "MORE"
+                  ),
+                  
+                  #"SYSTEM_SYSRULES_richTextDisplayField"(
+                    value: {
+                      char(10), char(10)
+                    }
+                  ),
+                  
+                  #"SYSTEM_SYSRULES_gridField_v3"(
+                    labelPosition: "COLLAPSED",
+                    data: local!tableRows,
+                    columns: {
+                      #"SYSTEM_SYSRULES_gridColumn"(
+                        label: "",
+                        value: 
+                        #"SYSTEM_SYSRULES_richTextDisplayField"(
+                          value: {
+                            #"SYSTEM_SYSRULES_richTextItem_v1"(
+                              text: index(fv!row, "label", null),
+                              style: "STRONG"
+                            )
+                          }
+                        )
+                      ),
+                      #"SYSTEM_SYSRULES_gridColumn"(
+                        label: "",
+                        value: index(fv!row, "value", null)
+                      )
+                    },
+                    pagingSaveInto: {}
+                  ),
+                                      
+                  #"SYSTEM_SYSRULES_columnsLayout"(
+                    columns: {
+                      #"SYSTEM_SYSRULES_columnLayout"(
+                        contents: {
+                          #"SYSTEM_SYSRULES_cardLayout"(
+                            contents: {
+                              #"SYSTEM_SYSRULES_richTextDisplayField"(
+                                labelPosition: "COLLAPSED",
+                                value: {
+                                  #"SYSTEM_SYSRULES_richTextItem_v1"(
+                                    text: #"urn:appian:translation-string:v1:3f3253a0-bdf5-4153-8a15-2572dd288ce4",
+                                    size: "STANDARD",
+                                    style: {"STRONG"}
+                                  )
+                                },
+                                align: "CENTER"
+                              )
+                            },
+                            link: #"SYSTEM_SYSRULES_dynamicLink"(
+                              saveInto: {
+                                a!save(
+                                  target: ri!request[#"urn:appian:record-field:v1:869b0f23-8e42-4780-8dfc-89deb24c798d/d70e3d78-9e76-4cdf-87df-70266c671007"],
+                                  value: #"_a-0000ed87-2144-8000-9bee-011c48011c48_1413501"
+                                )
+                              }
+                            ),
+                            style: if(
+                              ri!request[#"urn:appian:record-field:v1:869b0f23-8e42-4780-8dfc-89deb24c798d/d70e3d78-9e76-4cdf-87df-70266c671007"] = #"_a-0000ed87-2144-8000-9bee-011c48011c48_1413501",
+                              "ACCENT",
+                              "#D3D3D3"
+                            ),
+                            shape: "SEMI_ROUNDED",
+                            marginAbove: "MORE",
+                            marginBelow: "MORE"
+                          )
+                        }
+                      ),
+                      #"SYSTEM_SYSRULES_columnLayout"(
+                        contents: {
+                          #"SYSTEM_SYSRULES_cardLayout"(
+                            contents: {
+                              #"SYSTEM_SYSRULES_richTextDisplayField"(
+                                labelPosition: "COLLAPSED",
+                                value: {
+                                  #"SYSTEM_SYSRULES_richTextItem_v1"(
+                                    text: #"urn:appian:translation-string:v1:7dfc02c3-fb2c-451d-91db-6aa0d6b43e7a",
+                                    size: "STANDARD",
+                                    style: {"STRONG"}
+                                  )
+                                },
+                                align: "CENTER"
+                              )
+                            },
+                            link: #"SYSTEM_SYSRULES_dynamicLink"(
+                              saveInto: {
+                                a!save(
+                                  target: ri!request[#"urn:appian:record-field:v1:869b0f23-8e42-4780-8dfc-89deb24c798d/d70e3d78-9e76-4cdf-87df-70266c671007"],
+                                  value: #"_a-0000ed87-2144-8000-9bee-011c48011c48_1413482"
+                                )
+                              }
+                            ),
+                            style: if(
+                              ri!request[#"urn:appian:record-field:v1:869b0f23-8e42-4780-8dfc-89deb24c798d/d70e3d78-9e76-4cdf-87df-70266c671007"] = #"_a-0000ed87-2144-8000-9bee-011c48011c48_1413482",
+                              "ACCENT",
+                              "#D3D3D3"
+                            ),
+                            shape: "SEMI_ROUNDED",
+                            marginAbove: "MORE",
+                            marginBelow: "MORE"
+                          )
+                        }
+                      )
+                    }
+                  )
+                },
+                width: "10X"
+              ),
+              #"SYSTEM_SYSRULES_columnLayout"(
+                width: "1X"
+              )        
+            }
+          )
+        }
+      ),
+      #"SYSTEM_SYSRULES_columnsLayout"(
+        columns: {
+          #"SYSTEM_SYSRULES_columnLayout"(
+            width: "1X"
+          ),
+          #"SYSTEM_SYSRULES_columnLayout"(
+            width: "10X",
+            contents: {
+              #"SYSTEM_SYSRULES_paragraphField"(
+                label: #"urn:appian:translation-string:v1:c596b857-5a21-4fc0-948c-85480807be1e",
+                required: ri!request[#"urn:appian:record-field:v1:869b0f23-8e42-4780-8dfc-89deb24c798d/d70e3d78-9e76-4cdf-87df-70266c671007"] = #"_a-0000ed87-2144-8000-9bee-011c48011c48_1413501",
+                value: ri!request[#"urn:appian:record-field:v1:869b0f23-8e42-4780-8dfc-89deb24c798d/710b0932-ee3e-4421-8500-8e1939e95a2e"],
+                saveInto: ri!request[#"urn:appian:record-field:v1:869b0f23-8e42-4780-8dfc-89deb24c798d/710b0932-ee3e-4421-8500-8e1939e95a2e"],
+                characterLimit: 4000,
+                showWhen: or(
+                  ri!request[#"urn:appian:record-field:v1:869b0f23-8e42-4780-8dfc-89deb24c798d/d70e3d78-9e76-4cdf-87df-70266c671007"] = #"_a-0000ed87-2144-8000-9bee-011c48011c48_1413501",
+                  ri!request[#"urn:appian:record-field:v1:869b0f23-8e42-4780-8dfc-89deb24c798d/d70e3d78-9e76-4cdf-87df-70266c671007"] = #"_a-0000ed87-2144-8000-9bee-011c48011c48_1413482"
+                )
+              ),
+              
+            }
+          ),          
+          #"SYSTEM_SYSRULES_columnLayout"(
+            width: "1X"
+          )
+        }
+      ),
+      #"SYSTEM_SYSRULES_sectionLayout_v1"(
+        label: "",
+        divider: "ABOVE",
+        showWhen: ri!request[#"urn:appian:record-field:v1:869b0f23-8e42-4780-8dfc-89deb24c798d/d70e3d78-9e76-4cdf-87df-70266c671007"] = #"_a-0000ed87-2144-8000-9bee-011c48011c48_1413501",
+        contents: {
+          #"SYSTEM_SYSRULES_columnsLayout"(
+            columns: {
+              #"SYSTEM_SYSRULES_columnLayout"(
+                width: "2X"
+              ),
+              #"SYSTEM_SYSRULES_columnLayout"(
+                contents: {
+                  #"SYSTEM_SYSRULES_richTextDisplayField"(
+                    value: {
+                      #"SYSTEM_SYSRULES_richTextItem_v1"(
+                        text: {
+                          #"urn:appian:translation-string:v1:4f6cacfb-bd6d-4b18-94ad-ca84fb4f01e7"
+                        },
+                        size: "MEDIUM",
+                        style: {"STRONG"}
+                      )
+                    },
+                    align: "CENTER"
+                  ),
+                  #"SYSTEM_SYSRULES_radioButtonField_v1"(
+                    choiceLabels: {#"urn:appian:translation-string:v1:a0b9e5c6-2121-4c5a-86a9-fc952df71bd7", #"urn:appian:translation-string:v1:086e4be7-1efa-4a72-beec-eb65b3fb4afe"},
+                    choiceValues: {true, false},
+                    choiceLayout: "STACKED",
+                    choiceStyle: "CARDS",
+                    spacing: "MORE",
+                    value: local!notificationGiven,
+                    saveInto: local!notificationGiven,
+                    marginAbove: "LESS",
+                    marginBelow: "LESS"
+                  )
+                }
+              ),
+              #"SYSTEM_SYSRULES_columnLayout"(
+                width: "2X"
+              )
+            }
+          )
+        }
+      ),
+      #"SYSTEM_SYSRULES_sectionLayout_v1"(
+        label: #"urn:appian:translation-string:v1:ced2a839-6b59-4396-8265-4e23bbce02f2",
+        divider: "ABOVE",
+        showWhen: local!notificationGiven,
+        contents: {
+          
+          #"SYSTEM_SYSRULES_textField"(
+            label: #"urn:appian:translation-string:v1:6c963fc8-83fd-4f41-9fe4-20a7fcc87f71",
+            helpTooltip: #"urn:appian:translation-string:v1:b8012f52-cde9-4582-b791-58d12155ce46",
+            readOnly: true
+          ),
+          #"SYSTEM_SYSRULES_sideBySideLayout"(
+            marginAbove: "NONE",
+            marginBelow: "MORE",
+            alignVertical: "MIDDLE",
+            spacing: "STANDARD",
+            items: {
+              #"SYSTEM_SYSRULES_sideBySideItem"(),
+              #"SYSTEM_SYSRULES_sideBySideItem"(
+                width: "MINIMIZE",
+                item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                  labelPosition: "COLLAPSED",
+                  align: "CENTER",
+                  value: {
+                    #"SYSTEM_SYSRULES_richTextIcon"(
+                      icon: if(
+                        local!feedbackEvaluation = #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1545811",
+                        "dot-circle-o",
+                        "circle-o"
+                      ),
+                      caption: #"urn:appian:translation-string:v1:85f4f39f-e04d-493d-b493-210682d3dc67",
+                      size: "LARGE",
+                      linkStyle: "STANDALONE",
+                      link: #"SYSTEM_SYSRULES_dynamicLink"(
+                        value: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1545811",
+                        saveInto: local!feedbackEvaluation
+                      )
+                    )
+                  }
+                )
+              ),
+              #"SYSTEM_SYSRULES_sideBySideItem"(
+                width: "MINIMIZE",
+                item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                  labelPosition: "COLLAPSED",
+                  align: "CENTER",
+                  value: {
+                    #"SYSTEM_SYSRULES_richTextIcon"(
+                      icon: if(
+                        local!feedbackEvaluation = #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1499982",
+                        "dot-circle-o",
+                        "circle-o"
+                      ),
+                      caption: #"urn:appian:translation-string:v1:7b480f19-5172-44bc-a493-cd327b4820e1",
+                      size: "LARGE",
+                      linkStyle: "STANDALONE",
+                      link: #"SYSTEM_SYSRULES_dynamicLink"(
+                        value: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1499982",
+                        saveInto: local!feedbackEvaluation
+                      )
+                    )
+                  }
+                )
+              ),
+              #"SYSTEM_SYSRULES_sideBySideItem"(
+                width: "MINIMIZE",
+                item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                  labelPosition: "COLLAPSED",
+                  align: "CENTER",
+                  value: {
+                    #"SYSTEM_SYSRULES_richTextIcon"(
+                      icon: if(
+                        local!feedbackEvaluation = #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1499988",
+                        "dot-circle-o",
+                        "circle-o"
+                      ),
+                      caption: #"urn:appian:translation-string:v1:608ecdfe-5e43-479a-b4ec-79e51e4a820c",
+                      size: "LARGE",
+                      linkStyle: "STANDALONE",
+                      link: #"SYSTEM_SYSRULES_dynamicLink"(
+                        value: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1499988",
+                        saveInto: local!feedbackEvaluation
+                      )
+                    )
+                  }
+                )
+              ),
+              #"SYSTEM_SYSRULES_sideBySideItem"(
+                width: "MINIMIZE",
+                item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                  labelPosition: "COLLAPSED",
+                  align: "CENTER",
+                  value: {
+                    #"SYSTEM_SYSRULES_richTextIcon"(
+                      icon: if(
+                        local!feedbackEvaluation = #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1499994",
+                        "dot-circle-o",
+                        "circle-o"
+                      ),
+                      caption: #"urn:appian:translation-string:v1:6d6c530d-d9ec-4841-bf58-fa0be408f72b",
+                      size: "LARGE",
+                      linkStyle: "STANDALONE",
+                      link: #"SYSTEM_SYSRULES_dynamicLink"(
+                        value: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1499994",
+                        saveInto: local!feedbackEvaluation
+                      )
+                    )
+                  }
+                )
+              ),
+              #"SYSTEM_SYSRULES_sideBySideItem"(
+                width: "MINIMIZE",
+                item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                  labelPosition: "COLLAPSED",
+                  align: "CENTER",
+                  value: {
+                    #"SYSTEM_SYSRULES_richTextIcon"(
+                      icon: if(
+                        local!feedbackEvaluation = #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1545817",
+                        "dot-circle-o",
+                        "circle-o"
+                      ),
+                      caption: #"urn:appian:translation-string:v1:edeae6fd-f2f6-4d18-8afb-9076251f40ba",
+                      size: "LARGE",
+                      linkStyle: "STANDALONE",
+                      link: #"SYSTEM_SYSRULES_dynamicLink"(
+                        value: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1545817",
+                        saveInto: local!feedbackEvaluation
+                      )
+                    )
+                  }
+                )
+              ),
+              #"SYSTEM_SYSRULES_sideBySideItem"()
+            }
+          ),
+          #"SYSTEM_SYSRULES_paragraphField"(
+            label: #"urn:appian:translation-string:v1:05c825ad-d61e-4a7e-89f5-f10e2def312e",
+            characterLimit: 4000,
+            value: local!feedbackComment,
+            saveInto: local!feedbackComment
+          )
+        }
+      ),
+      #"SYSTEM_SYSRULES_sectionLayout_v1"(
+        contents: {
+          #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1605697"(
+            text: {
+              
+            },
+            label: #"urn:appian:translation-string:v1:63c774cf-5f27-490b-90ae-53f22a550fde",
+          )
+        }
+      )
+    },
+    buttons: {
+      #"SYSTEM_SYSRULES_ButtonLayout"(
+        primaryButtons: {
+          #"SYSTEM_SYSRULES_buttonWidget_v1"(
+            label: #"urn:appian:translation-string:v1:f77c5ad7-1935-44cc-a63e-843733004e30",
+            saveInto: {
+              a!save(
+                target: ri!request[#"urn:appian:record-field:v1:869b0f23-8e42-4780-8dfc-89deb24c798d/7ac9c394-ee75-466f-9790-274b821dd0af"],
+                value: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1535244"
+              ),
+              a!save(
+                target: ri!request[#"urn:appian:record-field:v1:869b0f23-8e42-4780-8dfc-89deb24c798d/746e407a-2a3a-4a00-b4fc-59b2103b6131"],
+                value: loggedInUser()
+              ),
+              a!save(
+                target: ri!request[#"urn:appian:record-field:v1:869b0f23-8e42-4780-8dfc-89deb24c798d/f3ba344c-c6d8-48a9-b57e-2ac2380a8f74"],
+                value: now()
+              ),
+              
+              if(
+                local!notificationGiven,
+                {
+                  a!save(
+                    target: ri!feedback[#"urn:appian:record-field:v1:94ff8066-06c8-4151-932e-7d17fcfa6501/465fb45f-1d79-41d4-a3b1-80903f8bd240"],
+                    value: loggedInUser()
+                  ),
+                  a!save(
+                    target: ri!feedback[#"urn:appian:record-field:v1:94ff8066-06c8-4151-932e-7d17fcfa6501/ea69a7e7-d87d-4151-abe6-83c7e3947ba5"],
+                    value: now()
+                  ),
+                  a!save(
+                    target: ri!feedback[#"urn:appian:record-field:v1:94ff8066-06c8-4151-932e-7d17fcfa6501/379f00b0-e0a3-4eb2-94d1-0060ee517a44"],
+                    value: ri!request[#"urn:appian:record-field:v1:869b0f23-8e42-4780-8dfc-89deb24c798d/a2e6a1a3-9952-4aee-a7d5-c5077d3fb9be"]
+                  ),
+                  a!save(
+                    target: ri!feedback[#"urn:appian:record-field:v1:94ff8066-06c8-4151-932e-7d17fcfa6501/49d1a18d-53c2-4c1d-9157-ef034b8650b0"],
+                    value: #"_a-0000ee50-153e-8000-88de-179188179188_26171"
+                  ),
+                  a!save(
+                    target: ri!feedback[#"urn:appian:record-field:v1:94ff8066-06c8-4151-932e-7d17fcfa6501/9c22ca15-6f39-43e6-bcae-4e0ef5ca7675"],
+                    value: if(
+                      a!isNullOrEmpty(ri!feedback[#"urn:appian:record-field:v1:94ff8066-06c8-4151-932e-7d17fcfa6501/9c22ca15-6f39-43e6-bcae-4e0ef5ca7675"]),
+                      0,
+                      ri!feedback[#"urn:appian:record-field:v1:94ff8066-06c8-4151-932e-7d17fcfa6501/9c22ca15-6f39-43e6-bcae-4e0ef5ca7675"]
+                    )
+                  ),
+                  a!save(
+                    target: ri!feedback[#"urn:appian:record-field:v1:94ff8066-06c8-4151-932e-7d17fcfa6501/6f9d7f03-6e33-40e4-ba05-aadae69c19c3"],
+                    value: if(
+                      a!isNullOrEmpty(ri!feedback[#"urn:appian:record-field:v1:94ff8066-06c8-4151-932e-7d17fcfa6501/6f9d7f03-6e33-40e4-ba05-aadae69c19c3"]),
+                      false,
+                      ri!feedback[#"urn:appian:record-field:v1:94ff8066-06c8-4151-932e-7d17fcfa6501/6f9d7f03-6e33-40e4-ba05-aadae69c19c3"]
+                    )
+                  ),
+                  a!save(
+                    target: ri!feedback[#"urn:appian:record-field:v1:94ff8066-06c8-4151-932e-7d17fcfa6501/06de55ad-fa3f-4138-bb91-0a11734b75fc"],
+                    value: if(
+                      a!isNullOrEmpty(ri!feedback[#"urn:appian:record-field:v1:94ff8066-06c8-4151-932e-7d17fcfa6501/06de55ad-fa3f-4138-bb91-0a11734b75fc"]),
+                      false,
+                      ri!feedback[#"urn:appian:record-field:v1:94ff8066-06c8-4151-932e-7d17fcfa6501/06de55ad-fa3f-4138-bb91-0a11734b75fc"]
+                    )
+                  ),
+                  a!save(
+                    target: ri!feedback[#"urn:appian:record-field:v1:94ff8066-06c8-4151-932e-7d17fcfa6501/9c22ca15-6f39-43e6-bcae-4e0ef5ca7675"],
+                    value: local!feedbackEvaluation
+                  ),
+                  a!save(
+                    target: ri!feedback[#"urn:appian:record-field:v1:94ff8066-06c8-4151-932e-7d17fcfa6501/79e8a242-1b19-442f-98ef-eaa6bf0aac8c"], 
+                    value: local!feedbackComment
+                  )
+                },
+                {}
+              )
+            },
+            submit: true,
+            style: "SOLID",
+            disabled: or(
+                        a!isNullOrEmpty(ri!request[#"urn:appian:record-field:v1:869b0f23-8e42-4780-8dfc-89deb24c798d/d70e3d78-9e76-4cdf-87df-70266c671007"]), 
+                        if(
+                          ri!request[#"urn:appian:record-field:v1:869b0f23-8e42-4780-8dfc-89deb24c798d/d70e3d78-9e76-4cdf-87df-70266c671007"] == #"_a-0000ed87-2144-8000-9bee-011c48011c48_1413501",
+                          a!isNullOrEmpty(ri!request[#"urn:appian:record-field:v1:869b0f23-8e42-4780-8dfc-89deb24c798d/710b0932-ee3e-4421-8500-8e1939e95a2e"]),
+                          false
+                        )
+                      )
+          )
+        }
+      )
+    }
+  )
+)</definition>
+        <namedTypedValue>
+            <name>request</name>
+            <type>
+                <name>869b0f23-8e42-4780-8dfc-89deb24c798d</name>
+                <namespace>urn:com:appian:recordtype:datatype</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>feedback</name>
+            <type>
+                <name>94ff8066-06c8-4151-932e-7d17fcfa6501</name>
+                <namespace>urn:com:appian:recordtype:datatype</namespace>
+            </type>
+        </namedTypedValue>
+        <preferredEditor>interface</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+        <isCustom>false</isCustom>
+    </interface>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <typedValue>
+        <type>
+            <name>RuleTestConfig?list</name>
+            <namespace>http://www.appian.com/ae/types/2009</namespace>
+        </type>
+        <value>
+            <el>
+                <a:name/>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">#"SYSTEM_SYSRULES_queryRecordByIdentifier"(
+  recordType: #"urn:appian:record-type:v1:869b0f23-8e42-4780-8dfc-89deb24c798d",
+  identifier: 51
+)</a:value>
+                    <a:nameRef>request</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">null</a:value>
+                    <a:nameRef>feedback</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+            </el>
+        </value>
+    </typedValue>
+    <history>
+        <historyInfo versionUuid="_a-0000ee50-153e-8000-88de-179188179188_42042"/>
+    </history>
+</contentHaul>

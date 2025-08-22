@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<translationStringHaul xmlns:a="http://www.appian.com/ae/types/2009">
+  <versionUuid>2d52d46e-ea96-46f3-a4ec-72ad59b28951</versionUuid>
+  <translationString a:uuid="79376cfc-aece-4279-bb0c-886c1f07afec">
+    <a:translationSetUuid>5f1fccd2-d309-46dc-a451-abf6d078df5a</a:translationSetUuid>
+    <a:description/>
+    <a:translatorNotes/>
+    <translationTexts>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>de</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Bitte beantworten Sie die Rückfrage des Gefangenen zum Antrag:</a:translatedText>
+      </translatedText>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>en-US</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Please respond to the inquiry submitted by the inmate regarding the request:</a:translatedText>
+      </translatedText>
+    </translationTexts>
+    <translationStringVariables/>
+  </translationString>
+  <history>
+    <historyInfo versionUuid="c76d1c70-99c5-4c2f-92e1-19845921491a"/>
+    <historyInfo versionUuid="2d52d46e-ea96-46f3-a4ec-72ad59b28951"/>
+  </history>
+</translationStringHaul>

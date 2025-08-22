@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<groupHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_e-0000ed02-f61f-8000-9b37-01075c01075c_5588</versionUuid>
+    <group>
+        <name>Prisoner Services Collaborators</name>
+        <securityMap>SECURITYMAP_TEAM</securityMap>
+        <uuid>_e-0000ed02-f61f-8000-9b37-01075c01075c_5587</uuid>
+        <groupTypeUuid>SYSTEM_GROUP_TYPE_CUSTOM</groupTypeUuid>
+        <description>Group that all Prisoner Services activity is secured to</description>
+        <delegatedCreation>false</delegatedCreation>
+        <memberPolicy>MEMBERPOLICY_CLOSED</memberPolicy>
+        <viewingPolicy>VIEWINGPOLICY_LOW</viewingPolicy>
+        <attributes/>
+    </group>
+    <members>
+        <users/>
+        <groups>
+            <groupUuid>_e-0000ed87-210d-8000-9b3b-01075c01075c_6561</groupUuid>
+            <groupUuid>_e-0000ed87-210d-8000-9b3b-01075c01075c_6621</groupUuid>
+        </groups>
+    </members>
+    <admins>
+        <users/>
+        <groups/>
+    </admins>
+    <ruleSet/>
+    <history>
+        <historyInfo versionUuid="_e-0000ed02-f61f-8000-9b37-01075c01075c_5588"/>
+    </history>
+</groupHaul>

@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1644543</versionUuid>
+    <interface>
+        <name>PS_C_ReportToBeCreated</name>
+        <uuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1643812</uuid>
+        <description>Component cointaining some Report Data</description>
+        <parentUuid>4e30e89d-6b0d-415f-8a87-1107bebc8692</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>a!localVariables(
+  local!inmates: property(
+    #"_a-0000ee09-79c9-8000-9bf0-011c48011c48_1488663"(eventId: ri!eventId),
+    "inmates",
+    null
+  ),
+  {
+  #"SYSTEM_SYSRULES_cardLayout"(
+    contents: {
+      #"SYSTEM_SYSRULES_dropdownField_v1"(
+        choiceLabels: {"Strafanzeige"},
+        choiceValues: {"Strafanzeige"},
+        label: #"urn:appian:translation-string:v1:534302bb-813e-45f4-ab0a-b95932ff49cf",
+        labelPosition: "ABOVE",
+        placeholder: #"urn:appian:translation-string:v1:58d5f115-8d7f-4790-8542-1f288df0b3e8",
+        value: ri!reportType,
+        saveInto: ri!reportType,
+        searchDisplay: "AUTO",
+        validations: {}
+      ),
+      #"SYSTEM_SYSRULES_multipleDropdownField_v1"(
+        choiceLabels: {"Staatsanwaltschaft Hamburg", "Staatsanwaltschaft Bremen", "Staatsanwaltschaft Berlin"},
+        choiceValues: {"daniel.schury@pd-g.de", "jens.angele@pd-g.de", "konstantinos.pilpilidis@pd-g.de"},
+        label: #"urn:appian:translation-string:v1:41cec3ef-9c86-4a13-ab1f-bac454e99049",
+        labelPosition: "ABOVE",
+        placeholder: #"urn:appian:translation-string:v1:58d5f115-8d7f-4790-8542-1f288df0b3e8",
+        value: ri!emailReceivers,
+        saveInto: ri!emailReceivers,
+        searchDisplay: "AUTO",
+        validations: {}
+      ),
+      #"SYSTEM_SYSRULES_textField"(
+        label: #"urn:appian:translation-string:v1:d569c07c-52ef-4ad0-830d-35d2b469b542",
+        labelPosition: "ABOVE",
+        value: ri!fileNumberReceiver,
+        saveInto: ri!fileNumberReceiver,
+        refreshAfter: "UNFOCUS",
+        validations: {}
+      ),
+      #"SYSTEM_SYSRULES_multipleDropdownField_v1"(
+        choiceLabels: #"SYSTEM_SYSRULES_forEach"(
+          items: local!inmates,
+          expression: concat(fv!item[#"urn:appian:record-field:v1:b9f2b8a1-aa3c-420e-9856-a362e5c58683/7daa88ab-46be-4aa0-8fd9-53cf52511478"], " ", fv!item[#"urn:appian:record-field:v1:b9f2b8a1-aa3c-420e-9856-a362e5c58683/897606a4-d50b-4a42-bcd0-e4d68bbb2856"])
+        ),
+        choiceValues: local!inmates,
+        label: #"urn:appian:translation-string:v1:3c2f1b79-f08c-47dd-a565-3fe566a9f5be",
+        labelPosition: "ABOVE",
+        value: ri!inmates,
+        saveInto: ri!inmates,
+        searchDisplay: "AUTO",
+        validations: {}
+      )
+    },
+    height: "AUTO",
+    style: "TRANSPARENT",
+    marginBelow: "STANDARD"
+  )
+  
+}
+)</definition>
+        <namedTypedValue>
+            <name>reportType</name>
+            <type>
+                <name>string</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+            <value/>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>emailReceivers</name>
+            <type>
+                <name>Text?list</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>fileNumberReceiver</name>
+            <type>
+                <name>string</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+            <value/>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>inmates</name>
+            <type>
+                <name>b9f2b8a1-aa3c-420e-9856-a362e5c58683?list</name>
+                <namespace>urn:com:appian:recordtype:datatype</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>eventId</name>
+            <type>
+                <name>int</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <preferredEditor>interface</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+        <isCustom>false</isCustom>
+    </interface>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <typedValue>
+        <type>
+            <name>RuleTestConfig?list</name>
+            <namespace>http://www.appian.com/ae/types/2009</namespace>
+        </type>
+        <value>
+            <el>
+                <a:name/>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string"/>
+                    <a:nameRef>reportType</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">null</a:value>
+                    <a:nameRef>emailReceivers</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string"/>
+                    <a:nameRef>fileNumberReceiver</a:nameRef>
+                    <a:id>3</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">null</a:value>
+                    <a:nameRef>inmates</a:nameRef>
+                    <a:id>4</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:int">52</a:value>
+                    <a:nameRef>eventId</a:nameRef>
+                    <a:id>5</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+            </el>
+        </value>
+    </typedValue>
+    <history>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1644543"/>
+    </history>
+</contentHaul>

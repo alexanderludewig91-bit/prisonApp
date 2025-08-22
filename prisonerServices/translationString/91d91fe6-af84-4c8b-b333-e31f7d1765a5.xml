@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<translationStringHaul xmlns:a="http://www.appian.com/ae/types/2009">
+  <versionUuid>b491bfb6-0b49-440d-869d-1e16b0c417a7</versionUuid>
+  <translationString a:uuid="91d91fe6-af84-4c8b-b333-e31f7d1765a5">
+    <a:translationSetUuid>5f1fccd2-d309-46dc-a451-abf6d078df5a</a:translationSetUuid>
+    <a:description/>
+    <a:translatorNotes/>
+    <translationTexts>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>de</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Anstaltsleitung muss im Anschluss Mitteilung erstellen</a:translatedText>
+      </translatedText>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>en-US</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>When selecting this, Superintendant has final check</a:translatedText>
+      </translatedText>
+    </translationTexts>
+    <translationStringVariables/>
+  </translationString>
+  <history>
+    <historyInfo versionUuid="ee86406e-641b-44b4-9249-09c400f70d06"/>
+    <historyInfo versionUuid="636d4dc6-a471-47a7-ac01-6d744d496263"/>
+    <historyInfo versionUuid="b491bfb6-0b49-440d-869d-1e16b0c417a7"/>
+  </history>
+</translationStringHaul>

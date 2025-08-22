@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<siteHaul xmlns:a="http://www.appian.com/ae/types/2009" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <versionUuid>9cb8591a-3b9b-44f1-8e7d-95d7d1247a64</versionUuid>
+  <site a:uuid="7675e544-1988-4096-b03d-b4a5dd735773" name="PS SharedTerminal">
+    <description>This site is used by inmates accessing the application via a shared terminal through their own account</description>
+    <urlStub>shared-terminal</urlStub>
+    <page a:uuid="288371e6-7708-4929-888c-353ad42a154c">
+      <staticName>Home</staticName>
+      <description/>
+      <urlStub>terminal-landing</urlStub>
+      <uiObject a:uuid="_a-0000ed87-2144-8000-9bee-011c48011c48_1416794" xsi:type="a:ContentFreeformRule"/>
+      <iconId>f015</iconId>
+      <visibilityExpr>fn!true()</visibilityExpr>
+      <pageWidth>FULL</pageWidth>
+      <areUrlParamsEncrypted>true</areUrlParamsEncrypted>
+      <autoContextUpdateEnabled>true</autoContextUpdateEnabled>
+    </page>
+    <page a:uuid="556ed11f-102c-45fd-a691-2a476463905b">
+      <nameExpr>#"urn:appian:translation-string:v1:f169c5d0-7a06-49fd-8475-7e3739efd248"</nameExpr>
+      <description/>
+      <urlStub>mysubmissions</urlStub>
+      <uiObject a:uuid="_a-0000ed87-2144-8000-9bee-011c48011c48_1418092" xsi:type="a:ContentFreeformRule"/>
+      <iconId>f3a8</iconId>
+      <visibilityExpr>fn!true()</visibilityExpr>
+      <pageWidth>FULL</pageWidth>
+      <sitePageInput a:uuid="9cbaab59-8b50-4157-8d79-eac4380d938b">
+        <inputName>displayFilters</inputName>
+        <allowQueryParameter>true</allowQueryParameter>
+        <defaultValue/>
+        <urlParamName>displayFilters</urlParamName>
+      </sitePageInput>
+      <areUrlParamsEncrypted>true</areUrlParamsEncrypted>
+      <autoContextUpdateEnabled>true</autoContextUpdateEnabled>
+    </page>
+    <page a:uuid="4c96e97f-df98-403c-bb0b-8eb5dd014965">
+      <staticName>Kontoinformationen</staticName>
+      <description/>
+      <urlStub>kontoinformationen</urlStub>
+      <uiObject a:uuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1602900" xsi:type="a:ContentFreeformRule"/>
+      <iconId>f351</iconId>
+      <visibilityExpr>fn!true()</visibilityExpr>
+      <pageWidth>WIDE</pageWidth>
+      <areUrlParamsEncrypted>true</areUrlParamsEncrypted>
+      <autoContextUpdateEnabled>true</autoContextUpdateEnabled>
+    </page>
+    <visibility>268435456</visibility>
+    <headerBackgroundColor>#1F3873</headerBackgroundColor>
+    <selectedTabBackgroundColor>#A6B1D5</selectedTabBackgroundColor>
+    <faviconRef a:uuid="SYSTEM_CONTENT_SITES_DEFAULT_FAVICON" xsi:type="a:CollaborationDocument"/>
+    <accentColor>#1F3873</accentColor>
+    <logoExpr>#"_a-0000ed02-f63d-8000-9bea-011c48011c48_1062006"</logoExpr>
+    <showName>false</showName>
+    <tempoLinkVisibility>HIDDEN</tempoLinkVisibility>
+    <showRecordNews>true</showRecordNews>
+    <tasksInSitesVisibility>HIDDEN</tasksInSitesVisibility>
+    <buttonShape>SEMI_ROUNDED</buttonShape>
+    <loadingBarColor>#4D63AB</loadingBarColor>
+    <navigationBarStyle>SIDEBAR</navigationBarStyle>
+    <inputShape>SEMI_ROUNDED</inputShape>
+    <isSystem>false</isSystem>
+    <displayName>Shared Terminal</displayName>
+    <isStaticDisplayName>true</isStaticDisplayName>
+    <nameExprIsEvaluable>true</nameExprIsEvaluable>
+    <primaryNavLayoutType>SIDEBAR</primaryNavLayoutType>
+    <buttonLabelCase>UPPERCASE</buttonLabelCase>
+    <dialogShape>SQUARED</dialogShape>
+  </site>
+  <roleMap>
+    <role name="site_administrator">
+      <users/>
+      <groups>
+        <groupUuid>_e-0000ed87-210d-8000-9b3b-01075c01075c_6563</groupUuid>
+        <groupUuid>_e-0000ed87-210d-8000-9b3b-01075c01075c_6558</groupUuid>
+      </groups>
+    </role>
+    <role name="site_viewer">
+      <users/>
+      <groups>
+        <groupUuid>_e-0000ed87-210d-8000-9b3b-01075c01075c_6561</groupUuid>
+      </groups>
+    </role>
+  </roleMap>
+  <history>
+    <historyInfo versionUuid="9cb8591a-3b9b-44f1-8e7d-95d7d1247a64"/>
+  </history>
+</siteHaul>

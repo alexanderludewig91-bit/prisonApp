@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ed02-f63d-8000-9bea-011c48011c48_1059345</versionUuid>
+    <interface>
+        <name>PS_TaskReport</name>
+        <uuid>_a-0000ed02-f63d-8000-9bea-011c48011c48_1058788</uuid>
+        <description>Dashboard interface for the main task report [Tasking]</description>
+        <parentUuid>bb69cd5d-2b14-4fb7-b9d0-11ebd5815cda</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>a!localVariables(
+  local!pagingInfo: #"SYSTEM_SYSRULES_pagingInfo"(startIndex: 1, batchSize: 25),
+  local!sendingTask: false,
+  local!sendTaskSuccess,
+  local!toOrFrom: "my tasks",
+  /* Retrieve data from the process report to use here */
+  local!report: a!refreshVariable(
+    value: a!queryProcessAnalytics(
+      report: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058660",
+      contextProcessModels: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058652",
+      /* Filter for tasks assigned to the current user or sent by the current user.      *
+       * c8 is the field that holds the assignee, c1 is the field that holds the sender. */
+      query: #"SYSTEM_SYSRULES_query"(
+        filter: #"SYSTEM_SYSRULES_queryFilter"(
+          field: if(local!toOrFrom = "my tasks", "c8", "c1"),
+          operator: "=",
+          value: loggedInUser()
+        ),
+        pagingInfo: local!pagingInfo
+      )
+    ),
+    /* Retrieve the data each minute to display the latest tasks */
+    refreshInterval: 1,
+    /* Retrieves the data each time a new task is sent to display the latest tasks */
+    refreshOnVarChange: local!sendTaskSuccess
+  ),
+  /* Retrieve record names to use on record links, because the process report only has record IDs */
+  local!recordNames: #"SYSTEM_SYSRULES_queryEntity_v2"(
+    entity: #"6a0584c4-a10b-4f66-ba97-7ae5b2000a5a_MAINDSECONSTANT",
+    query: #"SYSTEM_SYSRULES_query"(
+      selection: #"SYSTEM_SYSRULES_querySelection"(
+        columns: {
+          #"SYSTEM_SYSRULES_queryColumn"(field: "id"),
+          #"SYSTEM_SYSRULES_queryColumn"(field: "title")
+        }
+      ),
+      /* Filter to only retrieve records that have open tasks assigned to the current user.  *
+       * c7 is the report field that holds record IDs, and the union() call removes          *
+       * duplicates from the list.                                                           */
+      filter: #"SYSTEM_SYSRULES_queryFilter"(
+        field: "id",
+        operator: "in",
+        value: union(tointeger(index(local!report.data, "c7", {})), tointeger({}))
+      ),
+      pagingInfo: #"SYSTEM_SYSRULES_pagingInfo"(startIndex: 1, batchSize: -1)
+    ),
+    fetchTotalCount: false
+  ),
+  {
+    /* The first half of the interface shows the controls for sending tasks */
+    #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058796"(
+      sendingTask: local!sendingTask,
+      sendTaskSuccess: local!sendTaskSuccess
+    ),
+    #"SYSTEM_SYSRULES_ButtonLayout"(
+      showWhen: not(local!sendingTask),
+      secondaryButtons: #"SYSTEM_SYSRULES_ButtonWidget"(
+        label: "Send New Task",
+        value: true,
+        saveInto: {
+          local!sendingTask,
+          a!save(local!sendTaskSuccess, null)
+        }
+      )
+    ),
+    /* The second half of the interface shows the tasks assigned to the current user */
+    #"SYSTEM_SYSRULES_radioButtonField"(
+      labelPosition: "COLLAPSED",
+      choiceLabels: {"My open tasks", "Open tasks sent by me"},
+      choiceValues: {"my tasks", "sent by me"},
+      choiceLayout: "COMPACT",
+      value: local!toOrFrom,
+      saveInto: local!toOrFrom
+    ),
+    #"SYSTEM_SYSRULES_gridField_v3"(
+      labelPosition: "COLLAPSED",
+      rowHeader: 1,
+      instructions: local!report.description,
+      emptyGridMessage: if(
+        local!toOrFrom = "my tasks",
+        "You have no open tasks in the Prisoner Services application",
+        "No tasks sent by you are currently open in the Prisoner Services application"
+      ),
+      data: local!report,
+      columns: {
+        #"SYSTEM_SYSRULES_forEach"(
+          items: local!report.columnConfigs,
+          expression: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058784"(
+            columnConfig: fv!item,
+            recordNames: local!recordNames.data,
+            filterByRecord: false,
+            toOrFrom: local!toOrFrom,
+            currentPage: fv!currentPage
+          )
+        )
+      },
+      pagingSaveInto: local!pagingInfo
+    )
+  }
+)</definition>
+        <metadataExpr></metadataExpr>
+        <preferredEditor>interface</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+        <isCustom>false</isCustom>
+    </interface>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <history>
+        <historyInfo versionUuid="_a-0000ed02-f63d-8000-9bea-011c48011c48_1059345"/>
+    </history>
+</contentHaul>

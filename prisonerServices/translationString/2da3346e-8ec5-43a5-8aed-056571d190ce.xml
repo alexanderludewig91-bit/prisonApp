@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<translationStringHaul xmlns:a="http://www.appian.com/ae/types/2009">
+  <versionUuid>2d6d1baf-1ec2-4a91-8272-b592c655eaae</versionUuid>
+  <translationString a:uuid="2da3346e-8ec5-43a5-8aed-056571d190ce">
+    <a:translationSetUuid>5f1fccd2-d309-46dc-a451-abf6d078df5a</a:translationSetUuid>
+    <a:description/>
+    <a:translatorNotes/>
+    <translationTexts>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>de</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Welche Gefangenen waren am Ereignis beteiligt?</a:translatedText>
+      </translatedText>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>en-US</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Which inmates were involved in the event?</a:translatedText>
+      </translatedText>
+    </translationTexts>
+    <translationStringVariables/>
+  </translationString>
+  <history>
+    <historyInfo versionUuid="e58c0d7d-4433-48f0-adde-f985810d3695"/>
+    <historyInfo versionUuid="2d6d1baf-1ec2-4a91-8272-b592c655eaae"/>
+  </history>
+</translationStringHaul>

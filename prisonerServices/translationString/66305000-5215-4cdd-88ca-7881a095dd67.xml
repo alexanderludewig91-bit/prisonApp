@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<translationStringHaul xmlns:a="http://www.appian.com/ae/types/2009">
+  <versionUuid>334f6701-9aba-4f42-ba57-eee180ae201a</versionUuid>
+  <translationString a:uuid="66305000-5215-4cdd-88ca-7881a095dd67">
+    <a:translationSetUuid>5f1fccd2-d309-46dc-a451-abf6d078df5a</a:translationSetUuid>
+    <a:description/>
+    <a:translatorNotes/>
+    <translationTexts>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>de</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Ihr Antrag wird an den Allgemeinen Vollzugsdienst (AVD) zur Bearbeitung weitergeleitet.</a:translatedText>
+      </translatedText>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>en-US</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Your request will be forwarded to the general enforcement service (AVD).</a:translatedText>
+      </translatedText>
+    </translationTexts>
+    <translationStringVariables/>
+  </translationString>
+  <history>
+    <historyInfo versionUuid="334f6701-9aba-4f42-ba57-eee180ae201a"/>
+  </history>
+</translationStringHaul>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee50-153e-8000-88de-179188179188_19021</versionUuid>
+    <interface>
+        <name>PS_C_EventAttachmentCheckbox</name>
+        <uuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1647601</uuid>
+        <description></description>
+        <parentUuid>4e30e89d-6b0d-415f-8a87-1107bebc8692</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>a!localVariables(
+  local!attachment: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1520799"(
+    eventId: ri!eventID,
+    filteredFormat: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1524665"[1]
+  ).data,
+  /*attachmant List*/
+  if(
+    a!defaultValue(value: ri!showWhen, default: true),
+    if(
+      a!isNullOrEmpty(local!attachment),
+      #"SYSTEM_SYSRULES_richTextDisplayField"(
+        label: "Empty Message",
+        labelPosition: "COLLAPSED",
+        value: #"SYSTEM_SYSRULES_richTextItem_v1"(
+          text: #"urn:appian:translation-string:v1:37e0bad3-b656-433a-9744-11372606b48c"
+        )
+      ),
+      {
+        #"SYSTEM_SYSRULES_checkboxField_v1"(
+          choiceLabels: #"SYSTEM_SYSRULES_forEach"(
+            local!attachment,
+            fv!item[#"urn:appian:record-field:v1:17ccedd3-4c03-4664-8a75-fd71ae87f3ce/02925b99-1527-48bb-9fc8-406df81b2170"] &amp; "." &amp; fv!item[#"urn:appian:record-field:v1:17ccedd3-4c03-4664-8a75-fd71ae87f3ce/79c16d9b-9cce-4e0a-81bc-962f7bfc35e2"] 
+          ),
+          choiceValues: local!attachment[#"urn:appian:record-field:v1:17ccedd3-4c03-4664-8a75-fd71ae87f3ce/2e5753c4-e094-4e27-b8af-32c9447ddcbf"],
+          value: ri!selected,
+          saveInto: ri!selected
+        ),
+      }
+    ),
+    {}
+  )
+)</definition>
+        <namedTypedValue>
+            <name>eventID</name>
+            <type>
+                <name>int</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>showWhen</name>
+            <type>
+                <name>boolean</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>selected</name>
+            <type>
+                <name>Integer?list</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <preferredEditor>interface</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+        <isCustom>false</isCustom>
+    </interface>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <history>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1672992"/>
+        <historyInfo versionUuid="_a-0000ee50-153e-8000-88de-179188179188_19021"/>
+    </history>
+</contentHaul>

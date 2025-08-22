@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee50-153e-8000-88de-179188179188_39996</versionUuid>
+    <interface>
+        <name>PS_F_AssessmentEventSuperintedant</name>
+        <uuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1545775</uuid>
+        <description></description>
+        <parentUuid>4e30e89d-6b0d-415f-8a87-1107bebc8692</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>a!localVariables(
+  local!participantsAndInmates: #"_a-0000ee09-79c9-8000-9bf0-011c48011c48_1488663"(
+    eventId: ri!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/8eedcd4f-41f4-4085-889b-efedecf448e2"]
+  ),
+  local!prison: #"_a-0000ee09-79c9-8000-9bf0-011c48011c48_1488362"(
+    id: ri!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/e1088bb7-c94e-425c-8e45-84e65157b5eb"]
+  ),
+  local!eventOpinions: {
+    #"urn:appian:record-type:v1:d20e13d7-6450-4ab5-8eb8-31b00904e791"()
+  },  
+  local!pdfDoc,
+  #"SYSTEM_SYSRULES_wizardLayout"(
+    titleBar: #"SYSTEM_SYSRULES_headerTemplateFull"(
+      title: #"urn:appian:translation-string:v1:45937181-deae-4fb9-96a8-18175a7e00d1"
+    ),
+    contentsWidth: "FULL",
+    steps: {
+      #"SYSTEM_SYSRULES_wizardStep"(
+        label: #"urn:appian:translation-string:v1:0f240937-aedd-49ae-84e4-237fcf33990b",
+        contents: {
+          #"SYSTEM_SYSRULES_columnLayout"(
+            contents: {
+              #"SYSTEM_SYSRULES_sectionLayout_v1"(
+                label: #"urn:appian:translation-string:v1:afb33c89-9505-4e64-a3ef-0f3c4d90b083",
+                labelColor: "STANDARD",
+                contents: {
+                  #"SYSTEM_SYSRULES_columnsLayout"(
+                    columns: {
+                      #"SYSTEM_SYSRULES_columnLayout"(
+                        contents: {
+                          #"SYSTEM_SYSRULES_dropdownField_v1"(
+                            data: #"urn:appian:record-type:v1:d5a7da26-3c12-415b-9167-ee3cdac1eba7",
+                            choiceLabels: fv!data[#"urn:appian:record-field:v1:d5a7da26-3c12-415b-9167-ee3cdac1eba7/29cd76cb-80e7-44d1-962a-2ea20474655e"],
+                            choiceValues: #"urn:appian:record-field:v1:d5a7da26-3c12-415b-9167-ee3cdac1eba7/be6689d6-075e-4691-8039-a1da6e855e74",
+                            label: #"urn:appian:translation-string:v1:f89fa137-c04f-487f-a8d5-bb79bee90fd2",
+                            labelPosition: "ABOVE",
+                            value: ri!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/096e0c76-b28e-4985-a673-0232d1bbc9e3"],
+                            saveInto: ri!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/096e0c76-b28e-4985-a673-0232d1bbc9e3"],
+                            searchDisplay: "AUTO",
+                            required: true,
+                            validations: {}
+                          )
+                        }
+                      ),
+                      #"SYSTEM_SYSRULES_columnLayout"(
+                        contents: {
+                          #"SYSTEM_SYSRULES_dateTimeField"(
+                            label: #"urn:appian:translation-string:v1:3fe9eb01-6274-4743-a1de-d31cc9b0f0f5",
+                            labelPosition: "ABOVE",
+                            helptooltip: #"urn:appian:translation-string:v1:42665e07-2645-4b6e-8d77-e192a4602862",
+                            value: ri!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/98c7949e-598f-4d8a-b5b7-c0beacd1cef5"],
+                            saveInto: ri!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/98c7949e-598f-4d8a-b5b7-c0beacd1cef5"],
+                            validations: if(
+                              ri!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/98c7949e-598f-4d8a-b5b7-c0beacd1cef5"] &gt; now(),
+                              #"urn:appian:translation-string:v1:42665e07-2645-4b6e-8d77-e192a4602862",
+                              ""
+                            )
+                          )
+                        },
+                        width: "AUTO"
+                      )
+                    }
+                  ),
+                  #"SYSTEM_SYSRULES_columnsLayout"(
+                    columns: {
+                      #"SYSTEM_SYSRULES_columnLayout"(
+                        contents: {
+                          #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1543309"(
+                            eventId: ri!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/8eedcd4f-41f4-4085-889b-efedecf448e2"]
+                          )
+                        }
+                      ),
+                      #"SYSTEM_SYSRULES_columnLayout"(
+                        contents: {
+                          #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1542994"(
+                            eventId: ri!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/8eedcd4f-41f4-4085-889b-efedecf448e2"]
+                          )
+                        }
+                      )
+                    }
+                  ),
+                  #"SYSTEM_SYSRULES_columnsLayout"(
+                    columns: {
+                      #"SYSTEM_SYSRULES_columnLayout"(
+                        contents: {
+                          #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1684502"(
+                            participantIds: ri!participantIds,
+                            participantsAndInmates: local!participantsAndInmates,
+                            prisonId: ri!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/e1088bb7-c94e-425c-8e45-84e65157b5eb"],
+                            label: if(
+                              a!isNullOrEmpty(local!participantsAndInmates.participants),
+                              #"urn:appian:translation-string:v1:5201aba8-d77e-4319-9ac3-24c95d28cf0d",
+                              #"urn:appian:translation-string:v1:700fd161-4e1f-4632-ad56-26affe8bef5f"
+                            ),
+                          ),
+                        }
+                      ),
+                      #"SYSTEM_SYSRULES_columnLayout"(
+                        contents: {
+                          #"SYSTEM_SYSRULES_pickerFieldRecords_v2"(
+                            label: if(
+                              a!isNullOrEmpty(local!participantsAndInmates.inmates),
+                              #"urn:appian:translation-string:v1:89cb8f5a-ad36-411b-9f1d-ffd92d06d7c0",
+                              #"urn:appian:translation-string:v1:423120c8-368d-4960-82f1-26874d1391de"
+                            ),
+                            placeholder: #"urn:appian:translation-string:v1:2da3346e-8ec5-43a5-8aed-056571d190ce",
+                            recordType: #"urn:appian:record-type:v1:b9f2b8a1-aa3c-420e-9856-a362e5c58683",
+                            filters: #"SYSTEM_SYSRULES_queryLogicalExpression"(
+                              operator: "AND",
+                              filters: {
+                                #"SYSTEM_SYSRULES_queryFilter"(
+                                  field: #"urn:appian:record-field:v1:b9f2b8a1-aa3c-420e-9856-a362e5c58683/fc3d08af-a253-434c-b9c7-16ff16d2c803",
+                                  operator: "=",
+                                  value: local!prison[#"urn:appian:record-field:v1:c035ef79-0201-4600-a2b7-9075b42e1d87/18523cc9-885d-4706-a91b-efc4cc8eda99"]
+                                ),
+                                #"SYSTEM_SYSRULES_queryFilter"(
+                                  field: #"urn:appian:record-field:v1:b9f2b8a1-aa3c-420e-9856-a362e5c58683/d70d7a0c-0ee6-4949-84d6-2c58d8caffcc",
+                                  operator: "not in",
+                                  value: property(
+                                    local!participantsAndInmates,
+                                    "inmates",
+                                    null
+                                  )[#"urn:appian:record-field:v1:b9f2b8a1-aa3c-420e-9856-a362e5c58683/d70d7a0c-0ee6-4949-84d6-2c58d8caffcc"],
+                                  applyWhen: a!isNotNullOrEmpty(
+                                    property(
+                                      local!participantsAndInmates,
+                                      "inmates",
+                                      null
+                                    )
+                                  )
+                                )
+                              }
+                            ),
+                            value: ri!inmateIds,
+                            saveInto: ri!inmateIds,
+                            required: false
+                          )
+                        }
+                      )
+                    }
+                  ),
+                  #"SYSTEM_SYSRULES_styledTextEditorField"(
+                    label: #"urn:appian:translation-string:v1:352ab866-8386-4bbc-8640-9ed0dd022792",
+                    labelPosition: "ABOVE",
+                    value: ri!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/4690edf7-5623-48c2-ae87-0e89e052fd8f"],
+                    saveInto: ri!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/4690edf7-5623-48c2-ae87-0e89e052fd8f"],
+                    sizeLimit: 4000,
+                    height: "MEDIUM",
+                    required: true,
+                    validations: {},
+                    marginBelow: "STANDARD"
+                  )
+                },
+                isCollapsible: false,
+                divider: "BELOW",
+                marginBelow: "STANDARD"
+              ),
+              #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1688513"(
+                prison: local!prison,
+                event: ri!event,
+                showWhen: true
+              ),
+              #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1605697"(
+                text: {
+                  if(
+                    a!isNotNullOrEmpty(
+                      local!eventOpinions[#"urn:appian:record-field:v1:d20e13d7-6450-4ab5-8eb8-31b00904e791/80d59003-45f5-4439-ba3b-56108d2077a6"]
+                    ),
+                    #"urn:appian:translation-string:v1:adb78e2f-e9cb-403b-97f6-27cf4e05c51e",
+                    #"urn:appian:translation-string:v1:fb2f1a64-431c-4170-9a8e-d3177aa271a1"
+                  )
+                },
+                label: #"urn:appian:translation-string:v1:7bc77076-ea1b-405f-9e9c-cefd2fcb1fda"
+              )
+            }
+          )
+        }
+      ),
+      #"SYSTEM_SYSRULES_wizardStep"(
+        label: #"urn:appian:translation-string:v1:95a02e69-1038-4372-9976-301c3899cf1e",
+        contents: {
+          #"SYSTEM_SYSRULES_sectionLayout_v1"(
+            label: #"urn:appian:translation-string:v1:b0698ff5-e717-4bde-9f94-da86fcb6a21e",
+            labelColor: "STANDARD",
+            contents: {
+              #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1542740"(
+                eventID: ri!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/8eedcd4f-41f4-4085-889b-efedecf448e2"],
+                showWhen: true
+              ),
+              #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1525034"(
+                documents: ri!documents,
+                allowedFileTypes: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1524665",
+                label: #"urn:appian:translation-string:v1:b0698ff5-e717-4bde-9f94-da86fcb6a21e"
+              )
+            },
+            isCollapsible: false,
+            isInitiallyCollapsed: false,
+            divider: "BELOW"
+          ),
+          #"SYSTEM_SYSRULES_sectionLayout_v1"(
+            label: #"urn:appian:translation-string:v1:95a02e69-1038-4372-9976-301c3899cf1e",
+            labelColor: "STANDARD",
+            divider: "BELOW",
+            contents: {
+              #"SYSTEM_SYSRULES_styledTextEditorField"(
+                labelPosition: "COLLAPSED",
+                value: ri!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/19b82b49-5118-4290-9d00-b9df4cdc2e0d"],
+                saveInto: ri!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/19b82b49-5118-4290-9d00-b9df4cdc2e0d"],
+                sizeLimit: #"_a-0000ee09-79c9-8000-9bf0-011c48011c48_1477556"
+              ),
+            }
+          ),
+          #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1605697"(
+            text: {
+              if(
+                a!isNotNullOrEmpty(
+                  local!eventOpinions[#"urn:appian:record-field:v1:d20e13d7-6450-4ab5-8eb8-31b00904e791/80d59003-45f5-4439-ba3b-56108d2077a6"]
+                ),
+                #"urn:appian:translation-string:v1:adb78e2f-e9cb-403b-97f6-27cf4e05c51e",
+                #"urn:appian:translation-string:v1:fb2f1a64-431c-4170-9a8e-d3177aa271a1"
+              )
+            },
+            label: #"urn:appian:translation-string:v1:7bc77076-ea1b-405f-9e9c-cefd2fcb1fda"
+          )
+        }
+      ),
+      #"SYSTEM_SYSRULES_wizardStep"(
+        label: #"urn:appian:translation-string:v1:0f3a2741-386e-47f3-9650-830e3d5a0bdb",
+        contents: {
+          #"SYSTEM_SYSRULES_sectionLayout_v1"(
+            labelColor: "STANDARD",
+            divider: "BELOW",
+            contents: {
+              #"SYSTEM_SYSRULES_styledTextEditorField"(
+                label: #"urn:appian:translation-string:v1:352ab866-8386-4bbc-8640-9ed0dd022792",
+                value: ri!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/61db1d39-522d-4c9e-b318-32cc49f721e9"],
+                saveInto: ri!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/61db1d39-522d-4c9e-b318-32cc49f721e9"],
+                sizeLimit: #"_a-0000ee09-79c9-8000-9bf0-011c48011c48_1477556"
+              )
+            }
+          ),
+          #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1605697"(
+            text: {
+              if(
+                a!isNotNullOrEmpty(
+                  local!eventOpinions[#"urn:appian:record-field:v1:d20e13d7-6450-4ab5-8eb8-31b00904e791/80d59003-45f5-4439-ba3b-56108d2077a6"]
+                ),
+                #"urn:appian:translation-string:v1:adb78e2f-e9cb-403b-97f6-27cf4e05c51e",
+                #"urn:appian:translation-string:v1:fb2f1a64-431c-4170-9a8e-d3177aa271a1"
+              )
+            },
+            label: #"urn:appian:translation-string:v1:7bc77076-ea1b-405f-9e9c-cefd2fcb1fda"
+          )
+        }
+      ),
+      #"SYSTEM_SYSRULES_wizardStep"(
+        label: #"urn:appian:translation-string:v1:604d07c3-0960-4746-aed0-79942a68888c",
+        contents: {
+          #"SYSTEM_SYSRULES_sectionLayout_v1"(
+            label: #"urn:appian:translation-string:v1:441c1091-3855-43b0-b14b-488a2296a020",
+            labelColor: "STANDARD",
+            contents: {
+              #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1542417"(
+                eventID: ri!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/8eedcd4f-41f4-4085-889b-efedecf448e2"],
+                showWhen: true,
+                prison: local!prison
+              ),
+              #"SYSTEM_SYSRULES_ButtonArrayLayout"(
+                buttons: {
+                  #"SYSTEM_SYSRULES_buttonWidget_v1"(
+                    label: #"urn:appian:translation-string:v1:f78dbb44-728d-4ea0-89d0-ec88b02f8cf4",
+                    saveInto: a!save(
+                      local!eventOpinions,
+                      {
+                        local!eventOpinions,
+                        #"urn:appian:record-type:v1:d20e13d7-6450-4ab5-8eb8-31b00904e791"()
+                      }
+                    ),
+                    submit: false,
+                    size: "SMALL",
+                    style: "GHOST"
+                  )
+                },
+                align: "START"
+              ),
+            },
+            isCollapsible: false,
+            isInitiallyCollapsed: false,
+            divider: "BELOW"
+          ),
+          #"SYSTEM_SYSRULES_sectionLayout_v1"(
+            label: #"urn:appian:translation-string:v1:604d07c3-0960-4746-aed0-79942a68888c",
+            divider: "BELOW",
+            labelColor: "STANDARD",
+            contents: {
+              #"SYSTEM_SYSRULES_styledTextEditorField"(
+                labelPosition: "COLLAPSED",
+                value: ri!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/9893583e-17eb-4b3f-a92d-a5c69e02a2d8"],
+                saveInto: ri!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/9893583e-17eb-4b3f-a92d-a5c69e02a2d8"],
+                sizeLimit: #"_a-0000ee09-79c9-8000-9bf0-011c48011c48_1477556"
+              )
+            }
+          ),
+          #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1605697"(
+            text: {
+              if(
+                a!isNotNullOrEmpty(
+                  local!eventOpinions[#"urn:appian:record-field:v1:d20e13d7-6450-4ab5-8eb8-31b00904e791/80d59003-45f5-4439-ba3b-56108d2077a6"]
+                ),
+                #"urn:appian:translation-string:v1:adb78e2f-e9cb-403b-97f6-27cf4e05c51e",
+                #"urn:appian:translation-string:v1:fb2f1a64-431c-4170-9a8e-d3177aa271a1"
+              )
+            },
+            label: #"urn:appian:translation-string:v1:7bc77076-ea1b-405f-9e9c-cefd2fcb1fda"
+          )
+        }
+      ),
+      #"SYSTEM_SYSRULES_wizardStep"(
+        label: #"urn:appian:translation-string:v1:bd60f318-a130-4f31-8df9-2749d21005bd",
+        contents: {
+          #"SYSTEM_SYSRULES_columnLayout"(         
+            #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1546597"(
+              event: ri!event,
+              pdfDoc: local!pdfDoc,
+              inmates: ri!selectedInmates
+            )          
+          )
+        }
+      )
+    },
+    primaryButtons: {
+
+      #"SYSTEM_SYSRULES_buttonWidget_v1"(
+        label: #"urn:appian:translation-string:v1:00763daf-06db-4f23-9fce-6e896f2f4039",
+        saveInto: {
+          a!save(
+            ri!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/4b90ba43-0c7b-4b16-90b6-1879f6dce616"],
+            loggedInUser()
+          ),
+          a!save(
+            ri!event[#"urn:appian:record-field:v1:fa952da3-a305-45ce-924b-89ca2dab3222/9275ef7f-40d2-47ce-a109-a87cbc719cb2"],
+            now()
+          ),
+          a!save(ri!event, ri!event),
+          a!save(
+            target: ri!eventOpinions,
+            value: remove(
+              local!eventOpinions,
+              where(
+                #"SYSTEM_SYSRULES_forEach"(
+                  items: local!eventOpinions[#"urn:appian:record-field:v1:d20e13d7-6450-4ab5-8eb8-31b00904e791/80d59003-45f5-4439-ba3b-56108d2077a6"],
+                  expression: isnull(fv!item)
+                )
+              )
+            )
+          ),
+          a!save(
+            target: ri!eventOpinions[#"urn:appian:record-field:v1:d20e13d7-6450-4ab5-8eb8-31b00904e791/b816fde2-3f17-4fae-984d-c99216d6a968"],
+            value: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1545934"[1]/*gutachten*/
+
+          )
+
+        },
+        submit: true,
+        style: "SOLID",
+        loadingIndicator: true,
+        showWhen: fv!isLastStep
+      )
+    },
+    secondaryButtons: {
+      #"SYSTEM_SYSRULES_buttonWidget_v1"(
+        label: #"urn:appian:translation-string:v1:d940fe67-4bc0-43d9-9eca-be0aa0394b8a",
+        value: true,
+        saveInto: {},
+        submit: true,
+        style: "LINK",
+        validate: false
+      )
+    }
+  )
+)</definition>
+        <namedTypedValue>
+            <name>event</name>
+            <type>
+                <name>fa952da3-a305-45ce-924b-89ca2dab3222</name>
+                <namespace>urn:com:appian:recordtype:datatype</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>inmateIds</name>
+            <type>
+                <name>Integer?list</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>documents</name>
+            <type>
+                <name>CollaborationDocument?list</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>participantIds</name>
+            <type>
+                <name>Integer?list</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>eventOpinions</name>
+            <type>
+                <name>d20e13d7-6450-4ab5-8eb8-31b00904e791?list</name>
+                <namespace>urn:com:appian:recordtype:datatype</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>emailReceivers</name>
+            <type>
+                <name>Text?list</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>selectedInmates</name>
+            <type>
+                <name>b9f2b8a1-aa3c-420e-9856-a362e5c58683?list</name>
+                <namespace>urn:com:appian:recordtype:datatype</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>htmlBody</name>
+            <type>
+                <name>string</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+            <value/>
+        </namedTypedValue>
+        <preferredEditor>interface</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+        <isCustom>false</isCustom>
+    </interface>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <typedValue>
+        <type>
+            <name>RuleTestConfig?list</name>
+            <namespace>http://www.appian.com/ae/types/2009</namespace>
+        </type>
+        <value>
+            <el>
+                <a:name/>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">#"_a-0000ee46-8277-8000-88d4-179188179188_12135"()</a:value>
+                    <a:nameRef>event</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">null</a:value>
+                    <a:nameRef>inmateIds</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:nameRef>documents</a:nameRef>
+                    <a:id>3</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">null</a:value>
+                    <a:nameRef>participantIds</a:nameRef>
+                    <a:id>4</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">null</a:value>
+                    <a:nameRef>eventOpinions</a:nameRef>
+                    <a:id>5</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">null</a:value>
+                    <a:nameRef>emailReceivers</a:nameRef>
+                    <a:id>6</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">null</a:value>
+                    <a:nameRef>selectedInmates</a:nameRef>
+                    <a:id>7</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string"/>
+                    <a:nameRef>htmlBody</a:nameRef>
+                    <a:id>8</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+            </el>
+        </value>
+    </typedValue>
+    <history>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1624578"/>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1649094"/>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1688788"/>
+        <historyInfo versionUuid="_a-0000ee50-153e-8000-88de-179188179188_39996"/>
+    </history>
+</contentHaul>

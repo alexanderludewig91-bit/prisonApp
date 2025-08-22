@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ed02-f63d-8000-9bea-011c48011c48_1059124</versionUuid>
+    <interface>
+        <name>PS_OpenTasksGrid</name>
+        <uuid>_a-0000ed02-f63d-8000-9bea-011c48011c48_1058748</uuid>
+        <description>Component interface that returns a grid showing all open tasks for a given Service record [Tasking] [Records]</description>
+        <parentUuid>bb69cd5d-2b14-4fb7-b9d0-11ebd5815cda</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>a!localVariables(
+  local!pagingInfo: #"SYSTEM_SYSRULES_pagingInfo"(startIndex: 1, batchSize: 5),
+  /* Retrieve data from the process report to use here */
+  local!report: a!queryProcessAnalytics(
+    report: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058660",
+    contextProcessModels: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058652",
+    query: #"SYSTEM_SYSRULES_query"(
+      filter: #"SYSTEM_SYSRULES_queryFilter"(
+        field: "c7",
+        operator: "=",
+        value: ri!recordId
+      ),
+      pagingInfo: local!pagingInfo
+    )
+  ),
+  {
+    #"SYSTEM_SYSRULES_gridField_v3"(
+    /* If there is no data, display nothing.                                       *
+     * Otherwise, iterate over the column rule to show a grid of task information. */
+      label: local!report.name,
+      showWhen: local!report.totalCount &gt; 0,
+      instructions: local!report.description,
+      data: local!report,
+      columns: {
+        #"SYSTEM_SYSRULES_forEach"(
+          items: local!report.columnConfigs,
+          expression: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058784"(
+            columnConfig: fv!item,
+            currentPage: fv!currentPage,
+            filterByRecord: true
+          )
+        )
+      },
+      pagingSaveInto: local!pagingInfo
+    )
+  }
+)</definition>
+        <namedTypedValue>
+            <name>recordId</name>
+            <type>
+                <name>int</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <metadataExpr></metadataExpr>
+        <preferredEditor>interface</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+        <isCustom>false</isCustom>
+    </interface>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <history>
+        <historyInfo versionUuid="_a-0000ed02-f63d-8000-9bea-011c48011c48_1059124"/>
+    </history>
+</contentHaul>

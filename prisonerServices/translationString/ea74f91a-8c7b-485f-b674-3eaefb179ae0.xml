@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<translationStringHaul xmlns:a="http://www.appian.com/ae/types/2009">
+  <versionUuid>6001f80a-8ab4-444f-88b8-aced8ae89f13</versionUuid>
+  <translationString a:uuid="ea74f91a-8c7b-485f-b674-3eaefb179ae0">
+    <a:translationSetUuid>5f1fccd2-d309-46dc-a451-abf6d078df5a</a:translationSetUuid>
+    <a:description/>
+    <a:translatorNotes/>
+    <translationTexts>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>en-US</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>The system recognized an already active stipend request: You requested stipend for this month already</a:translatedText>
+      </translatedText>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>de</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Das System hat einen bereits gestellten Antrag auf Teilhabegeld für diesen Monat erkannt. Sie können daher keinen weiteren Antrag auf Teilhabegeld für den entsprechenden Monat stellen.</a:translatedText>
+      </translatedText>
+    </translationTexts>
+    <translationStringVariables/>
+  </translationString>
+  <history>
+    <historyInfo versionUuid="6001f80a-8ab4-444f-88b8-aced8ae89f13"/>
+  </history>
+</translationStringHaul>

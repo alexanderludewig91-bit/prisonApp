@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<siteHaul xmlns:a="http://www.appian.com/ae/types/2009" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <versionUuid>8248beae-8a4c-46b8-a52e-ab686faebbb5</versionUuid>
+  <site a:uuid="6ca8806b-3f6b-4b39-a415-86ccf1bee582" name="PS TV">
+    <description/>
+    <urlStub>dga-tv</urlStub>
+    <page a:uuid="3cd07bc4-1951-4080-a286-e9d600701fd5">
+      <staticName>TV</staticName>
+      <description/>
+      <urlStub>tv</urlStub>
+      <uiObject a:uuid="_a-0000ed02-f63d-8000-9bea-011c48011c48_1060678" xsi:type="a:ContentFreeformRule"/>
+      <iconId>f016</iconId>
+      <visibilityExpr>fn!true()</visibilityExpr>
+      <pageWidth>FULL</pageWidth>
+      <areUrlParamsEncrypted>true</areUrlParamsEncrypted>
+      <autoContextUpdateEnabled>true</autoContextUpdateEnabled>
+    </page>
+    <visibility>268435456</visibility>
+    <headerBackgroundColor>#111111</headerBackgroundColor>
+    <faviconRef a:uuid="SYSTEM_CONTENT_SITES_DEFAULT_FAVICON" xsi:type="a:CollaborationDocument"/>
+    <accentColor>#AADB1E</accentColor>
+    <logoExpr>#"_a-0000ed02-f63d-8000-9bea-011c48011c48_1062006"</logoExpr>
+    <showName>false</showName>
+    <tempoLinkVisibility>HIDDEN</tempoLinkVisibility>
+    <showRecordNews>true</showRecordNews>
+    <tasksInSitesVisibility>HIDDEN</tasksInSitesVisibility>
+    <buttonShape>SEMI_ROUNDED</buttonShape>
+    <loadingBarColor>#06d6a0</loadingBarColor>
+    <navigationBarStyle>STYLE2</navigationBarStyle>
+    <inputShape>SEMI_ROUNDED</inputShape>
+    <isSystem>false</isSystem>
+    <displayName>PS TV</displayName>
+    <isStaticDisplayName>true</isStaticDisplayName>
+    <nameExprIsEvaluable>true</nameExprIsEvaluable>
+    <primaryNavLayoutType>TOPBAR</primaryNavLayoutType>
+    <buttonLabelCase>UPPERCASE</buttonLabelCase>
+    <dialogShape>SQUARED</dialogShape>
+  </site>
+  <roleMap>
+    <role name="site_administrator">
+      <users/>
+      <groups>
+        <groupUuid>_e-0000ed87-210d-8000-9b3b-01075c01075c_6558</groupUuid>
+      </groups>
+    </role>
+    <role name="site_viewer">
+      <users/>
+      <groups>
+        <groupUuid>_e-0000ed87-210d-8000-9b3b-01075c01075c_6561</groupUuid>
+      </groups>
+    </role>
+  </roleMap>
+  <history>
+    <historyInfo versionUuid="8248beae-8a4c-46b8-a52e-ab686faebbb5"/>
+  </history>
+</siteHaul>

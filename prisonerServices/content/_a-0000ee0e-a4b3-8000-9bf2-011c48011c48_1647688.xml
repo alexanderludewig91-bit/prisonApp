@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1648076</versionUuid>
+    <interface>
+        <name>PS_C_AuthorityLetterGeneratorDamageAssessment</name>
+        <uuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1647688</uuid>
+        <description></description>
+        <parentUuid>4e30e89d-6b0d-415f-8a87-1107bebc8692</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>{
+  #"SYSTEM_SYSRULES_checkboxField_v1"(
+    choiceLabels: {
+      #"urn:appian:translation-string:v1:de7bf95d-96d9-4c04-92d2-78dd08f274a8",
+    },
+    choiceValues: {true()},
+    label: #"urn:appian:translation-string:v1:ea0f7060-d5a1-4041-8b2e-fe42166e4929",
+    labelPosition: "ABOVE",
+    saveInto: {ri!recordedBodilyHarm},
+    validations: {}
+  ),
+  #"SYSTEM_SYSRULES_checkboxField_v1"(
+    choiceLabels: {
+      #"urn:appian:translation-string:v1:e281eeaa-2cdf-4108-84a4-e4156fe626ab",
+    },
+    choiceValues: {true()},
+    labelPosition: "ABOVE",
+    saveInto: {ri!recordedPropertyDamage},
+    validations: {}
+  ),
+  #"SYSTEM_SYSRULES_checkboxField_v1"(
+    choiceLabels: {
+      #"urn:appian:translation-string:v1:3710cc32-b107-4ad6-a014-2947a61318d2",
+    },
+    choiceValues: {true()},
+    labelPosition: "ABOVE",
+    saveInto: {ri!policeInformed},
+    validations: {}
+  ),
+  #"SYSTEM_SYSRULES_checkboxField_v1"(
+    choiceLabels: {
+      #"urn:appian:translation-string:v1:de41ba60-72e0-49f8-97d4-bbaaf68c095b",
+    },
+    choiceValues: {true()},
+    labelPosition: "ABOVE",
+    saveInto: {ri!processEscalated},
+    validations: {}
+  ),
+  #"SYSTEM_SYSRULES_cardLayout"(
+    showBorder: false,
+    showShadow: true,
+    marginBelow: "STANDARD",
+    contents: {
+      #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1647601"(
+        eventID: ri!eventId,
+        showWhen: true
+      )
+    }
+  ),
+}</definition>
+        <namedTypedValue>
+            <name>recordedBodilyHarm</name>
+            <type>
+                <name>boolean</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>recordedPropertyDamage</name>
+            <type>
+                <name>boolean</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>policeInformed</name>
+            <type>
+                <name>boolean</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>processEscalated</name>
+            <type>
+                <name>boolean</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>eventId</name>
+            <type>
+                <name>int</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <preferredEditor>interface</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+        <isCustom>false</isCustom>
+    </interface>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <history>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1648076"/>
+    </history>
+</contentHaul>

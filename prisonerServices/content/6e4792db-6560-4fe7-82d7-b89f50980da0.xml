@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>fefe0498-1f58-4be3-a701-d1b06222b412</versionUuid>
+    <interface>
+        <name>PS_CreateOrUpdateNewService</name>
+        <uuid>6e4792db-6560-4fe7-82d7-b89f50980da0</uuid>
+        <description>Form interface for creating or updating New Services as an action</description>
+        <parentUuid>4e30e89d-6b0d-415f-8a87-1107bebc8692</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>#"SYSTEM_SYSRULES_formLayout_v1"(
+  label: if(
+    ri!isUpdate,
+    "Update New Service",
+    "Create New Service"
+  ),
+  contents: {
+    #"SYSTEM_SYSRULES_columnsLayout"(
+      columns: {
+        #"SYSTEM_SYSRULES_columnLayout"(
+          contents: {
+            #"SYSTEM_SYSRULES_textField"(
+              label: "Name",
+              labelPosition: "ABOVE",
+              required: false,
+              value: ri!record[#"urn:appian:record-field:v1:309979c2-c7d9-40f7-b1a6-8b97ce1f4b38/beca9641-3846-41ea-a60f-6431df182394"],
+              saveInto: ri!record[#"urn:appian:record-field:v1:309979c2-c7d9-40f7-b1a6-8b97ce1f4b38/beca9641-3846-41ea-a60f-6431df182394"],
+              characterLimit: 255
+            ),
+            #"SYSTEM_SYSRULES_dateField"(
+              label: "Start Date",
+              labelPosition: "ABOVE",
+              required: false,
+              value: ri!record[#"urn:appian:record-field:v1:309979c2-c7d9-40f7-b1a6-8b97ce1f4b38/22f8d9a6-51d5-4e8a-aa48-e468a13dcd77"],
+              saveInto: ri!record[#"urn:appian:record-field:v1:309979c2-c7d9-40f7-b1a6-8b97ce1f4b38/22f8d9a6-51d5-4e8a-aa48-e468a13dcd77"]
+            ),
+            #"SYSTEM_SYSRULES_textField"(
+              label: "Icon",
+              labelPosition: "ABOVE",
+              required: false,
+              value: ri!record[#"urn:appian:record-field:v1:309979c2-c7d9-40f7-b1a6-8b97ce1f4b38/e6e355ad-959a-48b6-b75b-3ebd0e14ab88"],
+              saveInto: ri!record[#"urn:appian:record-field:v1:309979c2-c7d9-40f7-b1a6-8b97ce1f4b38/e6e355ad-959a-48b6-b75b-3ebd0e14ab88"],
+              characterLimit: 255
+            )
+          }
+        ),
+        #"SYSTEM_SYSRULES_columnLayout"(
+          contents: {
+            #"SYSTEM_SYSRULES_textField"(
+              label: "Description",
+              labelPosition: "ABOVE",
+              required: false,
+              value: ri!record[#"urn:appian:record-field:v1:309979c2-c7d9-40f7-b1a6-8b97ce1f4b38/c3554570-228f-4ac1-9ef6-bf311dbacebf"],
+              saveInto: ri!record[#"urn:appian:record-field:v1:309979c2-c7d9-40f7-b1a6-8b97ce1f4b38/c3554570-228f-4ac1-9ef6-bf311dbacebf"],
+              characterLimit: 4000
+            ),
+            #"SYSTEM_SYSRULES_dateField"(
+              label: "End Date",
+              labelPosition: "ABOVE",
+              required: false,
+              value: ri!record[#"urn:appian:record-field:v1:309979c2-c7d9-40f7-b1a6-8b97ce1f4b38/84badfc0-336c-4c5c-abcd-b87a60c9f99f"],
+              saveInto: ri!record[#"urn:appian:record-field:v1:309979c2-c7d9-40f7-b1a6-8b97ce1f4b38/84badfc0-336c-4c5c-abcd-b87a60c9f99f"]
+            )
+          }
+        )
+      }
+    )
+  },
+  buttons: #"SYSTEM_SYSRULES_ButtonLayout"(
+    primaryButtons: {
+      #"SYSTEM_SYSRULES_buttonWidget_v1"(
+        label: if(ri!isUpdate, "Save", "Create"),
+        submit: true,
+        validate: true,
+        saveInto: if(
+          ri!isUpdate,
+          {
+            a!save(
+              target: ri!record[#"urn:appian:record-field:v1:309979c2-c7d9-40f7-b1a6-8b97ce1f4b38/d9c7638a-c4ff-429c-9115-303aabd6b07e"],
+              value: loggedInUser()
+            ),
+            a!save(
+              target: ri!record[#"urn:appian:record-field:v1:309979c2-c7d9-40f7-b1a6-8b97ce1f4b38/c69517e2-56fb-4f65-b84b-dd78be2ee06c"],
+              value: now()
+            )
+          },
+          {
+            a!save(
+              target: ri!record[#"urn:appian:record-field:v1:309979c2-c7d9-40f7-b1a6-8b97ce1f4b38/f6cd0964-d510-406f-a4b2-6ed967b1bf2e"],
+              value: loggedInUser()
+            ),
+            a!save(
+              target: ri!record[#"urn:appian:record-field:v1:309979c2-c7d9-40f7-b1a6-8b97ce1f4b38/db4164a2-3a65-4406-9099-e3f2a8a3cf40"],
+              value: now()
+            )
+          }
+        ),
+        style: "SOLID"
+      )
+    },
+    secondaryButtons: {
+      #"SYSTEM_SYSRULES_buttonWidget_v1"(
+        label: "Cancel",
+        value: true,
+        saveInto: ri!cancel,
+        submit: true,
+        style: "OUTLINE",
+        validate: false
+      )
+    }
+  )
+)</definition>
+        <namedTypedValue>
+            <name>record</name>
+            <type>
+                <name>309979c2-c7d9-40f7-b1a6-8b97ce1f4b38</name>
+                <namespace>urn:com:appian:recordtype:datatype</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>cancel</name>
+            <type>
+                <name>boolean</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>isUpdate</name>
+            <description>Tracks whether this form is being used to create a new record or update an existing one</description>
+            <type>
+                <name>boolean</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <preferredEditor>interface</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+        <isCustom>false</isCustom>
+    </interface>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <history>
+        <historyInfo versionUuid="fefe0498-1f58-4be3-a701-d1b06222b412"/>
+    </history>
+</contentHaul>

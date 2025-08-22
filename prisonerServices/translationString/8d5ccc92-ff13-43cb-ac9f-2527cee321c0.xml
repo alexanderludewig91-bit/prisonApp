@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<translationStringHaul xmlns:a="http://www.appian.com/ae/types/2009">
+  <versionUuid>70081f7e-b45b-4772-bcf0-bda40b9f697c</versionUuid>
+  <translationString a:uuid="8d5ccc92-ff13-43cb-ac9f-2527cee321c0">
+    <a:translationSetUuid>5f1fccd2-d309-46dc-a451-abf6d078df5a</a:translationSetUuid>
+    <a:description/>
+    <a:translatorNotes/>
+    <translationTexts>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>en-US</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>{inmate} was born before the selected event Date. Please select another date.</a:translatedText>
+      </translatedText>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>de</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>{inmate} wurde vor dem ausgewählten Datum geboren. Bitte wählen Sie ein anderes Datum.</a:translatedText>
+      </translatedText>
+    </translationTexts>
+    <translationStringVariables>
+      <translationStringVariable a:uuid="436bb6d5-e9bf-4241-a658-f1223aaedad2">
+        <a:name>inmate</a:name>
+      </translationStringVariable>
+    </translationStringVariables>
+  </translationString>
+  <history>
+    <historyInfo versionUuid="70081f7e-b45b-4772-bcf0-bda40b9f697c"/>
+  </history>
+</translationStringHaul>

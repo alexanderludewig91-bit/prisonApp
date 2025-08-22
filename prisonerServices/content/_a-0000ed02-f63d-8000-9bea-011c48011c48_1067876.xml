@@ -1,0 +1,482 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1616228</versionUuid>
+    <interface>
+        <name>PS_F_EvaluateVisitRequest</name>
+        <uuid>_a-0000ed02-f63d-8000-9bea-011c48011c48_1067876</uuid>
+        <description></description>
+        <parentUuid>bb69cd5d-2b14-4fb7-b9d0-11ebd5815cda</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>a!localVariables(
+  local!report1: "&lt;ul&gt;&lt;li&gt;&lt;p&gt;&lt;strong&gt;Datum:&lt;/strong&gt; 20. Februar 2025&lt;br /&gt;&lt;strong&gt;Inhalt:&lt;/strong&gt; Er zeigte sich w" &amp; fn!char(228) &amp; "hrend des Gespr" &amp; fn!char(228) &amp; "chs kooperativ und reflektiert. Er sprach offen " &amp; fn!char(252) &amp; "ber seine Vergangenheit und die Gr" &amp; fn!char(252) &amp; "nde f" &amp; fn!char(252) &amp; "r seine Inhaftierung. Er " &amp; fn!char(228) &amp; "u" &amp; fn!char(223) &amp; "erte den Wunsch, an Rehabilitationsprogrammen teilzunehmen und sich weiterzubilden.&lt;/p&gt;&lt;/li&gt;&lt;li&gt;&lt;p&gt;&lt;strong&gt;Datum:&lt;/strong&gt; 25. Februar 2025&lt;br /&gt;&lt;strong&gt;Inhalt:&lt;/strong&gt; Er berichtete " &amp; fn!char(252) &amp; "ber Fortschritte in seinem Verhalten und seine Teilnahme an den angebotenen Programmen. Er zeigte Interesse an einer beruflichen Weiterbildung und fragte nach M" &amp; fn!char(246) &amp; "glichkeiten, nach seiner Entlassung eine Arbeit zu finden.&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;",
+  local!report2: "&lt;ul&gt;&lt;li&gt;&lt;p&gt;Er nutzt regelm" &amp; fn!char(228)&amp; fn!char(223) &amp; "ig die Bibliothek und hat sich mehrere B" &amp; fn!char(252) &amp; "cher zu den Themen Pers" &amp; fn!char(246) &amp; "nlichkeitsentwicklung und berufliche Weiterbildung ausgeliehen.&lt;/p&gt;&lt;/li&gt;&lt;li&gt;&lt;p&gt;Er hat Zugang zu einem Computer und nutzt diesen haupts" &amp; fn!char(228) &amp; "chlich f" &amp; fn!char(252) &amp; "r Bildungszwecke, wie das Erlernen neuer F" &amp; fn!char(228) &amp; "higkeiten und das Schreiben von Bewerbungen.&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;",
+  local!report3: "&lt;ul&gt;&lt;li&gt;&lt;p&gt;&lt;strong&gt;Holzwerkstatt:&lt;/strong&gt; Er arbeitet seit Januar 2025 in der Holzwerkstatt. Seine Vorgesetzten berichten, dass er zuverl" &amp; fn!char(228) &amp; "ssig und engagiert ist. Er hat bereits mehrere Projekte erfolgreich abgeschlossen und zeigt gro" &amp; fn!char(223) &amp; "es handwerkliches Geschick.&lt;/p&gt;&lt;/li&gt;&lt;li&gt;&lt;p&gt;&lt;strong&gt;K" &amp; fn!char(252) &amp; "che:&lt;/strong&gt; Er hat auch in der K" &amp; fn!char(252) &amp; "che ausgeholfen und sich als teamf" &amp; fn!char(228) &amp; "hig und lernbereit erwiesen. Er hat sich schnell in die Abl" &amp; fn!char(228) &amp; "ufe eingearbeitet und unterst" &amp; fn!char(252) &amp; "tzt das K" &amp; fn!char(252) &amp; "chenteam tatkr" &amp; fn!char(228) &amp; "ftig.&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;",
+  local!report4: "&lt;ul&gt;&lt;li&gt;&lt;p&gt;Er zeigt insgesamt ein positives Verhalten und h" &amp; fn!char(228) &amp; "lt sich an die Regeln des Gef" &amp; fn!char(228) &amp; "ngnisses. Er hat keine Disziplinarverst" &amp; fn!char(246)&amp; fn!char(223) &amp; "e und wird von den Mitinsassen respektiert.&lt;/p&gt;&lt;/li&gt;&lt;li&gt;&lt;p&gt;Er nimmt regelm" &amp; fn!char(228)&amp; fn!char(223) &amp; "ig an den angebotenen Sport- und Freizeitaktivit" &amp; fn!char(228) &amp; "ten teil und zeigt dabei eine positive Einstellung.&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;",
+  local!report5: "&lt;p&gt;Er zeigt deutliche Fortschritte in seiner Rehabilitation. Er ist motiviert, an seiner pers" &amp; fn!char(246) &amp; "nlichen und beruflichen Entwicklung zu arbeiten, und nutzt die angebotenen Ressourcen effektiv. Es wird empfohlen, ihm weiterhin Zugang zu Bildungs- und Rehabilitationsprogrammen zu gew" &amp; fn!char(228) &amp; "hren und ihn bei der Vorbereitung auf seine Entlassung zu unterst" &amp; fn!char(252) &amp; "tzen.&lt;/p&gt;",
+  local!question,
+  #"SYSTEM_SYSRULES_formLayout_v1"(
+    backgroundColor: "WHITE",
+    label: "Besuchsantrag Prüfen",
+    instructions: "Hier kommt eine konkrete Beschreibung der Aufgabe,",
+    contents: {
+      #"SYSTEM_SYSRULES_columnsLayout"(
+        columns: {
+          #"SYSTEM_SYSRULES_columnLayout"(
+            contents: {
+              #"SYSTEM_SYSRULES_sectionLayout_v1"(
+                label: "Antrag",
+                labelIcon: "address-book",
+                contents: {
+                  #"SYSTEM_SYSRULES_cardLayout"(
+                    contents: {
+                      #"SYSTEM_SYSRULES_textField"(
+                        label: "Antragsteller",
+                        labelPosition: "JUSTIFIED",
+                        value: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1546843"(ri!request[#"urn:appian:record-field:v1:2e4db39a-2f38-4769-b11e-8ad8441f993a/3ae6d220-0450-4065-b61f-4b136d605959"]),
+                        readOnly: true
+                      ),
+                      #"SYSTEM_SYSRULES_dateField"(
+                        label: "Datum",
+                        labelPosition: "JUSTIFIED",
+                        value: ri!request[#"urn:appian:record-field:v1:2e4db39a-2f38-4769-b11e-8ad8441f993a/1248a4bf-108e-4870-8db8-2816b7cd4bea"],
+                        readOnly: true
+                      ),
+                      #"SYSTEM_SYSRULES_textField"(
+                        label: "Gäste",
+                        labelPosition: "JUSTIFIED",
+                        value: joinarray(split(ri!request[#"urn:appian:record-field:v1:2e4db39a-2f38-4769-b11e-8ad8441f993a/3bc83589-99d7-4e39-9aab-a543720daca7"], ";"), ", "),
+                        readOnly: true
+                      ),
+                      #"SYSTEM_SYSRULES_paragraphField"(
+                        label: "Grund",
+                        labelPosition: "ABOVE",
+                        value: ri!request[#"urn:appian:record-field:v1:2e4db39a-2f38-4769-b11e-8ad8441f993a/71d51822-db2b-4543-b00e-364428dbdfbc"],
+                        showCharacterCount: false,
+                        readOnly: true
+                      )
+                    },
+                    style: "INFO",
+                    shape: "ROUNDED",
+                    showBorder: false,
+                    showShadow: true
+                  )
+                }
+              ),
+              #"SYSTEM_SYSRULES_sectionLayout_v1"(
+                label: "Rückfrage",
+                labelIcon: "comments",
+                contents: {
+                  #"SYSTEM_SYSRULES_cardLayout"(
+                    contents: {
+                      #"SYSTEM_SYSRULES_paragraphField"(
+                        label: "Frage",
+                        labelPosition: "ABOVE",
+                        value: ri!question,
+                        showCharacterCount: false,
+                        readOnly: true
+                      ),
+                      #"SYSTEM_SYSRULES_paragraphField"(
+                        label: "Antwort",
+                        labelPosition: "ABOVE",
+                        value: ri!answer,
+                        showCharacterCount: false,
+                        readOnly: true
+                      )
+                    },
+                    style: "INFO",
+                    shape: "ROUNDED",
+                    showBorder: false,
+                    showShadow: true
+                  )
+                },
+                showWhen: a!isNotNullOrEmpty(ri!answer)
+              )
+            }
+          ),
+          #"SYSTEM_SYSRULES_columnLayout"(
+            contents: {
+              #"SYSTEM_SYSRULES_sectionLayout_v1"(
+                label: "KI-Führungsbericht " &amp; #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1546843"(ri!request[#"urn:appian:record-field:v1:2e4db39a-2f38-4769-b11e-8ad8441f993a/3ae6d220-0450-4065-b61f-4b136d605959"]),
+                labelIcon: "info",
+                contents: {
+                  #"SYSTEM_SYSRULES_cardLayout"(
+                    contents: {
+                      #"SYSTEM_SYSRULES_sideBySideLayout"(
+                        items: {
+                          #"SYSTEM_SYSRULES_sideBySideItem"(
+                            item: #"SYSTEM_SYSRULES_styledTextEditorField"(
+                              label: "Styled Text Editor",
+                              labelPosition: "COLLAPSED",
+                              value: local!report5,
+                              sizeLimit: 4000,
+                              height: "MEDIUM",
+                              readOnly: true
+                            )
+                          ),
+                          #"SYSTEM_SYSRULES_sideBySideItem"(
+                            item: #"SYSTEM_SYSRULES_stampField"(
+                              labelPosition: "COLLAPSED",
+                              text: "42",
+                              contentColor: "STANDARD",
+                              size: "SMALL"
+                            ),
+                            width: "MINIMIZE"
+                          )
+                        }
+                      ),
+                      #"SYSTEM_SYSRULES_sectionLayout_v1"(
+                        label: "Gesprächsprotokolle",
+                        labelSize: "SMALL",
+                        contents: {
+                          #"SYSTEM_SYSRULES_styledTextEditorField"(
+                            label: "Styled Text Editor",
+                            labelPosition: "COLLAPSED",
+                            value: local!report1,
+                            sizeLimit: 4000,
+                            height: "MEDIUM",
+                            readOnly: true
+                          )
+                        },
+                        isCollapsible: true,
+                        isInitiallyCollapsed: true
+                      ),
+                      #"SYSTEM_SYSRULES_sectionLayout_v1"(
+                        label: "Mediennutzung",
+                        labelSize: "SMALL",
+                        contents: {
+                          #"SYSTEM_SYSRULES_styledTextEditorField"(
+                            label: "Styled Text Editor",
+                            labelPosition: "COLLAPSED",
+                            value: local!report2,
+                            sizeLimit: 4000,
+                            height: "MEDIUM",
+                            readOnly: true
+                          )
+                        },
+                        isCollapsible: true,
+                        isInitiallyCollapsed: true
+                      ),
+                      #"SYSTEM_SYSRULES_sectionLayout_v1"(
+                        label: "Berichte aus den Werkstätten",
+                        labelSize: "SMALL",
+                        contents: {
+                          #"SYSTEM_SYSRULES_styledTextEditorField"(
+                            label: "Styled Text Editor",
+                            labelPosition: "COLLAPSED",
+                            value: local!report3,
+                            sizeLimit: 4000,
+                            height: "MEDIUM",
+                            readOnly: true
+                          )
+                        },
+                        isCollapsible: true,
+                        isInitiallyCollapsed: true
+                      ),
+                      #"SYSTEM_SYSRULES_sectionLayout_v1"(
+                        label: "Allgemeines Verhalten",
+                        labelSize: "SMALL",
+                        contents: {
+                          #"SYSTEM_SYSRULES_styledTextEditorField"(
+                            label: "Styled Text Editor",
+                            labelPosition: "COLLAPSED",
+                            value: local!report4,
+                            sizeLimit: 4000,
+                            height: "MEDIUM",
+                            readOnly: true
+                          )
+                        },
+                        isCollapsible: true,
+                        isInitiallyCollapsed: true
+                      )
+                    },
+                    style: "INFO",
+                    shape: "ROUNDED",
+                    showBorder: false,
+                    showShadow: true
+                  )
+                }
+              )
+            }
+          )
+        }
+      ),
+      #"SYSTEM_SYSRULES_sectionLayout_v1"(
+        label: "Verlauf",
+        labelIcon: "archive",
+        contents: {
+          #"SYSTEM_SYSRULES_eventHistoryListField"(
+            label: "Event History",
+            labelPosition: "COLLAPSED",
+            eventData: {
+              #"SYSTEM_SYSRULES_eventData"(
+                recordType: #"urn:appian:record-type:v1:f4e3c5fd-9f99-496e-a23f-31f98c2db72c",
+                filters: #"SYSTEM_SYSRULES_queryLogicalExpression"(
+                  operator: "AND",
+                  filters: {
+                    #"SYSTEM_SYSRULES_queryFilter"(
+                      field: #"urn:appian:record-field:v1:f4e3c5fd-9f99-496e-a23f-31f98c2db72c/275590f7-3a7d-4cae-bbb7-bdae5b7762bf",
+                      operator: "=",
+                      value: ri!request[#"urn:appian:record-field:v1:2e4db39a-2f38-4769-b11e-8ad8441f993a/1a44d310-f607-46fd-b655-3e8724b79bb1"]
+                    )
+                  },
+                  ignoreFiltersWithEmptyValues: true
+                ),
+                timestamp: #"urn:appian:record-field:v1:f4e3c5fd-9f99-496e-a23f-31f98c2db72c/24b298d0-2be4-4bf2-be68-a93be0aef46d",
+                user: #"urn:appian:record-field:v1:f4e3c5fd-9f99-496e-a23f-31f98c2db72c/32758b2d-59d8-4508-9329-cbf9bbd86755",
+                comment: #"urn:appian:record-field:v1:f4e3c5fd-9f99-496e-a23f-31f98c2db72c/e578215d-41ce-41f3-a3f3-6deecb089557",
+                eventTypeName: fv!data[#"urn:appian:record-field:v1:f4e3c5fd-9f99-496e-a23f-31f98c2db72c/4752c7d0-05d4-431f-9297-8a03f59ab709/4f6952ac-b5c9-4ba2-bf7c-e7f39a669914"]
+              )
+            },
+            refreshAfter: "RECORD_ACTION",
+            eventStyle: "LIST_WITH_COMMENTS",
+            showSearchBox: true,
+            showReverseSortButton: true
+          )
+        },
+        isCollapsible: true,
+        isInitiallyCollapsed: true
+      ),
+      #"SYSTEM_SYSRULES_sectionLayout_v1"(
+        label: "Entscheidung",
+        labelIcon: "balance-scale",
+        contents: {
+          #"SYSTEM_SYSRULES_cardLayout"(
+            contents: {
+              #"SYSTEM_SYSRULES_cardChoiceField"(
+                label: "Card Choices",
+                labelPosition: "COLLAPSED",
+                data: {
+                  a!map(id: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1068423", icon: "thumbs-up", primaryText: "Ja", secondaryText: "Besuch genehmigen"),
+                  a!map(id: #"_a-0000ed87-2144-8000-9bee-011c48011c48_1075332", icon: "question", primaryText: "Rückfrage", secondaryText: "Rückfrage an Antragsteller"),
+                  a!map(id: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1068411", icon: "user-tie", primaryText: "Delegieren", secondaryText: "Prüfung durch Andere"),
+                  a!map(id: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1068417", icon: "thumbs-down", primaryText: "Nein", secondaryText: "Besuch ablehnen")
+                },
+                cardTemplate: #"SYSTEM_SYSRULES_cardTemplateTile"(
+                  id: fv!data.id,
+                  primaryText: fv!data.primaryText,
+                  secondaryText: fv!data.secondaryText,
+                  icon: fv!data.icon
+                ),
+                value: ri!decision,
+                saveInto: ri!decision,
+                maxSelections: 1,
+                align: "CENTER",
+                showShadow: true,
+                required: true
+              ),
+              #"SYSTEM_SYSRULES_pickerFieldUsers"(
+                label: "Weitere Prüfung durch",
+                maxSelections: 1,
+                value: ri!delegateUser,
+                saveInto: ri!delegateUser,
+                showWhen: ri!decision = #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1068411",
+                required: true
+              ),
+              #"SYSTEM_SYSRULES_paragraphField"(
+                label: "Kommentar",
+                value: ri!comment,
+                saveInto: ri!comment,
+                height: "MEDIUM",
+                showWhen: ri!decision &lt;&gt; #"_a-0000ed87-2144-8000-9bee-011c48011c48_1075332",
+                required: true
+              ),
+              #"SYSTEM_SYSRULES_paragraphField"(
+                label: "Rückfrage",
+                value: local!question,
+                saveInto: local!question,
+                height: "MEDIUM",
+                showWhen: ri!decision = #"_a-0000ed87-2144-8000-9bee-011c48011c48_1075332",
+                required: true
+              )
+            },
+            style: "INFO",
+            shape: "ROUNDED",
+            showBorder: false,
+            showShadow: true
+          )
+        }
+      ),
+      #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1605697"(
+        text: {
+          "Der Antragsteller erhält eine Nachricht über deine Entscheidung.",
+          "Die Gäste werden per Email eingeladen.",
+          "In der Zugangsverwaltung werden die Gäste für dieses Datum angelegt."
+        },
+        showWhen: ri!decision = #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1068423"
+      ),
+      #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1605697"(
+        text: {
+          "Der Antragsteller erhält eine Nachricht über deine Entscheidung."
+        },
+        showWhen: ri!decision = #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1068417"
+      ),
+      #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1605697"(
+        text: {
+          "Der ausgewählte Benutzer bekommt eine Aufgabe zur Prüfung des Antrags."
+        },
+        showWhen: ri!decision = #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1068411"
+      ),
+      #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1605697"(
+        text: {
+          "Der Antragsteller erhält eine Aufgabe in der er deine Rückfrage beantwortet.",
+          "Du erhälst dann diesen Antrag zur erneuten Prüfung.",
+          "Der Antragsteller hat 2 Tage Zeit. Danach wird dein Antrag verworfen."
+        },
+        showWhen: ri!decision = #"_a-0000ed87-2144-8000-9bee-011c48011c48_1075332"
+      )
+    },
+    buttons: #"SYSTEM_SYSRULES_ButtonLayout"(
+      primaryButtons: {
+        #"SYSTEM_SYSRULES_buttonWidget_v1"(
+          label: "Entscheidung Umsetzen",
+          icon: "chevron-right",
+          iconPosition: "END",
+          saveInto: {
+            a!save(
+              target: ri!question,
+              value: local!question
+            ),
+            a!save(
+              target: ri!request[#"urn:appian:record-field:v1:2e4db39a-2f38-4769-b11e-8ad8441f993a/df425fdb-0f35-4150-a497-dbf371bc0c0f"],
+              value: ri!decision
+            )
+          },
+          submit: true,
+          style: "SOLID",
+          loadingIndicator: true
+        )
+      },
+      secondaryButtons: {}
+    )
+  )
+)</definition>
+        <namedTypedValue>
+            <name>request</name>
+            <type>
+                <name>2e4db39a-2f38-4769-b11e-8ad8441f993a</name>
+                <namespace>urn:com:appian:recordtype:datatype</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>comment</name>
+            <type>
+                <name>string</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+            <value/>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>decision</name>
+            <type>
+                <name>string</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+            <value/>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>delegateUser</name>
+            <type>
+                <name>User</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>question</name>
+            <type>
+                <name>string</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+            <value/>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>answer</name>
+            <type>
+                <name>string</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+            <value/>
+        </namedTypedValue>
+        <preferredEditor>interface</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+        <isCustom>false</isCustom>
+    </interface>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <typedValue>
+        <type>
+            <name>RuleTestConfig?list</name>
+            <namespace>http://www.appian.com/ae/types/2009</namespace>
+        </type>
+        <value>
+            <el>
+                <a:name/>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">#"urn:appian:record-type:v1:2e4db39a-2f38-4769-b11e-8ad8441f993a"(#"urn:appian:record-field:v1:2e4db39a-2f38-4769-b11e-8ad8441f993a/1248a4bf-108e-4870-8db8-2816b7cd4bea": today(), #"urn:appian:record-field:v1:2e4db39a-2f38-4769-b11e-8ad8441f993a/bd55e7e8-03c6-4f77-988b-8b8f254043d2": false, #"urn:appian:record-field:v1:2e4db39a-2f38-4769-b11e-8ad8441f993a/3ae6d220-0450-4065-b61f-4b136d605959": fn!touser("stefan.helzle@bechtle.com"), #"urn:appian:record-field:v1:2e4db39a-2f38-4769-b11e-8ad8441f993a/f51c6f76-9293-444e-91b7-3287f0bd53b9": fn!datetime(2025, 2, 27, 13, 20, 38, 450), #"urn:appian:record-field:v1:2e4db39a-2f38-4769-b11e-8ad8441f993a/3bc83589-99d7-4e39-9aab-a543720daca7": "Oma;Ehefrau;Bruder", #"urn:appian:record-field:v1:2e4db39a-2f38-4769-b11e-8ad8441f993a/71d51822-db2b-4543-b00e-364428dbdfbc": "eu minim ex proident laboris consequat laborum incididunt anim occaecat aute consequat magna sit proident")</a:value>
+                    <a:nameRef>request</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string"/>
+                    <a:nameRef>comment</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string"/>
+                    <a:nameRef>decision</a:nameRef>
+                    <a:id>3</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true" xsi:type="a:User"/>
+                    <a:nameRef>delegateUser</a:nameRef>
+                    <a:id>4</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string"/>
+                    <a:nameRef>question</a:nameRef>
+                    <a:id>5</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string"/>
+                    <a:nameRef>answer</a:nameRef>
+                    <a:id>6</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+            </el>
+        </value>
+    </typedValue>
+    <history>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1616228"/>
+    </history>
+</contentHaul>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1653762</versionUuid>
+    <interface>
+        <name>PS_C_ParticipantDisplay</name>
+        <uuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1543309</uuid>
+        <description></description>
+        <parentUuid>4e30e89d-6b0d-415f-8a87-1107bebc8692</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>a!localVariables(
+  local!participants: property(
+    #"_a-0000ee09-79c9-8000-9bf0-011c48011c48_1488663"(
+      eventId: ri!eventId),
+      "participants",
+      null
+  ),
+  {
+    #"SYSTEM_SYSRULES_headingField"(
+      text: #"urn:appian:translation-string:v1:4d45002c-836c-4e02-95f4-03631802dbb1",
+      size: "EXTRA_SMALL",
+      fontWeight: "BOLD"
+    ),
+    if(
+      a!isNullOrEmpty(local!participants),
+      #"SYSTEM_SYSRULES_richTextDisplayField"(
+        labelPosition: "COLLAPSED",
+        value: #"SYSTEM_SYSRULES_richTextItem_v1"(
+          text: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1533796"
+        )
+      ),
+      #"SYSTEM_SYSRULES_forEach"(
+        items: local!participants,
+        expression: #"SYSTEM_SYSRULES_sideBySideLayout"(
+          items: {
+            #"SYSTEM_SYSRULES_sideBySideItem"(
+              item: #"SYSTEM_SYSRULES_imageField_v1"(
+                labelPosition: "COLLAPSED",
+                images: #"SYSTEM_SYSRULES_userImage"(
+                  user: fv!item[#"urn:appian:record-field:v1:3854eb39-6a61-48cd-82b6-e4645b2900fe/02011db0-86ad-4cf2-bf76-8358c5fd0dc2"]
+                ),
+                size: "ICON_PLUS",
+                style: "AVATAR"
+              ),
+              width: "MINIMIZE"
+            ),
+            #"SYSTEM_SYSRULES_sideBySideItem"(
+              item: #"SYSTEM_SYSRULES_richTextDisplayField"(
+                label: #"urn:appian:translation-string:v1:4d45002c-836c-4e02-95f4-03631802dbb1",
+                labelPosition: "COLLAPSED",
+                value: #"_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1546843"(
+                  user: fv!item[#"urn:appian:record-field:v1:3854eb39-6a61-48cd-82b6-e4645b2900fe/02011db0-86ad-4cf2-bf76-8358c5fd0dc2"]
+                )
+              )
+            )
+          },
+          alignVertical: "MIDDLE"
+        )
+      )
+    )
+  }
+)</definition>
+        <namedTypedValue>
+            <name>eventId</name>
+            <type>
+                <name>int</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <preferredEditor>interface</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+        <isCustom>false</isCustom>
+    </interface>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <history>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1546861"/>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1653762"/>
+    </history>
+</contentHaul>

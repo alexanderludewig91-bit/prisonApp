@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<contentHaul xmlns:a="http://www.appian.com/ae/types/2009">
+    <versionUuid>_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1626759</versionUuid>
+    <rule>
+        <name>PS_CreateActivityCDT</name>
+        <uuid>59db3d82-279c-4deb-ac61-0971b6443d56_MAKEACTIVITYCDT</uuid>
+        <description>Formatting rule that generates the activity history for a particular process [Activity History]</description>
+        <parentUuid>bb69cd5d-2b14-4fb7-b9d0-11ebd5815cda</parentUuid>
+        <visibility>
+            <advertise>false</advertise>
+            <hierarchy>true</hierarchy>
+            <indexable>true</indexable>
+            <quota>false</quota>
+            <searchable>true</searchable>
+            <system>false</system>
+            <unlogged>false</unlogged>
+        </visibility>
+        <definition>'type!{urn:com:appian:types:PS}PS_Activity'(
+  recordId: ri!recordId,
+  who: ri!who,
+  action: ri!action,
+  /* Use a different Details pattern for each type of activity */
+  details:if(
+    ri!action = #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058628",
+    "To: " &amp; #"28845323-04ee-4e83-9c6c-cd99b14e142b_FORMATNAME"(ri!taskAssignee) &amp; char(10) &amp; "Details: " &amp; ri!taskDetails &amp; if(
+      isnull(ri!taskDeadline),
+      "",
+      char(10) &amp; "Deadline: " &amp; ri!taskDeadline
+    ),
+    if(
+      or(ri!action = #"b1bcb3b4-5035-4ffc-b897-b0827c9cf76e_ACTIONCOMPLETED", ri!action = #"35beec5b-7eb3-4ebc-9c67-03ff6e89ce2f_ACTIONSKIPPED"),
+      "From: " &amp; #"28845323-04ee-4e83-9c6c-cd99b14e142b_FORMATNAME"(ri!taskAssigner) &amp; char(10) &amp; if(isnull(ri!comments), "(No Comments)", "Comments: " &amp; ri!comments),
+      if(
+        ri!action = #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058624",
+        "Message: " &amp; ri!message &amp; if(not(isnull(ri!attachment)), char(10) &amp; "Attachment: " &amp; #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058680"(ri!attachment), ""),
+        if(
+          or(ri!action = #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058620", ri!action = #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058636"),
+          #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058720"(
+            oldCDT: ri!oldCDT,
+            newCDT: ri!newCDT,
+            fields: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058804",
+            fieldNames: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058800",
+            fieldTypes: #"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058808"
+          ) &amp; if(
+            or(isnull(ri!newDocs), count(ri!newDocs)=0),
+            "",
+            "Attached Files: " &amp; joinarray(apply(#"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058680", ri!newDocs), ", ") &amp; char(10)
+          ) &amp; if(
+            or(isnull(ri!deletedDocs), count(ri!deletedDocs)=0),
+            "",
+            "Deleted Files: " &amp; joinarray(apply(#"_a-0000ed02-f63d-8000-9bea-011c48011c48_1058680", ri!deletedDocs), ", ")
+          ),
+          "no activity found"
+        )
+      )
+    )
+  ),
+  when: now()
+)</definition>
+        <namedTypedValue>
+            <name>recordId</name>
+            <type>
+                <name>int</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>who</name>
+            <type>
+                <name>User</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>action</name>
+            <type>
+                <name>string</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+            <value/>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>taskAssignee</name>
+            <type>
+                <name>User</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>taskAssigner</name>
+            <type>
+                <name>User</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>taskDetails</name>
+            <type>
+                <name>string</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+            <value/>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>taskDeadline</name>
+            <type>
+                <name>dateTime</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>comments</name>
+            <type>
+                <name>string</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+            <value/>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>message</name>
+            <type>
+                <name>string</name>
+                <namespace>http://www.w3.org/2001/XMLSchema</namespace>
+            </type>
+            <value/>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>attachment</name>
+            <type>
+                <name>CollaborationDocument</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>oldCDT</name>
+            <type>
+                <name>PS_Service</name>
+                <namespace>urn:com:appian:types:PS</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>newCDT</name>
+            <type>
+                <name>PS_Service</name>
+                <namespace>urn:com:appian:types:PS</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>newDocs</name>
+            <type>
+                <name>CollaborationDocument?list</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <namedTypedValue>
+            <name>deletedDocs</name>
+            <type>
+                <name>CollaborationDocument?list</name>
+                <namespace>http://www.appian.com/ae/types/2009</namespace>
+            </type>
+        </namedTypedValue>
+        <preferredEditor>legacy</preferredEditor>
+        <offlineEnabled>false</offlineEnabled>
+    </rule>
+    <roleMap public="true">
+        <role inherit="true" allowForAll="false" name="readers">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="authors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="true" allowForAll="false" name="administrators">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyReaders">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAuthors">
+            <users/>
+            <groups/>
+        </role>
+        <role inherit="false" allowForAll="false" name="denyAdministrators">
+            <users/>
+            <groups/>
+        </role>
+    </roleMap>
+    <typedValue>
+        <type>
+            <name>RuleTestConfig?list</name>
+            <namespace>http://www.appian.com/ae/types/2009</namespace>
+        </type>
+        <value>
+            <el>
+                <a:name>NULL</a:name>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true" xsi:type="xsd:int"/>
+                    <a:nameRef>recordId</a:nameRef>
+                    <a:id>1</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true" xsi:type="a:User"/>
+                    <a:nameRef>who</a:nameRef>
+                    <a:id>2</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string"/>
+                    <a:nameRef>action</a:nameRef>
+                    <a:id>3</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true" xsi:type="a:User"/>
+                    <a:nameRef>taskAssignee</a:nameRef>
+                    <a:id>4</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true" xsi:type="a:User"/>
+                    <a:nameRef>taskAssigner</a:nameRef>
+                    <a:id>5</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string"/>
+                    <a:nameRef>taskDetails</a:nameRef>
+                    <a:id>6</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true" xsi:type="xsd:dateTime"/>
+                    <a:nameRef>taskDeadline</a:nameRef>
+                    <a:id>7</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string"/>
+                    <a:nameRef>comments</a:nameRef>
+                    <a:id>8</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xsd:string"/>
+                    <a:nameRef>message</a:nameRef>
+                    <a:id>9</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true" xsi:type="a:CollaborationDocument"/>
+                    <a:nameRef>attachment</a:nameRef>
+                    <a:id>10</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">null</a:value>
+                    <a:nameRef>oldCDT</a:nameRef>
+                    <a:id>11</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="a:Expression">null</a:value>
+                    <a:nameRef>newCDT</a:nameRef>
+                    <a:id>12</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                    <a:nameRef>newDocs</a:nameRef>
+                    <a:id>13</a:id>
+                </a:ruleInputTestConfigs>
+                <a:ruleInputTestConfigs>
+                    <a:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                    <a:nameRef>deletedDocs</a:nameRef>
+                    <a:id>14</a:id>
+                </a:ruleInputTestConfigs>
+                <a:assertions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+                <a:isDefault>true</a:isDefault>
+            </el>
+        </value>
+    </typedValue>
+    <history>
+        <historyInfo versionUuid="_a-0000ee0e-a4b3-8000-9bf2-011c48011c48_1626759"/>
+    </history>
+</contentHaul>

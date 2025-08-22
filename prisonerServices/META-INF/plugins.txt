@@ -1,0 +1,4 @@
+com.vuram.plugins.htmltopdfconversion
+HTML To PDF Conversion
+2.1.12
+

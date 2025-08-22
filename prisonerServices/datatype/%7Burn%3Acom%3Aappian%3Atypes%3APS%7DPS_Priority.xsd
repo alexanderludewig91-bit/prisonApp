@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="urn:com:appian:types:PS"
+  xmlns:tns="urn:com:appian:types:PS" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <xsd:complexType name="PS_Priority">
+    <xsd:annotation>
+      <xsd:appinfo source="appian.jpa">@Table(name="qckapp_ps_priority")</xsd:appinfo>
+      <xsd:appinfo source="http://www.appian.com/ae/types/2009">
+        <ns2:Metadata xmlns:ns2="http://www.appian.com/ae/types/2009">
+          <ns2:versionUuid>0003ed73-f2a5-8000-1996-7f0000014e7a</ns2:versionUuid>
+          <ns2:history>
+            <ns2:historyInfo versionUuid="0003ed73-f2a5-8000-1996-7f0000014e7a"/>
+          </ns2:history>
+        </ns2:Metadata>
+      </xsd:appinfo>
+      <xsd:documentation><![CDATA[Data structure to reference a lookup table to Service Priority]]></xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="id" nillable="true" type="xsd:int">
+        <xsd:annotation>
+          <xsd:appinfo source="appian.jpa">@Id @GeneratedValue</xsd:appinfo>
+        </xsd:annotation>
+      </xsd:element>
+      <xsd:element name="value" nillable="true" type="xsd:string"/>
+      <xsd:element name="order" nillable="true" type="xsd:int"/>
+      <xsd:element name="active" nillable="true" type="xsd:boolean"/>
+    </xsd:sequence>
+  </xsd:complexType>
+</xsd:schema>

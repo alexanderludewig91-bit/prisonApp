@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<translationStringHaul xmlns:a="http://www.appian.com/ae/types/2009">
+  <versionUuid>2d95a481-24e8-4129-8c35-c9311e5c489b</versionUuid>
+  <translationString a:uuid="79780568-3eea-4135-b350-d27529284c10">
+    <a:translationSetUuid>5f1fccd2-d309-46dc-a451-abf6d078df5a</a:translationSetUuid>
+    <a:description/>
+    <a:translatorNotes/>
+    <translationTexts>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>en-US</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>You are requesting a stipend for the selected month. Please note that you can only submit this request only once per month.</a:translatedText>
+      </translatedText>
+      <translatedText>
+        <a:translationLocale>
+          <a:localeLanguageTag>de</a:localeLanguageTag>
+        </a:translationLocale>
+        <a:translatedText>Hiermit beantragen Sie Teilhabegeld für den ausgewählten Monat. Bitte beachten Sie, dass dieser Antrag nur einmal pro Monat gestellt werden kann.</a:translatedText>
+      </translatedText>
+    </translationTexts>
+    <translationStringVariables/>
+  </translationString>
+  <history>
+    <historyInfo versionUuid="2d95a481-24e8-4129-8c35-c9311e5c489b"/>
+  </history>
+</translationStringHaul>
