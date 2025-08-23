@@ -42,6 +42,7 @@ const Navbar = () => {
       if (isAdmin) {
         staffNavigation.push({ name: 'Admin-Dashboard', href: '/admin-dashboard' })
         staffNavigation.push({ name: 'Admin-Logs', href: '/admin-logs' })
+        staffNavigation.push({ name: 'Hausverwaltung', href: '/house-management' })
       }
       
       return staffNavigation

@@ -28,6 +28,8 @@ model User {
   assignedServices Service[] @relation("AssignedTo")
   activities Activity[] @relation("ActivityUser")
   adminLogs AdminLog[] @relation("AdminLogs")
+  cellAssignments CellAssignment[] @relation("CellAssignments")
+  assignmentCreatedBy CellAssignment[] @relation("AssignmentCreatedBy")
 
   @@map("users")
 }
@@ -139,4 +141,71 @@ model AdminLog {
   admin       User     @relation("AdminLogs", fields: [adminUserId], references: [id], onDelete: Cascade)
 
   @@map("admin_logs")
+}
+
+// Hausverwaltung
+model House {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Beziehungen
+  stations    Station[]
+
+  @@map("houses")
+}
+
+model Station {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Beziehungen
+  houseId     Int
+  house       House    @relation(fields: [houseId], references: [id], onDelete: Cascade)
+  cells       Cell[]
+
+  @@map("stations")
+}
+
+model Cell {
+  id          Int      @id @default(autoincrement())
+  number      String   // Zellennummer (z.B. "A-101")
+  description String?
+  capacity    Int      @default(1) // Anzahl Insassen pro Zelle
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Beziehungen
+  stationId   Int
+  station     Station  @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  assignments CellAssignment[]
+
+  @@unique([stationId, number]) // Zellennummer muss pro Station eindeutig sein
+  @@map("cells")
+}
+
+model CellAssignment {
+  id          Int      @id @default(autoincrement())
+  isActive    Boolean  @default(true)
+  assignedAt  DateTime @default(now())
+  assignedBy  Int?     // Admin-ID der die Zuweisung vorgenommen hat (optional)
+  notes       String?  // Zusätzliche Notizen zur Zuweisung
+  
+  // Beziehungen
+  cellId      Int
+  cell        Cell     @relation(fields: [cellId], references: [id], onDelete: Cascade)
+  userId      Int
+  user        User     @relation("CellAssignments", fields: [userId], references: [id], onDelete: Cascade)
+  assignedByUser User? @relation("AssignmentCreatedBy", fields: [assignedBy], references: [id])
+
+  @@unique([cellId, userId]) // Ein Insasse kann nur einmal einer Zelle zugewiesen sein
+  @@map("cell_assignments")
 }
