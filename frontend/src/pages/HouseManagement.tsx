@@ -8,6 +8,7 @@ import TransferModal from '../components/TransferModal';
 import CellCard from '../components/CellCard';
 import DraggableInmate from '../components/DraggableInmate';
 import DropZone from '../components/DropZone';
+import UnassignedInmateAssignmentModal from '../components/UnassignedInmateAssignmentModal';
 
 interface House {
   id: number;
@@ -58,14 +59,20 @@ const HouseManagement: React.FC = () => {
   const [assignmentModalOpen, setAssignmentModalOpen] = useState(false);
   const [removeModalOpen, setRemoveModalOpen] = useState(false);
   const [transferModalOpen, setTransferModalOpen] = useState(false);
+  const [unassignedAssignmentModalOpen, setUnassignedAssignmentModalOpen] = useState(false);
   const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
   const [selectedAssignment, setSelectedAssignment] = useState<any>(null);
+  const [selectedUnassignedInmate, setSelectedUnassignedInmate] = useState<any>(null);
 
   // Search & Filter States
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedHouse, setSelectedHouse] = useState('');
   const [selectedStation, setSelectedStation] = useState('');
   const [occupancyFilter, setOccupancyFilter] = useState('all');
+  
+  // Unassigned Inmates States
+  const [unassignedInmates, setUnassignedInmates] = useState<any[]>([]);
+  const [loadingUnassigned, setLoadingUnassigned] = useState(false);
 
   // Prüfe Admin-Berechtigung
   const userGroups = user?.groups?.map(g => g.name) || [];
@@ -80,6 +87,13 @@ const HouseManagement: React.FC = () => {
 
     fetchHouses();
   }, [isAdmin]);
+
+  // Unzugewiesene Insassen laden, wenn Tab aktiv ist
+  useEffect(() => {
+    if (activeTab === 'assignments' && isAdmin) {
+      fetchUnassignedInmates();
+    }
+  }, [activeTab, isAdmin]);
 
   const fetchHouses = async () => {
     try {
@@ -96,6 +110,25 @@ const HouseManagement: React.FC = () => {
       setError(err instanceof Error ? err.message : 'Unbekannter Fehler');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Unzugewiesene Insassen laden
+  const fetchUnassignedInmates = async () => {
+    try {
+      setLoadingUnassigned(true);
+      const response = await fetch('/api/users/inmates-unassigned');
+      
+      if (!response.ok) {
+        throw new Error('Fehler beim Laden der unzugewiesenen Insassen');
+      }
+
+      const data = await response.json();
+      setUnassignedInmates(data.users);
+    } catch (err) {
+      console.error('Fehler beim Laden der unzugewiesenen Insassen:', err);
+    } finally {
+      setLoadingUnassigned(false);
     }
   };
 
@@ -188,6 +221,43 @@ const HouseManagement: React.FC = () => {
     setSelectedAssignment(assignment);
     setSelectedCell(cell);
     setTransferModalOpen(true);
+  };
+
+  // Modal öffnen für Zuweisung unzugewiesener Insassen
+  const openUnassignedAssignmentModal = (inmate: any) => {
+    setSelectedUnassignedInmate(inmate);
+    setUnassignedAssignmentModalOpen(true);
+  };
+
+  // Zuweisung für unzugewiesene Insassen
+  const handleUnassignedAssignment = async (inmateId: number, cellId: number, notes: string) => {
+    try {
+      console.log('Unassigned assignment:', { inmateId, cellId, notes });
+
+      const response = await fetch(`/api/houses/cells/${cellId}/assignments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId: inmateId, notes }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('API Fehler:', errorData);
+        throw new Error(errorData.error || errorData.details || 'Fehler beim Zuweisen');
+      }
+
+      const result = await response.json();
+      console.log('Zuweisung erfolgreich:', result);
+
+      // Daten neu laden
+      await fetchHouses();
+      await fetchUnassignedInmates();
+    } catch (err) {
+      console.error('Zuweisung Fehler:', err);
+      throw err;
+    }
   };
 
   // Verlegung durchführen
@@ -320,7 +390,7 @@ const HouseManagement: React.FC = () => {
     setOccupancyFilter('all');
   };
 
-  // Gefilterte Daten
+  // Gefilterte Daten mit tiefgehender Filterung
   const filteredHouses = useMemo(() => {
     return houses.filter(house => {
       // Haus-Filter
@@ -365,8 +435,97 @@ const HouseManagement: React.FC = () => {
       }
 
       return true;
-    });
-  }, [houses, selectedHouse, selectedStation, searchTerm]);
+    }).map(house => {
+             // Tiefgehende Filterung der Stationen und Zellen
+       const filteredStations = house.stations.map(station => {
+         // Station-Filter - nur diese Station anzeigen
+         if (selectedStation && station.id.toString() !== selectedStation) {
+           return null;
+         }
+
+                   // Such-Filter für Zellen
+          let filteredCells = station.cells;
+          if (searchTerm) {
+            const searchLower = searchTerm.toLowerCase();
+            filteredCells = station.cells.filter(cell => {
+              // Zellen-Nummer oder Beschreibung
+              if (cell.number.toLowerCase().includes(searchLower) ||
+                  cell.description.toLowerCase().includes(searchLower)) {
+                return true;
+              }
+              // Insassen-Namen
+              if (cell.assignments.some(assignment =>
+                assignment.user.firstName.toLowerCase().includes(searchLower) ||
+                assignment.user.lastName.toLowerCase().includes(searchLower) ||
+                assignment.user.username.toLowerCase().includes(searchLower)
+              )) {
+                return true;
+              }
+              return false;
+            });
+          }
+
+          // Belegungs-Filter
+          if (occupancyFilter !== 'all') {
+            filteredCells = filteredCells.filter(cell => {
+              const occupancyPercentage = cell.capacity > 0 ? (cell.assignments.length / cell.capacity) * 100 : 0;
+              
+              switch (occupancyFilter) {
+                case 'empty':
+                  return cell.assignments.length === 0;
+                case 'partial':
+                  return cell.assignments.length > 0 && cell.assignments.length < cell.capacity;
+                case 'full':
+                  return cell.assignments.length >= cell.capacity;
+                default:
+                  return true;
+              }
+            });
+          }
+
+         // Bei Station-Filter: Alle Zellen der ausgewählten Station anzeigen
+         // Bei Such-Filter: Nur Zellen mit Treffern anzeigen
+         if (selectedStation) {
+           // Station ist ausgewählt - alle Zellen dieser Station anzeigen
+           return {
+             ...station,
+             cells: station.cells,
+             _count: {
+               ...station._count,
+               cells: station.cells.length
+             }
+           };
+         } else if (searchTerm && filteredCells.length === 0) {
+           // Suchbegriff vorhanden aber keine Treffer - Station ausblenden
+           return null;
+         } else {
+           // Keine spezielle Filterung oder Treffer vorhanden
+           return {
+             ...station,
+             cells: filteredCells,
+             _count: {
+               ...station._count,
+               cells: filteredCells.length
+             }
+           };
+         }
+       }).filter(Boolean); // Entferne null-Werte
+
+      // Nur Häuser mit gefilterten Stationen zurückgeben
+      if (filteredStations.length === 0) {
+        return null;
+      }
+
+      return {
+        ...house,
+        stations: filteredStations,
+        _count: {
+          ...house._count,
+          stations: filteredStations.length
+        }
+      };
+    }).filter(Boolean); // Entferne null-Werte
+     }, [houses, selectedHouse, selectedStation, searchTerm, occupancyFilter]);
 
   // Alle Stationen für Filter
   const allStations = useMemo(() => {
@@ -477,22 +636,22 @@ const HouseManagement: React.FC = () => {
         </nav>
       </div>
 
-       {/* Search Filters - nur für Häuser und Zuweisungen Tabs */}
-       {(activeTab === 'houses' || activeTab === 'assignments') && (
-         <SearchFilters
-           searchTerm={searchTerm}
-           onSearchChange={setSearchTerm}
-           selectedHouse={selectedHouse}
-           onHouseChange={setSelectedHouse}
-           selectedStation={selectedStation}
-           onStationChange={setSelectedStation}
-           occupancyFilter={occupancyFilter}
-           onOccupancyFilterChange={setOccupancyFilter}
-           houses={houses.map(h => ({ id: h.id, name: h.name }))}
-           stations={allStations}
-           onClearFilters={clearFilters}
-         />
-       )}
+               {/* Search Filters - nur für Häuser Tab */}
+        {activeTab === 'houses' && (
+          <SearchFilters
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            selectedHouse={selectedHouse}
+            onHouseChange={setSelectedHouse}
+            selectedStation={selectedStation}
+            onStationChange={setSelectedStation}
+            occupancyFilter={occupancyFilter}
+            onOccupancyFilterChange={setOccupancyFilter}
+            houses={houses.map(h => ({ id: h.id, name: h.name }))}
+            stations={allStations}
+            onClearFilters={clearFilters}
+          />
+        )}
 
        {/* Tab Content */}
        <div className="space-y-6">
@@ -740,74 +899,81 @@ const HouseManagement: React.FC = () => {
 
                  {activeTab === 'assignments' && (
            <div>
-             <h2 className="text-2xl font-semibold text-gray-900 mb-6">Zellen-Zuweisungen</h2>
+             <h2 className="text-2xl font-semibold text-gray-900 mb-6">Insassen ohne Zuweisung</h2>
              <p className="text-gray-600 mb-6">
-               Übersicht aller Insassen-Zuweisungen zu Zellen
+               Übersicht aller Insassen, die noch keiner Zelle zugewiesen sind
              </p>
              
-                            {/* Zuweisungen-Übersicht */}
-               <div className="space-y-6">
-                 {filteredHouses.map((house) => (
-                 <div key={house.id} className="bg-white shadow rounded-lg overflow-hidden">
-                   {/* Haus-Header */}
-                   <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                     <h3 className="text-lg font-semibold text-gray-900">{house.name}</h3>
-                     <p className="text-sm text-gray-600">{house.description}</p>
-                   </div>
-                   
-                   {/* Stationen mit Zuweisungen */}
-                   <div className="divide-y divide-gray-200">
-                     {house.stations.map((station) => {
-                       const assignmentsInStation = station.cells.reduce((total, cell) => 
-                         total + cell.assignments.length, 0
-                       );
-                       
-                       if (assignmentsInStation === 0) return null;
-                       
-                       return (
-                         <div key={station.id} className="px-6 py-4">
-                           <div className="mb-4">
-                             <h4 className="text-md font-medium text-gray-900">{station.name}</h4>
-                             <p className="text-sm text-gray-600">{station.description}</p>
-                           </div>
-                           
-                           {/* Zellen mit Zuweisungen */}
-                                                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                             {station.cells
-                               .filter(cell => cell.assignments.length > 0)
-                               .map((cell) => (
-                                 <DropZone
-                                   key={cell.id}
-                                   cell={cell}
-                                   onDrop={handleDrop}
-                                   onAssign={openAssignmentModal}
-                                 >
-                                   <CellCard
-                                     cell={cell}
-                                     onAssign={openAssignmentModal}
-                                     onRemove={openRemoveModal}
-                                     onTransfer={openTransferModal}
-                                     onDragStart={handleDragStart}
-                                   />
-                                 </DropZone>
-                               ))}
-                           </div>
-                         </div>
-                       );
-                     })}
-                   </div>
-                   
-                   {/* Keine Zuweisungen */}
-                   {house.stations.every(station => 
-                     station.cells.every(cell => cell.assignments.length === 0)
-                   ) && (
-                     <div className="px-6 py-8 text-center">
-                       <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                       <p className="text-gray-500">Keine Zuweisungen in diesem Haus</p>
-                     </div>
-                   )}
+             {/* Unzugewiesene Insassen */}
+             <div className="bg-white shadow rounded-lg">
+                               <div className="px-6 py-4 border-b border-gray-200">
+                  <div>
+                    <p className="text-sm text-gray-600">
+                      {loadingUnassigned ? 'Lade...' : `${unassignedInmates.length} Insassen ohne Zuweisung`}
+                    </p>
+                  </div>
+                </div>
+               
+               {loadingUnassigned ? (
+                 <div className="px-6 py-8 text-center">
+                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                   <p className="text-gray-500">Lade unzugewiesene Insassen...</p>
                  </div>
-               ))}
+               ) : unassignedInmates.length === 0 ? (
+                 <div className="px-6 py-8 text-center">
+                   <User className="h-12 w-12 text-green-500 mx-auto mb-4" />
+                   <p className="text-gray-900 font-medium mb-2">Alle Insassen sind zugewiesen!</p>
+                   <p className="text-gray-500">Es gibt keine Insassen ohne Zellen-Zuweisung.</p>
+                 </div>
+                               ) : (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                                             <thead className="bg-gray-50">
+                         <tr>
+                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                             Name
+                           </th>
+                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                             Benutzername
+                           </th>
+                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                             Aufnahmedatum
+                           </th>
+                           <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                             Aktion
+                           </th>
+                         </tr>
+                       </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {unassignedInmates.map((inmate) => (
+                          <tr key={inmate.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900">
+                                {inmate.firstName} {inmate.lastName}
+                              </div>
+                            </td>
+                                                         <td className="px-6 py-4 whitespace-nowrap">
+                               <div className="text-sm text-gray-600">{inmate.username}</div>
+                             </td>
+                                                         <td className="px-6 py-4 whitespace-nowrap">
+                               <div className="text-sm text-gray-500">
+                                 {new Date(inmate.createdAt).toLocaleDateString('de-DE')}
+                               </div>
+                             </td>
+                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                             <button
+                                 onClick={() => openUnassignedAssignmentModal(inmate)}
+                                 className="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-md text-sm font-medium transition-colors"
+                               >
+                                 Zuweisen
+                               </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+               )}
              </div>
            </div>
          )}
@@ -829,13 +995,20 @@ const HouseManagement: React.FC = () => {
           onRemove={handleRemoveAssignment}
         />
         
-        <TransferModal
-          isOpen={transferModalOpen}
-          onClose={() => setTransferModalOpen(false)}
-          assignment={selectedAssignment}
-          currentCell={selectedCell}
-          onTransfer={handleTransfer}
-        />
+                 <TransferModal
+           isOpen={transferModalOpen}
+           onClose={() => setTransferModalOpen(false)}
+           assignment={selectedAssignment}
+           currentCell={selectedCell}
+           onTransfer={handleTransfer}
+         />
+         
+         <UnassignedInmateAssignmentModal
+           isOpen={unassignedAssignmentModalOpen}
+           onClose={() => setUnassignedAssignmentModalOpen(false)}
+           inmate={selectedUnassignedInmate}
+           onAssign={handleUnassignedAssignment}
+         />
      </div>
    );
  };

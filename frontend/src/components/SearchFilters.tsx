@@ -115,10 +115,9 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="all">Alle Zellen</option>
-            <option value="available">Freie Zellen</option>
-            <option value="occupied">Belegte Zellen</option>
-            <option value="full">Voll belegte Zellen</option>
+            <option value="empty">Freie Zellen</option>
             <option value="partial">Teilweise belegte Zellen</option>
+            <option value="full">Belegte Zellen</option>
           </select>
         </div>
       </div>
@@ -163,10 +162,9 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
             {occupancyFilter !== 'all' && (
               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
                 Belegung: {
-                  occupancyFilter === 'available' ? 'Frei' :
-                  occupancyFilter === 'occupied' ? 'Belegt' :
-                  occupancyFilter === 'full' ? 'Voll' :
-                  occupancyFilter === 'partial' ? 'Teilweise' : ''
+                  occupancyFilter === 'empty' ? 'Frei' :
+                  occupancyFilter === 'partial' ? 'Teilweise belegt' :
+                  occupancyFilter === 'full' ? 'Belegt' : ''
                 }
                 <button
                   onClick={() => onOccupancyFilterChange('all')}
