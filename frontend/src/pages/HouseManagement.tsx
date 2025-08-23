@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Building, Users, MapPin, Home, Plus, X, User, ArrowRight } from 'lucide-react';
+import { Building, Users, MapPin, Home, Plus, X, User, ArrowRight, AlertCircle } from 'lucide-react';
 import CellAssignmentModal from '../components/CellAssignmentModal';
 import RemoveAssignmentModal from '../components/RemoveAssignmentModal';
 import SearchFilters from '../components/SearchFilters';
@@ -35,6 +35,14 @@ interface Cell {
       username: string;
     };
   }[];
+  station?: {
+    id: number;
+    name: string;
+    house: {
+      id: number;
+      name: string;
+    };
+  };
 }
 
 interface Station {
@@ -60,6 +68,7 @@ const HouseManagement: React.FC = () => {
   const [removeModalOpen, setRemoveModalOpen] = useState(false);
   const [transferModalOpen, setTransferModalOpen] = useState(false);
   const [unassignedAssignmentModalOpen, setUnassignedAssignmentModalOpen] = useState(false);
+  const [autoAssignmentModalOpen, setAutoAssignmentModalOpen] = useState(false);
   const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
   const [selectedAssignment, setSelectedAssignment] = useState<any>(null);
   const [selectedUnassignedInmate, setSelectedUnassignedInmate] = useState<any>(null);
@@ -73,6 +82,10 @@ const HouseManagement: React.FC = () => {
   // Unassigned Inmates States
   const [unassignedInmates, setUnassignedInmates] = useState<any[]>([]);
   const [loadingUnassigned, setLoadingUnassigned] = useState(false);
+  
+  // Result Modal States
+  const [resultModalOpen, setResultModalOpen] = useState(false);
+  const [resultData, setResultData] = useState<{ successCount: number; errorCount: number; message: string } | null>(null);
 
   // Prüfe Admin-Berechtigung
   const userGroups = user?.groups?.map(g => g.name) || [];
@@ -218,8 +231,32 @@ const HouseManagement: React.FC = () => {
 
   // Modal öffnen für Verlegung
   const openTransferModal = (assignment: any, cell: Cell) => {
+    // Finde die vollständigen Zellendaten mit Station-Informationen
+    let fullCellData: Cell | null = null;
+    
+    for (const house of houses) {
+      for (const station of house.stations) {
+        const foundCell = station.cells.find(c => c.id === cell.id);
+        if (foundCell) {
+          fullCellData = {
+            ...foundCell,
+            station: {
+              id: station.id,
+              name: station.name,
+              house: {
+                id: house.id,
+                name: house.name
+              }
+            }
+          };
+          break;
+        }
+      }
+      if (fullCellData) break;
+    }
+    
     setSelectedAssignment(assignment);
-    setSelectedCell(cell);
+    setSelectedCell(fullCellData || cell);
     setTransferModalOpen(true);
   };
 
@@ -258,6 +295,122 @@ const HouseManagement: React.FC = () => {
       console.error('Zuweisung Fehler:', err);
       throw err;
     }
+  };
+
+  // Automatische Zuweisung aller unzugewiesenen Insassen
+  const handleAutoAssignment = async () => {
+    try {
+      console.log('Automatische Zuweisung gestartet für', unassignedInmates.length, 'Insassen');
+
+      // Alle verfügbaren Zellen laden
+      const response = await fetch('/api/houses');
+      if (!response.ok) {
+        throw new Error('Fehler beim Laden der Häuser');
+      }
+
+      const data = await response.json();
+      
+      // Alle verfügbaren Zellen extrahieren (nicht voll belegt)
+      const availableCells: any[] = [];
+      data.houses.forEach((house: any) => {
+        house.stations.forEach((station: any) => {
+          station.cells.forEach((cell: any) => {
+            if (cell.assignments.length < cell.capacity) {
+              availableCells.push({
+                ...cell,
+                station: {
+                  id: station.id,
+                  name: station.name,
+                  house: {
+                    id: house.id,
+                    name: house.name
+                  }
+                }
+              });
+            }
+          });
+        });
+      });
+
+      // Zellen nach verfügbaren Plätzen sortieren (meiste Plätze zuerst)
+      availableCells.sort((a, b) => {
+        const aAvailable = a.capacity - a.assignments.length;
+        const bAvailable = b.capacity - b.assignments.length;
+        return bAvailable - aAvailable;
+      });
+
+      console.log('Verfügbare Zellen:', availableCells.length);
+
+      // Jeden unzugewiesenen Insassen einer verfügbaren Zelle zuweisen
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (const inmate of unassignedInmates) {
+        // Finde eine passende Zelle
+        const suitableCell = availableCells.find(cell => 
+          cell.assignments.length < cell.capacity
+        );
+
+        if (suitableCell) {
+          try {
+            const assignmentResponse = await fetch(`/api/houses/cells/${suitableCell.id}/assignments`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ 
+                userId: inmate.id, 
+                notes: 'Automatische Zuweisung' 
+              }),
+            });
+
+            if (assignmentResponse.ok) {
+              successCount++;
+              // Zelle als belegt markieren
+              suitableCell.assignments.push({ id: Date.now() });
+            } else {
+              errorCount++;
+              console.error(`Fehler bei Zuweisung von ${inmate.firstName} ${inmate.lastName}`);
+            }
+          } catch (err) {
+            errorCount++;
+            console.error(`Fehler bei Zuweisung von ${inmate.firstName} ${inmate.lastName}:`, err);
+          }
+        } else {
+          errorCount++;
+          console.error(`Keine verfügbare Zelle für ${inmate.firstName} ${inmate.lastName}`);
+        }
+      }
+
+      console.log(`Automatische Zuweisung abgeschlossen: ${successCount} erfolgreich, ${errorCount} Fehler`);
+
+      // Daten neu laden
+      await fetchHouses();
+      await fetchUnassignedInmates();
+
+             // Modal schließen
+       setAutoAssignmentModalOpen(false);
+
+       // Ergebnis-Dialog anzeigen
+       let message = '';
+       if (successCount > 0) {
+         message = `${successCount} Insassen wurden erfolgreich zugewiesen.`;
+         if (errorCount > 0) {
+           message += ` ${errorCount} Zuweisungen fehlgeschlagen.`;
+         }
+       } else {
+         message = 'Keine Insassen konnten zugewiesen werden.';
+       }
+       
+       setResultData({ successCount, errorCount, message });
+       setResultModalOpen(true);
+
+     } catch (err) {
+       console.error('Automatische Zuweisung Fehler:', err);
+       const errorMessage = 'Fehler bei der automatischen Zuweisung: ' + (err instanceof Error ? err.message : 'Unbekannter Fehler');
+       setResultData({ successCount: 0, errorCount: unassignedInmates.length, message: errorMessage });
+       setResultModalOpen(true);
+     }
   };
 
   // Verlegung durchführen
@@ -622,17 +775,17 @@ const HouseManagement: React.FC = () => {
             <Building className="h-4 w-4 inline mr-2" />
             Häuser
           </button>
-          <button
-            onClick={() => setActiveTab('assignments')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'assignments'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            <Users className="h-4 w-4 inline mr-2" />
-            Zuweisungen
-          </button>
+                     <button
+             onClick={() => setActiveTab('assignments')}
+             className={`py-2 px-1 border-b-2 font-medium text-sm ${
+               activeTab === 'assignments'
+                 ? 'border-blue-500 text-blue-600'
+                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+             }`}
+           >
+             <Users className="h-4 w-4 inline mr-2" />
+             Ausstehende Zuweisungen
+           </button>
         </nav>
       </div>
 
@@ -907,10 +1060,19 @@ const HouseManagement: React.FC = () => {
              {/* Unzugewiesene Insassen */}
              <div className="bg-white shadow rounded-lg">
                                <div className="px-6 py-4 border-b border-gray-200">
-                  <div>
-                    <p className="text-sm text-gray-600">
-                      {loadingUnassigned ? 'Lade...' : `${unassignedInmates.length} Insassen ohne Zuweisung`}
-                    </p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600">
+                        {loadingUnassigned ? 'Lade...' : `${unassignedInmates.length} Insassen ohne Zuweisung`}
+                      </p>
+                    </div>
+                                         <button
+                       onClick={() => setAutoAssignmentModalOpen(true)}
+                       disabled={loadingUnassigned || unassignedInmates.length === 0}
+                       className="px-3 py-1 text-sm bg-blue-700 text-white rounded hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                     >
+                       Automatische Zuweisung
+                     </button>
                   </div>
                 </div>
                
@@ -1003,12 +1165,153 @@ const HouseManagement: React.FC = () => {
            onTransfer={handleTransfer}
          />
          
-         <UnassignedInmateAssignmentModal
-           isOpen={unassignedAssignmentModalOpen}
-           onClose={() => setUnassignedAssignmentModalOpen(false)}
-           inmate={selectedUnassignedInmate}
-           onAssign={handleUnassignedAssignment}
-         />
+                   <UnassignedInmateAssignmentModal
+            isOpen={unassignedAssignmentModalOpen}
+            onClose={() => setUnassignedAssignmentModalOpen(false)}
+            inmate={selectedUnassignedInmate}
+            onAssign={handleUnassignedAssignment}
+          />
+          
+                     {/* Automatische Zuweisung Bestätigungs-Dialog */}
+           {autoAssignmentModalOpen && (
+             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+               <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+                 {/* Header */}
+                 <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                   <div>
+                     <h2 className="text-lg font-semibold text-gray-900">
+                       Automatische Zuweisung
+                     </h2>
+                     <p className="text-sm text-gray-600 mt-1">
+                       {unassignedInmates.length} Insassen ohne Zuweisung
+                     </p>
+                   </div>
+                   <button
+                     onClick={() => setAutoAssignmentModalOpen(false)}
+                     className="text-gray-400 hover:text-gray-600"
+                   >
+                     <X className="h-6 w-6" />
+                   </button>
+                 </div>
+
+                 {/* Content */}
+                 <div className="p-6">
+                   <div className="mb-6">
+                     <div className="flex items-center mb-4">
+                       <Users className="h-8 w-8 text-green-600 mr-3" />
+                       <div>
+                         <h3 className="text-lg font-medium text-gray-900">
+                           Alle Insassen automatisch zuweisen?
+                         </h3>
+                         <p className="text-sm text-gray-600 mt-1">
+                           Möchten Sie alle {unassignedInmates.length} Insassen ohne Zuweisung automatisch zu verfügbaren Zellen zuweisen?
+                         </p>
+                       </div>
+                     </div>
+                     
+                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                       <div className="flex items-center text-yellow-800 text-sm">
+                         <AlertCircle className="h-4 w-4 mr-2" />
+                         <div>
+                           <p className="font-medium">Hinweis:</p>
+                           <p>Die Zuweisung erfolgt automatisch nach verfügbaren Plätzen. Zellen mit mehr freien Plätzen werden zuerst belegt.</p>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+
+                   {/* Buttons */}
+                   <div className="flex items-center justify-end space-x-3">
+                     <button
+                       onClick={() => setAutoAssignmentModalOpen(false)}
+                       className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:ring-2 focus:ring-gray-500"
+                     >
+                       Abbrechen
+                     </button>
+                     <button
+                       onClick={handleAutoAssignment}
+                       className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 flex items-center"
+                     >
+                       <Users className="h-4 w-4 mr-2" />
+                       Alle zuweisen
+                     </button>
+                   </div>
+                 </div>
+               </div>
+             </div>
+           )}
+
+           {/* Ergebnis-Dialog */}
+           {resultModalOpen && resultData && (
+             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+               <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+                 {/* Header */}
+                 <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                   <div>
+                     <h2 className="text-lg font-semibold text-gray-900">
+                       Zuweisung abgeschlossen
+                     </h2>
+                     <p className="text-sm text-gray-600 mt-1">
+                       Ergebnis der automatischen Zuweisung
+                     </p>
+                   </div>
+                   <button
+                     onClick={() => setResultModalOpen(false)}
+                     className="text-gray-400 hover:text-gray-600"
+                   >
+                     <X className="h-6 w-6" />
+                   </button>
+                 </div>
+
+                 {/* Content */}
+                 <div className="p-6">
+                   <div className="mb-6">
+                     <div className="flex items-center mb-4">
+                       {resultData.successCount > 0 ? (
+                         <Users className="h-8 w-8 text-green-600 mr-3" />
+                       ) : (
+                         <AlertCircle className="h-8 w-8 text-red-600 mr-3" />
+                       )}
+                       <div>
+                         <h3 className="text-lg font-medium text-gray-900">
+                           {resultData.successCount > 0 ? 'Zuweisung erfolgreich' : 'Zuweisung fehlgeschlagen'}
+                         </h3>
+                         <p className="text-sm text-gray-600 mt-1">
+                           {resultData.message}
+                         </p>
+                       </div>
+                     </div>
+                     
+                     {/* Statistiken */}
+                     <div className="grid grid-cols-2 gap-4">
+                       <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                         <div className="text-center">
+                           <div className="text-2xl font-bold text-green-600">{resultData.successCount}</div>
+                           <div className="text-sm text-green-700">Erfolgreich</div>
+                         </div>
+                       </div>
+                       <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                         <div className="text-center">
+                           <div className="text-2xl font-bold text-red-600">{resultData.errorCount}</div>
+                           <div className="text-sm text-red-700">Fehlgeschlagen</div>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+
+                   {/* Buttons */}
+                   <div className="flex items-center justify-end">
+                     <button
+                       onClick={() => setResultModalOpen(false)}
+                       className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500"
+                     >
+                       Schließen
+                     </button>
+                   </div>
+                 </div>
+               </div>
+             </div>
+           )}
      </div>
    );
  };

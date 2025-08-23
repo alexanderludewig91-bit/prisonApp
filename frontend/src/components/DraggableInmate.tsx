@@ -71,9 +71,7 @@ const DraggableInmate: React.FC<DraggableInmateProps> = ({
              <X className="h-3 w-3" />
            </button>
          )}
-         <div className="text-xs text-gray-400 group-hover:text-gray-600 transition-colors">
-           Ziehen zum Verlegen
-         </div>
+
        </div>
     </div>
   );

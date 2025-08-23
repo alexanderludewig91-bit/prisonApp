@@ -159,7 +159,7 @@ const TransferModal: React.FC<TransferModalProps> = ({
                 <div className="font-medium text-gray-900">{currentCell.number}</div>
                 <div className="text-sm text-gray-600">{currentCell.description}</div>
                 <div className="text-xs text-gray-500">
-                  {currentCell.station.name} - {currentCell.station.house.name}
+                  {currentCell.station?.name || 'Unbekannte Station'} - {currentCell.station?.house?.name || 'Unbekanntes Haus'}
                 </div>
               </div>
               <div className="text-right">
