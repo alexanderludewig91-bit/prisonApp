@@ -88,6 +88,115 @@ const AdminDashboard: React.FC = () => {
   const [userSearch, setUserSearch] = useState('')
   const [userStatusFilter, setUserStatusFilter] = useState('')
   
+  // Insassen hinzufügen Modal State
+  const [showAddInmateModal, setShowAddInmateModal] = useState(false)
+  const [newInmateData, setNewInmateData] = useState({
+    firstName: '',
+    lastName: '',
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  })
+  
+  // Validierungsfehler State
+  const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({})
+  const [editValidationErrors, setEditValidationErrors] = useState<{[key: string]: string}>({})
+  
+  // E-Mail-Validierung
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+  
+  // Validierungsfunktion
+  const validateInmateData = () => {
+    const errors: {[key: string]: string} = {}
+    
+    // Vorname validieren
+    if (!newInmateData.firstName.trim()) {
+      errors.firstName = 'Vorname ist erforderlich'
+    } else if (newInmateData.firstName.trim().length < 1) {
+      errors.firstName = 'Vorname muss mindestens 1 Zeichen lang sein'
+    }
+    
+    // Nachname validieren
+    if (!newInmateData.lastName.trim()) {
+      errors.lastName = 'Nachname ist erforderlich'
+    } else if (newInmateData.lastName.trim().length < 1) {
+      errors.lastName = 'Nachname muss mindestens 1 Zeichen lang sein'
+    }
+    
+    // Benutzername validieren
+    if (!newInmateData.username.trim()) {
+      errors.username = 'Benutzername ist erforderlich'
+    } else if (newInmateData.username.trim().length < 3) {
+      errors.username = 'Benutzername muss mindestens 3 Zeichen lang sein'
+    }
+    
+    // E-Mail validieren
+    if (!newInmateData.email.trim()) {
+      errors.email = 'E-Mail-Adresse ist erforderlich'
+    } else if (!isValidEmail(newInmateData.email.trim())) {
+      errors.email = 'Bitte geben Sie eine gültige E-Mail-Adresse ein'
+    }
+    
+    // Passwort validieren
+    if (!newInmateData.password) {
+      errors.password = 'Passwort ist erforderlich'
+    } else if (newInmateData.password.length < 6) {
+      errors.password = 'Passwort muss mindestens 6 Zeichen lang sein'
+    }
+    
+    // Passwort-Bestätigung validieren
+    if (!newInmateData.confirmPassword) {
+      errors.confirmPassword = 'Passwort-Bestätigung ist erforderlich'
+    } else if (newInmateData.password !== newInmateData.confirmPassword) {
+      errors.confirmPassword = 'Passwörter stimmen nicht überein'
+    }
+    
+    setValidationErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+  
+  // Validierungsfunktion für Benutzer-Bearbeitung
+  const validateEditUserData = () => {
+    const errors: {[key: string]: string} = {}
+    
+    if (!userToEdit) return false
+    
+    // Vorname validieren
+    if (!userToEdit.firstName.trim()) {
+      errors.firstName = 'Vorname ist erforderlich'
+    } else if (userToEdit.firstName.trim().length < 1) {
+      errors.firstName = 'Vorname muss mindestens 1 Zeichen lang sein'
+    }
+    
+    // Nachname validieren
+    if (!userToEdit.lastName.trim()) {
+      errors.lastName = 'Nachname ist erforderlich'
+    } else if (userToEdit.lastName.trim().length < 1) {
+      errors.lastName = 'Nachname muss mindestens 1 Zeichen lang sein'
+    }
+    
+    // Benutzername validieren
+    if (!userToEdit.username.trim()) {
+      errors.username = 'Benutzername ist erforderlich'
+    } else if (userToEdit.username.trim().length < 3) {
+      errors.username = 'Benutzername muss mindestens 3 Zeichen lang sein'
+    }
+    
+    // E-Mail validieren
+    if (!userToEdit.email.trim()) {
+      errors.email = 'E-Mail-Adresse ist erforderlich'
+    } else if (!isValidEmail(userToEdit.email.trim())) {
+      errors.email = 'Bitte geben Sie eine gültige E-Mail-Adresse ein'
+    }
+    
+    setEditValidationErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+  
   // Mitglieder-Tabelle State
   const [memberSearch, setMemberSearch] = useState('')
   const [memberFilters, setMemberFilters] = useState({
@@ -262,6 +371,55 @@ const AdminDashboard: React.FC = () => {
     }
   }
 
+  const handleAddInmate = async () => {
+    try {
+      // Client-seitige Validierung
+      if (!validateInmateData()) {
+        setMessage({ type: 'error', text: 'Bitte korrigieren Sie die Validierungsfehler' })
+        return
+      }
+
+      // API-Aufruf
+      await api.post('/users/inmates', newInmateData)
+      
+      // Erfolg
+      setMessage({ type: 'success', text: 'Insasse erfolgreich erstellt' })
+      setShowAddInmateModal(false)
+      
+      // Formular zurücksetzen
+      setNewInmateData({
+        firstName: '',
+        lastName: '',
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
+      })
+      setValidationErrors({})
+      
+      // Benutzerliste aktualisieren
+      fetchUsers()
+      
+    } catch (error: any) {
+      console.error('Fehler beim Erstellen des Insassen:', error)
+      console.error('Response data:', error.response?.data)
+      console.error('Request data:', newInmateData)
+      
+      if (error.response?.data?.details) {
+        // Validierungsfehler vom Backend
+        console.error('Validation details:', error.response.data.details)
+        const validationErrors = error.response.data.details
+          .map((err: any) => err.msg)
+          .join(', ')
+        setMessage({ type: 'error', text: `Validierungsfehler: ${validationErrors}` })
+      } else if (error.response?.data?.error) {
+        setMessage({ type: 'error', text: error.response.data.error })
+      } else {
+        setMessage({ type: 'error', text: 'Fehler beim Erstellen des Insassen' })
+      }
+    }
+  }
+
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'INMATE': return 'bg-red-100 text-red-800'
@@ -407,18 +565,9 @@ const AdminDashboard: React.FC = () => {
   const handleSaveUser = async () => {
     if (!userToEdit) return
     
-    // Frontend-Validierung
-    if (!userToEdit.firstName.trim() || !userToEdit.lastName.trim() || !userToEdit.username.trim() || !userToEdit.email.trim()) {
-      setMessage({ type: 'error', text: 'Alle Felder müssen ausgefüllt werden!' })
-      setTimeout(() => setMessage(null), 5000)
-      return
-    }
-    
-    // E-Mail-Validierung
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(userToEdit.email)) {
-      setMessage({ type: 'error', text: 'Bitte geben Sie eine gültige E-Mail-Adresse ein!' })
-      setTimeout(() => setMessage(null), 5000)
+    // Client-seitige Validierung
+    if (!validateEditUserData()) {
+      setMessage({ type: 'error', text: 'Bitte korrigieren Sie die Validierungsfehler' })
       return
     }
     
@@ -439,6 +588,7 @@ const AdminDashboard: React.FC = () => {
       // Modal schließen
       setShowEditUserModal(false)
       setUserToEdit(null)
+      setEditValidationErrors({})
       
       // Nachricht nach 3 Sekunden ausblenden
       setTimeout(() => setMessage(null), 3000)
@@ -1199,18 +1349,29 @@ const AdminDashboard: React.FC = () => {
                </div>
              </div>
              
-             <div className="flex items-center justify-between mb-4">
-               <h3 className="text-lg font-semibold text-gray-900">
-                 {activeUserTab === 'inmates' ? 'Insassen verwalten' : 
-                  activeUserTab === 'allUsers' ? 'Verwaltungsbenutzer verwalten' :
-                  'Admins verwalten'}
-               </h3>
-               <p className="text-sm text-gray-600">
-                 {activeUserTab === 'inmates' ? 'Verwalten Sie die Benutzerkonten der Insassen' :
-                  activeUserTab === 'allUsers' ? 'Alle Benutzer außer Insassen verwalten' :
-                  'Admin-Benutzer mit vollen Systemrechten verwalten'}
-               </p>
-             </div>
+                            <div className="flex items-center justify-between mb-4">
+                 <div>
+                   <h3 className="text-lg font-semibold text-gray-900">
+                     {activeUserTab === 'inmates' ? 'Insassen verwalten' : 
+                      activeUserTab === 'allUsers' ? 'Verwaltungsbenutzer verwalten' :
+                      'Admins verwalten'}
+                   </h3>
+                   <p className="text-sm text-gray-600">
+                     {activeUserTab === 'inmates' ? 'Verwalten Sie die Benutzerkonten der Insassen' :
+                      activeUserTab === 'allUsers' ? 'Alle Benutzer außer Insassen verwalten' :
+                      'Admin-Benutzer mit vollen Systemrechten verwalten'}
+                   </p>
+                 </div>
+                 {activeUserTab === 'inmates' && (
+                   <button
+                     onClick={() => setShowAddInmateModal(true)}
+                     className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+                   >
+                     <UserPlus className="w-4 h-4" />
+                     Insassen hinzufügen
+                   </button>
+                 )}
+               </div>
 
                                                                              {/* Benutzer-Tabelle */}
                                                          {activeUserTab === 'allUsers' || activeUserTab === 'admins' ? (
@@ -1413,9 +1574,19 @@ const AdminDashboard: React.FC = () => {
                      <input
                        type="text"
                        value={userToEdit.firstName}
-                       onChange={(e) => setUserToEdit({...userToEdit, firstName: e.target.value})}
-                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       onChange={(e) => {
+                         setUserToEdit({...userToEdit, firstName: e.target.value})
+                         if (editValidationErrors.firstName) {
+                           setEditValidationErrors({...editValidationErrors, firstName: ''})
+                         }
+                       }}
+                       className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                         editValidationErrors.firstName ? 'border-red-500' : 'border-gray-300'
+                       }`}
                      />
+                     {editValidationErrors.firstName && (
+                       <p className="mt-1 text-sm text-red-600">{editValidationErrors.firstName}</p>
+                     )}
                    </div>
                    <div>
                      <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1424,9 +1595,19 @@ const AdminDashboard: React.FC = () => {
                      <input
                        type="text"
                        value={userToEdit.lastName}
-                       onChange={(e) => setUserToEdit({...userToEdit, lastName: e.target.value})}
-                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       onChange={(e) => {
+                         setUserToEdit({...userToEdit, lastName: e.target.value})
+                         if (editValidationErrors.lastName) {
+                           setEditValidationErrors({...editValidationErrors, lastName: ''})
+                         }
+                       }}
+                       className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                         editValidationErrors.lastName ? 'border-red-500' : 'border-gray-300'
+                       }`}
                      />
+                     {editValidationErrors.lastName && (
+                       <p className="mt-1 text-sm text-red-600">{editValidationErrors.lastName}</p>
+                     )}
                    </div>
                    <div>
                      <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1435,9 +1616,19 @@ const AdminDashboard: React.FC = () => {
                      <input
                        type="text"
                        value={userToEdit.username}
-                       onChange={(e) => setUserToEdit({...userToEdit, username: e.target.value})}
-                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       onChange={(e) => {
+                         setUserToEdit({...userToEdit, username: e.target.value})
+                         if (editValidationErrors.username) {
+                           setEditValidationErrors({...editValidationErrors, username: ''})
+                         }
+                       }}
+                       className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                         editValidationErrors.username ? 'border-red-500' : 'border-gray-300'
+                       }`}
                      />
+                     {editValidationErrors.username && (
+                       <p className="mt-1 text-sm text-red-600">{editValidationErrors.username}</p>
+                     )}
                    </div>
                    <div>
                      <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1446,9 +1637,19 @@ const AdminDashboard: React.FC = () => {
                      <input
                        type="email"
                        value={userToEdit.email}
-                       onChange={(e) => setUserToEdit({...userToEdit, email: e.target.value})}
-                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       onChange={(e) => {
+                         setUserToEdit({...userToEdit, email: e.target.value})
+                         if (editValidationErrors.email) {
+                           setEditValidationErrors({...editValidationErrors, email: ''})
+                         }
+                       }}
+                       className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                         editValidationErrors.email ? 'border-red-500' : 'border-gray-300'
+                       }`}
                      />
+                     {editValidationErrors.email && (
+                       <p className="mt-1 text-sm text-red-600">{editValidationErrors.email}</p>
+                     )}
                    </div>
                                                             <div>
                        <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1557,6 +1758,7 @@ const AdminDashboard: React.FC = () => {
                          setUserToEdit(null)
                          setShowNewPassword(false)
                          setShowConfirmPassword(false)
+                         setEditValidationErrors({})
                        }}
                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
                      >
@@ -1755,10 +1957,189 @@ const AdminDashboard: React.FC = () => {
                 </div>
               </div>
             </div>
-          )}
-        </div>
-      </div>
-    )
-  }
+           )}
+
+           {/* Modal für Insassen hinzufügen */}
+           {showAddInmateModal && (
+             <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+               <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                 <div className="mt-3">
+                   <h3 className="text-lg font-medium text-gray-900 mb-4">
+                     Neuen Insassen hinzufügen
+                   </h3>
+                   <div className="space-y-4">
+                                      <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-1">
+                     Vorname
+                   </label>
+                   <input
+                     type="text"
+                     value={newInmateData.firstName}
+                     onChange={(e) => {
+                       setNewInmateData({...newInmateData, firstName: e.target.value})
+                       // Validierungsfehler beim Tippen entfernen
+                       if (validationErrors.firstName) {
+                         setValidationErrors({...validationErrors, firstName: ''})
+                       }
+                     }}
+                     className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                       validationErrors.firstName ? 'border-red-500' : 'border-gray-300'
+                     }`}
+                   />
+                   {validationErrors.firstName && (
+                     <p className="mt-1 text-sm text-red-600">{validationErrors.firstName}</p>
+                   )}
+                 </div>
+                                      <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-1">
+                     Nachname
+                   </label>
+                   <input
+                     type="text"
+                     value={newInmateData.lastName}
+                     onChange={(e) => {
+                       setNewInmateData({...newInmateData, lastName: e.target.value})
+                       if (validationErrors.lastName) {
+                         setValidationErrors({...validationErrors, lastName: ''})
+                       }
+                     }}
+                     className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                       validationErrors.lastName ? 'border-red-500' : 'border-gray-300'
+                     }`}
+                   />
+                   {validationErrors.lastName && (
+                     <p className="mt-1 text-sm text-red-600">{validationErrors.lastName}</p>
+                   )}
+                 </div>
+                                      <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-1">
+                     Benutzername
+                   </label>
+                   <input
+                     type="text"
+                     value={newInmateData.username}
+                     onChange={(e) => {
+                       setNewInmateData({...newInmateData, username: e.target.value})
+                       if (validationErrors.username) {
+                         setValidationErrors({...validationErrors, username: ''})
+                       }
+                     }}
+                     className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                       validationErrors.username ? 'border-red-500' : 'border-gray-300'
+                     }`}
+                   />
+                   {validationErrors.username && (
+                     <p className="mt-1 text-sm text-red-600">{validationErrors.username}</p>
+                   )}
+                 </div>
+                                      <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-1">
+                     E-Mail
+                   </label>
+                   <input
+                     type="email"
+                     value={newInmateData.email}
+                     onChange={(e) => {
+                       setNewInmateData({...newInmateData, email: e.target.value})
+                       if (validationErrors.email) {
+                         setValidationErrors({...validationErrors, email: ''})
+                       }
+                     }}
+                     className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                       validationErrors.email ? 'border-red-500' : 'border-gray-300'
+                     }`}
+                   />
+                   {validationErrors.email && (
+                     <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
+                   )}
+                 </div>
+                                      <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-1">
+                     Passwort
+                   </label>
+                   <input
+                     type="password"
+                     value={newInmateData.password}
+                     onChange={(e) => {
+                       setNewInmateData({...newInmateData, password: e.target.value})
+                       if (validationErrors.password) {
+                         setValidationErrors({...validationErrors, password: ''})
+                       }
+                       // Passwort-Bestätigung auch validieren
+                       if (validationErrors.confirmPassword && e.target.value !== newInmateData.confirmPassword) {
+                         setValidationErrors({...validationErrors, confirmPassword: 'Passwörter stimmen nicht überein'})
+                       } else if (validationErrors.confirmPassword) {
+                         setValidationErrors({...validationErrors, confirmPassword: ''})
+                       }
+                     }}
+                     className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                       validationErrors.password ? 'border-red-500' : 'border-gray-300'
+                     }`}
+                     placeholder="Mindestens 6 Zeichen"
+                   />
+                   {validationErrors.password ? (
+                     <p className="mt-1 text-sm text-red-600">{validationErrors.password}</p>
+                   ) : (
+                     <p className="mt-1 text-xs text-gray-500">
+                       Das Passwort muss mindestens 6 Zeichen lang sein
+                     </p>
+                   )}
+                 </div>
+                                      <div>
+                   <label className="block text-sm font-medium text-gray-700 mb-1">
+                     Passwort bestätigen
+                   </label>
+                   <input
+                     type="password"
+                     value={newInmateData.confirmPassword}
+                     onChange={(e) => {
+                       setNewInmateData({...newInmateData, confirmPassword: e.target.value})
+                       if (validationErrors.confirmPassword) {
+                         setValidationErrors({...validationErrors, confirmPassword: ''})
+                       }
+                     }}
+                     className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                       validationErrors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                     }`}
+                     placeholder="Passwort wiederholen"
+                   />
+                   {validationErrors.confirmPassword && (
+                     <p className="mt-1 text-sm text-red-600">{validationErrors.confirmPassword}</p>
+                   )}
+                 </div>
+                     <div className="flex justify-end space-x-3">
+                       <button
+                                               onClick={() => {
+                        setShowAddInmateModal(false)
+                        setNewInmateData({
+                          firstName: '',
+                          lastName: '',
+                          username: '',
+                          email: '',
+                          password: '',
+                          confirmPassword: ''
+                        })
+                        setValidationErrors({})
+                      }}
+                         className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                       >
+                         Abbrechen
+                       </button>
+                                               <button
+                          onClick={handleAddInmate}
+                          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                        >
+                          Insassen hinzufügen
+                        </button>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+             </div>
+           )}
+         </div>
+       </div>
+     )
+   }
 
 export default AdminDashboard

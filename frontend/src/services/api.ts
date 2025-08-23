@@ -149,4 +149,17 @@ export const removeUserFromGroup = async (userId: number, groupId: number) => {
   return response.data
 }
 
+// Inmate API
+export const createInmate = async (inmateData: {
+  firstName: string
+  lastName: string
+  username: string
+  email: string
+  password: string
+  confirmPassword: string
+}) => {
+  const response = await api.post('/users/inmates', inmateData)
+  return response.data
+}
+
 export default api

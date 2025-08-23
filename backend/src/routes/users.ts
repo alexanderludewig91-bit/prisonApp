@@ -8,6 +8,169 @@ import bcrypt from 'bcryptjs';
 const router = express.Router();
 const prisma = new PrismaClient();
 
+// Neue Route für Inmate-Benutzer (MUSS vor /:id stehen!)
+router.get('/inmates', async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      where: {
+        groups: {
+          some: {
+            group: {
+              category: 'INMATE'
+            }
+          }
+        }
+      },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        isActive: true,
+        createdAt: true,
+        groups: {
+          include: {
+            group: {
+              select: {
+                id: true,
+                name: true,
+                description: true,
+                category: true,
+                permissions: true,
+                isActive: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    })
+
+    res.json({ users })
+  } catch (error) {
+    console.error('Fehler beim Laden der Inmate-Benutzer:', error)
+    res.status(500).json({ error: 'Fehler beim Laden der Inmate-Benutzer' })
+  }
+})
+
+// Neue Route für das Erstellen von Insassen (MUSS vor /:id stehen!)
+router.post('/inmates', [
+  body('firstName').trim().isLength({ min: 1 }).withMessage('Vorname ist erforderlich'),
+  body('lastName').trim().isLength({ min: 1 }).withMessage('Nachname ist erforderlich'),
+  body('username').trim().isLength({ min: 3 }).withMessage('Benutzername muss mindestens 3 Zeichen lang sein'),
+  body('email').isEmail().withMessage('Gültige E-Mail-Adresse ist erforderlich'),
+  body('password').isLength({ min: 6 }).withMessage('Passwort muss mindestens 6 Zeichen lang sein'),
+  body('confirmPassword').custom((value, { req }) => {
+    if (value !== req.body.password) {
+      throw new Error('Passwörter stimmen nicht überein');
+    }
+    return true;
+  })
+], async (req: Request, res: Response) => {
+  try {
+    // Validierung prüfen
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ 
+        error: 'Validierungsfehler', 
+        details: errors.array() 
+      });
+    }
+
+    const { firstName, lastName, username, email, password } = req.body;
+
+    // Prüfen, ob Benutzername bereits existiert
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { username },
+          { email }
+        ]
+      }
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ 
+        error: 'Benutzername oder E-Mail-Adresse bereits vergeben' 
+      });
+    }
+
+    // Passwort hashen
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // PS Inmates Gruppe finden
+    const inmatesGroup = await prisma.group.findFirst({
+      where: { name: 'PS Inmates' }
+    });
+
+    if (!inmatesGroup) {
+      return res.status(500).json({ 
+        error: 'PS Inmates Gruppe nicht gefunden' 
+      });
+    }
+
+    // Benutzer erstellen und zur PS Inmates Gruppe hinzufügen
+    const newUser = await prisma.user.create({
+      data: {
+        username,
+        email,
+        firstName,
+        lastName,
+        password: hashedPassword,
+        isActive: true,
+        groups: {
+          create: {
+            groupId: inmatesGroup.id,
+            role: 'MEMBER'
+          }
+        }
+      },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        isActive: true,
+        createdAt: true,
+        groups: {
+          include: {
+            group: {
+              select: {
+                id: true,
+                name: true,
+                description: true,
+                category: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Admin-Aktion loggen
+    const authReq = req as AuthenticatedRequest;
+    if (authReq.user) {
+      await logAdminActionManually(
+        authReq,
+        'USER_CREATED',
+        'USER',
+        `Neuen Insassen erstellt: ${firstName} ${lastName} (${username})`
+      );
+    }
+
+    res.status(201).json({ 
+      message: 'Insasse erfolgreich erstellt',
+      user: newUser 
+    });
+
+  } catch (error) {
+    console.error('Fehler beim Erstellen des Insassen:', error);
+    res.status(500).json({ error: 'Fehler beim Erstellen des Insassen' });
+  }
+});
+
 // Alle Benutzer abrufen
 router.get('/', async (req: Request, res: Response) => {
   try {
@@ -421,97 +584,5 @@ router.delete('/:id', async (req: AuthenticatedRequest, res: Response) => {
     res.status(500).json({ error: 'Fehler beim Löschen des Benutzers' });
   }
 });
-
-// Neue Route für Staff-Benutzer
-router.get('/staff', async (req, res) => {
-  try {
-    const users = await prisma.user.findMany({
-      where: {
-        groups: {
-          some: {
-            group: {
-              category: 'STAFF'
-            }
-          }
-        }
-      },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        isActive: true,
-        createdAt: true,
-        groups: {
-          include: {
-            group: {
-              select: {
-                id: true,
-                name: true,
-                description: true,
-                category: true,
-                permissions: true,
-                isActive: true
-              }
-            }
-          }
-        }
-      },
-      orderBy: { createdAt: 'desc' }
-    })
-
-    res.json({ users })
-  } catch (error) {
-    console.error('Fehler beim Laden der Staff-Benutzer:', error)
-    res.status(500).json({ error: 'Fehler beim Laden der Staff-Benutzer' })
-  }
-})
-
-// Neue Route für Inmate-Benutzer
-router.get('/inmates', async (req, res) => {
-  try {
-    const users = await prisma.user.findMany({
-      where: {
-        groups: {
-          some: {
-            group: {
-              category: 'INMATE'
-            }
-          }
-        }
-      },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        isActive: true,
-        createdAt: true,
-        groups: {
-          include: {
-            group: {
-              select: {
-                id: true,
-                name: true,
-                description: true,
-                category: true,
-                permissions: true,
-                isActive: true
-              }
-            }
-          }
-        }
-      },
-      orderBy: { createdAt: 'desc' }
-    })
-
-    res.json({ users })
-  } catch (error) {
-    console.error('Fehler beim Laden der Inmate-Benutzer:', error)
-    res.status(500).json({ error: 'Fehler beim Laden der Inmate-Benutzer' })
-  }
-})
 
 export default router;
