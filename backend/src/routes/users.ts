@@ -99,10 +99,11 @@ router.post('/inmates', [
     // Passwort hashen
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // PS Inmates Gruppe finden
-    const inmatesGroup = await prisma.group.findFirst({
-      where: { name: 'PS Inmates' }
-    });
+    // PS Inmates und PS All Users Gruppen finden
+    const [inmatesGroup, allUsersGroup] = await Promise.all([
+      prisma.group.findFirst({ where: { name: 'PS Inmates' } }),
+      prisma.group.findFirst({ where: { name: 'PS All Users' } })
+    ]);
 
     if (!inmatesGroup) {
       return res.status(500).json({ 
@@ -110,7 +111,13 @@ router.post('/inmates', [
       });
     }
 
-    // Benutzer erstellen und zur PS Inmates Gruppe hinzufügen
+    if (!allUsersGroup) {
+      return res.status(500).json({ 
+        error: 'PS All Users Gruppe nicht gefunden' 
+      });
+    }
+
+    // Benutzer erstellen
     const newUser = await prisma.user.create({
       data: {
         username,
@@ -118,14 +125,40 @@ router.post('/inmates', [
         firstName,
         lastName,
         password: hashedPassword,
-        isActive: true,
-        groups: {
-          create: {
-            groupId: inmatesGroup.id,
-            role: 'MEMBER'
-          }
-        }
+        isActive: true
       },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        isActive: true,
+        createdAt: true
+      }
+    });
+
+    // Benutzer zu beiden Gruppen hinzufügen
+    await Promise.all([
+      prisma.userGroup.create({
+        data: {
+          userId: newUser.id,
+          groupId: inmatesGroup.id,
+          role: 'MEMBER'
+        }
+      }),
+      prisma.userGroup.create({
+        data: {
+          userId: newUser.id,
+          groupId: allUsersGroup.id,
+          role: 'MEMBER'
+        }
+      })
+    ]);
+
+    // Benutzer mit Gruppen-Informationen abrufen
+    const userWithGroups = await prisma.user.findUnique({
+      where: { id: newUser.id },
       select: {
         id: true,
         username: true,
@@ -162,12 +195,208 @@ router.post('/inmates', [
 
     res.status(201).json({ 
       message: 'Insasse erfolgreich erstellt',
-      user: newUser 
+      user: userWithGroups 
     });
 
   } catch (error) {
     console.error('Fehler beim Erstellen des Insassen:', error);
     res.status(500).json({ error: 'Fehler beim Erstellen des Insassen' });
+  }
+});
+
+// Neue Route für Admin-Benutzer (MUSS vor /:id stehen!)
+router.get('/admins', async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      where: {
+        groups: {
+          some: {
+            group: {
+              category: 'ADMIN'
+            }
+          }
+        }
+      },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        isActive: true,
+        createdAt: true,
+        groups: {
+          include: {
+            group: {
+              select: {
+                id: true,
+                name: true,
+                description: true,
+                category: true,
+                permissions: true,
+                isActive: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    })
+
+    res.json({ users })
+  } catch (error) {
+    console.error('Fehler beim Laden der Admin-Benutzer:', error)
+    res.status(500).json({ error: 'Fehler beim Laden der Admin-Benutzer' })
+  }
+})
+
+// Neue Route für das Erstellen von Admins (MUSS vor /:id stehen!)
+router.post('/admins', [
+  body('firstName').trim().isLength({ min: 1 }).withMessage('Vorname ist erforderlich'),
+  body('lastName').trim().isLength({ min: 1 }).withMessage('Nachname ist erforderlich'),
+  body('username').trim().isLength({ min: 3 }).withMessage('Benutzername muss mindestens 3 Zeichen lang sein'),
+  body('email').isEmail().withMessage('Gültige E-Mail-Adresse ist erforderlich'),
+  body('password').isLength({ min: 6 }).withMessage('Passwort muss mindestens 6 Zeichen lang sein'),
+  body('confirmPassword').custom((value, { req }) => {
+    if (value !== req.body.password) {
+      throw new Error('Passwörter stimmen nicht überein');
+    }
+    return true;
+  })
+], async (req: Request, res: Response) => {
+  try {
+    // Validierung prüfen
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ 
+        error: 'Validierungsfehler', 
+        details: errors.array() 
+      });
+    }
+
+    const { firstName, lastName, username, email, password } = req.body;
+
+    // Prüfen, ob Benutzername bereits existiert
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { username },
+          { email }
+        ]
+      }
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ 
+        error: 'Benutzername oder E-Mail-Adresse bereits vergeben' 
+      });
+    }
+
+    // Passwort hashen
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // PS Designers und PS All Users Gruppen finden
+    const [designersGroup, allUsersGroup] = await Promise.all([
+      prisma.group.findFirst({ where: { name: 'PS Designers' } }),
+      prisma.group.findFirst({ where: { name: 'PS All Users' } })
+    ]);
+
+    if (!designersGroup) {
+      return res.status(500).json({ 
+        error: 'PS Designers Gruppe nicht gefunden' 
+      });
+    }
+
+    if (!allUsersGroup) {
+      return res.status(500).json({ 
+        error: 'PS All Users Gruppe nicht gefunden' 
+      });
+    }
+
+    // Benutzer erstellen
+    const newUser = await prisma.user.create({
+      data: {
+        username,
+        email,
+        firstName,
+        lastName,
+        password: hashedPassword,
+        isActive: true
+      },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        isActive: true,
+        createdAt: true
+      }
+    });
+
+    // Benutzer zu beiden Gruppen hinzufügen
+    await Promise.all([
+      prisma.userGroup.create({
+        data: {
+          userId: newUser.id,
+          groupId: designersGroup.id,
+          role: 'MEMBER'
+        }
+      }),
+      prisma.userGroup.create({
+        data: {
+          userId: newUser.id,
+          groupId: allUsersGroup.id,
+          role: 'MEMBER'
+        }
+      })
+    ]);
+
+    // Benutzer mit Gruppen-Informationen abrufen
+    const userWithGroups = await prisma.user.findUnique({
+      where: { id: newUser.id },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        isActive: true,
+        createdAt: true,
+        groups: {
+          include: {
+            group: {
+              select: {
+                id: true,
+                name: true,
+                description: true,
+                category: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Admin-Aktion loggen
+    const authReq = req as AuthenticatedRequest;
+    if (authReq.user) {
+      await logAdminActionManually(
+        authReq,
+        'USER_CREATED',
+        'USER',
+        `Neuen Admin erstellt: ${firstName} ${lastName} (${username})`
+      );
+    }
+
+    res.status(201).json({ 
+      message: 'Admin erfolgreich erstellt',
+      user: userWithGroups 
+    });
+
+  } catch (error) {
+    console.error('Fehler beim Erstellen des Admins:', error);
+    res.status(500).json({ error: 'Fehler beim Erstellen des Admins' });
   }
 });
 
@@ -582,6 +811,163 @@ router.delete('/:id', async (req: AuthenticatedRequest, res: Response) => {
   } catch (error) {
     console.error('Fehler beim Löschen des Benutzers:', error);
     res.status(500).json({ error: 'Fehler beim Löschen des Benutzers' });
+  }
+});
+
+// Neue Route für das Erstellen von Verwaltungsbenutzern
+router.post('/staff', [
+  body('firstName').trim().isLength({ min: 1 }).withMessage('Vorname ist erforderlich'),
+  body('lastName').trim().isLength({ min: 1 }).withMessage('Nachname ist erforderlich'),
+  body('username').trim().isLength({ min: 3 }).withMessage('Benutzername muss mindestens 3 Zeichen lang sein'),
+  body('email').isEmail().withMessage('Gültige E-Mail-Adresse ist erforderlich'),
+  body('password').isLength({ min: 6 }).withMessage('Passwort muss mindestens 6 Zeichen lang sein'),
+  body('confirmPassword').custom((value, { req }) => {
+    if (value !== req.body.password) {
+      throw new Error('Passwörter stimmen nicht überein');
+    }
+    return true;
+  }),
+  body('selectedGroup').notEmpty().withMessage('Staff-Gruppe ist erforderlich')
+], async (req: Request, res: Response) => {
+  try {
+    // Validierung prüfen
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ 
+        error: 'Validierungsfehler', 
+        details: errors.array() 
+      });
+    }
+
+    const { firstName, lastName, username, email, password, selectedGroup } = req.body;
+
+    // Prüfen, ob Benutzername bereits existiert
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { username },
+          { email }
+        ]
+      }
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ 
+        error: 'Benutzername oder E-Mail-Adresse bereits vergeben' 
+      });
+    }
+
+    // Passwort hashen
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // PS All Users und ausgewählte Staff-Gruppe finden
+    const [allUsersGroup, staffGroup] = await Promise.all([
+      prisma.group.findFirst({ where: { name: 'PS All Users' } }),
+      prisma.group.findFirst({ where: { id: Number(selectedGroup) } })
+    ]);
+
+    if (!allUsersGroup) {
+      return res.status(500).json({ 
+        error: 'PS All Users Gruppe nicht gefunden' 
+      });
+    }
+
+    if (!staffGroup) {
+      return res.status(500).json({ 
+        error: 'Ausgewählte Staff-Gruppe nicht gefunden' 
+      });
+    }
+
+    if (staffGroup.category !== 'STAFF') {
+      return res.status(400).json({ 
+        error: 'Ausgewählte Gruppe ist keine Staff-Gruppe' 
+      });
+    }
+
+    // Benutzer erstellen
+    const newUser = await prisma.user.create({
+      data: {
+        username,
+        email,
+        firstName,
+        lastName,
+        password: hashedPassword,
+        isActive: true
+      },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        isActive: true,
+        createdAt: true
+      }
+    });
+
+    // Benutzer zu beiden Gruppen hinzufügen
+    await Promise.all([
+      prisma.userGroup.create({
+        data: {
+          userId: newUser.id,
+          groupId: allUsersGroup.id,
+          role: 'MEMBER'
+        }
+      }),
+      prisma.userGroup.create({
+        data: {
+          userId: newUser.id,
+          groupId: staffGroup.id,
+          role: 'MEMBER'
+        }
+      })
+    ]);
+
+    // Benutzer mit Gruppen-Informationen abrufen
+    const userWithGroups = await prisma.user.findUnique({
+      where: { id: newUser.id },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        isActive: true,
+        createdAt: true,
+        groups: {
+          include: {
+            group: {
+              select: {
+                id: true,
+                name: true,
+                description: true,
+                category: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Admin-Aktion loggen
+    const authReq = req as AuthenticatedRequest;
+    if (authReq.user) {
+      await logAdminActionManually(
+        authReq,
+        'USER_CREATED',
+        'USER',
+        `Neuen Verwaltungsbenutzer erstellt: ${firstName} ${lastName} (${username}) in Gruppe ${staffGroup.description}`
+      );
+    }
+
+    res.status(201).json({ 
+      message: 'Verwaltungsbenutzer erfolgreich erstellt',
+      user: userWithGroups 
+    });
+
+  } catch (error) {
+    console.error('Fehler beim Erstellen des Verwaltungsbenutzers:', error);
+    res.status(500).json({ error: 'Fehler beim Erstellen des Verwaltungsbenutzers' });
   }
 });
 

@@ -99,8 +99,33 @@ const AdminDashboard: React.FC = () => {
     confirmPassword: ''
   })
   
+  // Verwaltungsbenutzer hinzufügen Modal State
+  const [showAddStaffModal, setShowAddStaffModal] = useState(false)
+  const [newStaffData, setNewStaffData] = useState({
+    firstName: '',
+    lastName: '',
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    selectedGroup: ''
+  })
+  
+  // Admin hinzufügen Modal State
+  const [showAddAdminModal, setShowAddAdminModal] = useState(false)
+  const [newAdminData, setNewAdminData] = useState({
+    firstName: '',
+    lastName: '',
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  })
+  
   // Validierungsfehler State
   const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({})
+  const [staffValidationErrors, setStaffValidationErrors] = useState<{[key: string]: string}>({})
+  const [adminValidationErrors, setAdminValidationErrors] = useState<{[key: string]: string}>({})
   const [editValidationErrors, setEditValidationErrors] = useState<{[key: string]: string}>({})
   
   // E-Mail-Validierung
@@ -156,6 +181,111 @@ const AdminDashboard: React.FC = () => {
     }
     
     setValidationErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+  
+  // Validierungsfunktion für Admin
+  const validateAdminData = () => {
+    const errors: {[key: string]: string} = {}
+    
+    // Vorname validieren
+    if (!newAdminData.firstName.trim()) {
+      errors.firstName = 'Vorname ist erforderlich'
+    } else if (newAdminData.firstName.trim().length < 1) {
+      errors.firstName = 'Vorname muss mindestens 1 Zeichen lang sein'
+    }
+    
+    // Nachname validieren
+    if (!newAdminData.lastName.trim()) {
+      errors.lastName = 'Nachname ist erforderlich'
+    } else if (newAdminData.lastName.trim().length < 1) {
+      errors.lastName = 'Nachname muss mindestens 1 Zeichen lang sein'
+    }
+    
+    // Benutzername validieren
+    if (!newAdminData.username.trim()) {
+      errors.username = 'Benutzername ist erforderlich'
+    } else if (newAdminData.username.trim().length < 3) {
+      errors.username = 'Benutzername muss mindestens 3 Zeichen lang sein'
+    }
+    
+    // E-Mail validieren
+    if (!newAdminData.email.trim()) {
+      errors.email = 'E-Mail-Adresse ist erforderlich'
+    } else if (!isValidEmail(newAdminData.email.trim())) {
+      errors.email = 'Bitte geben Sie eine gültige E-Mail-Adresse ein'
+    }
+    
+    // Passwort validieren
+    if (!newAdminData.password) {
+      errors.password = 'Passwort ist erforderlich'
+    } else if (newAdminData.password.length < 6) {
+      errors.password = 'Passwort muss mindestens 6 Zeichen lang sein'
+    }
+    
+    // Passwort-Bestätigung validieren
+    if (!newAdminData.confirmPassword) {
+      errors.confirmPassword = 'Passwort-Bestätigung ist erforderlich'
+    } else if (newAdminData.password !== newAdminData.confirmPassword) {
+      errors.confirmPassword = 'Passwörter stimmen nicht überein'
+    }
+    
+    setAdminValidationErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  // Validierungsfunktion für Verwaltungsbenutzer
+  const validateStaffData = () => {
+    const errors: {[key: string]: string} = {}
+    
+    // Vorname validieren
+    if (!newStaffData.firstName.trim()) {
+      errors.firstName = 'Vorname ist erforderlich'
+    } else if (newStaffData.firstName.trim().length < 1) {
+      errors.firstName = 'Vorname muss mindestens 1 Zeichen lang sein'
+    }
+    
+    // Nachname validieren
+    if (!newStaffData.lastName.trim()) {
+      errors.lastName = 'Nachname ist erforderlich'
+    } else if (newStaffData.lastName.trim().length < 1) {
+      errors.lastName = 'Nachname muss mindestens 1 Zeichen lang sein'
+    }
+    
+    // Benutzername validieren
+    if (!newStaffData.username.trim()) {
+      errors.username = 'Benutzername ist erforderlich'
+    } else if (newStaffData.username.trim().length < 3) {
+      errors.username = 'Benutzername muss mindestens 3 Zeichen lang sein'
+    }
+    
+    // E-Mail validieren
+    if (!newStaffData.email.trim()) {
+      errors.email = 'E-Mail-Adresse ist erforderlich'
+    } else if (!isValidEmail(newStaffData.email.trim())) {
+      errors.email = 'Bitte geben Sie eine gültige E-Mail-Adresse ein'
+    }
+    
+    // Passwort validieren
+    if (!newStaffData.password) {
+      errors.password = 'Passwort ist erforderlich'
+    } else if (newStaffData.password.length < 6) {
+      errors.password = 'Passwort muss mindestens 6 Zeichen lang sein'
+    }
+    
+    // Passwort-Bestätigung validieren
+    if (!newStaffData.confirmPassword) {
+      errors.confirmPassword = 'Passwort-Bestätigung ist erforderlich'
+    } else if (newStaffData.password !== newStaffData.confirmPassword) {
+      errors.confirmPassword = 'Passwörter stimmen nicht überein'
+    }
+    
+    // Staff-Gruppe validieren
+    if (!newStaffData.selectedGroup) {
+      errors.selectedGroup = 'Bitte wählen Sie eine Staff-Gruppe aus'
+    }
+    
+    setStaffValidationErrors(errors)
     return Object.keys(errors).length === 0
   }
   
@@ -420,6 +550,105 @@ const AdminDashboard: React.FC = () => {
     }
   }
 
+  const handleAddStaff = async () => {
+    try {
+      // Client-seitige Validierung
+      if (!validateStaffData()) {
+        setMessage({ type: 'error', text: 'Bitte korrigieren Sie die Validierungsfehler' })
+        return
+      }
+
+      // API-Aufruf
+      await api.post('/users/staff', newStaffData)
+      
+      // Erfolg
+      setMessage({ type: 'success', text: 'Verwaltungsbenutzer erfolgreich erstellt' })
+      setShowAddStaffModal(false)
+      
+      // Formular zurücksetzen
+      setNewStaffData({
+        firstName: '',
+        lastName: '',
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        selectedGroup: ''
+      })
+      setStaffValidationErrors({})
+      
+      // Benutzerliste aktualisieren
+      fetchUsers()
+      
+    } catch (error: any) {
+      console.error('Fehler beim Erstellen des Verwaltungsbenutzers:', error)
+      console.error('Response data:', error.response?.data)
+      console.error('Request data:', newStaffData)
+      
+      if (error.response?.data?.details) {
+        // Validierungsfehler vom Backend
+        console.error('Validation details:', error.response.data.details)
+        const validationErrors = error.response.data.details
+          .map((err: any) => err.msg)
+          .join(', ')
+        setMessage({ type: 'error', text: `Validierungsfehler: ${validationErrors}` })
+      } else if (error.response?.data?.error) {
+        setMessage({ type: 'error', text: error.response.data.error })
+      } else {
+        setMessage({ type: 'error', text: 'Fehler beim Erstellen des Verwaltungsbenutzers' })
+      }
+    }
+  }
+
+  const handleAddAdmin = async () => {
+    try {
+      // Client-seitige Validierung
+      if (!validateAdminData()) {
+        setMessage({ type: 'error', text: 'Bitte korrigieren Sie die Validierungsfehler' })
+        return
+      }
+
+      // API-Aufruf
+      await api.post('/users/admins', newAdminData)
+      
+      // Erfolg
+      setMessage({ type: 'success', text: 'Admin erfolgreich erstellt' })
+      setShowAddAdminModal(false)
+      
+      // Formular zurücksetzen
+      setNewAdminData({
+        firstName: '',
+        lastName: '',
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
+      })
+      setAdminValidationErrors({})
+      
+      // Benutzerliste aktualisieren
+      fetchUsers()
+      
+    } catch (error: any) {
+      console.error('Fehler beim Erstellen des Admins:', error)
+      console.error('Response data:', error.response?.data)
+      console.error('Request data:', newAdminData)
+      
+      if (error.response?.data?.details) {
+        // Validierungsfehler vom Backend
+        console.error('Validation details:', error.response.data.details)
+        const validationErrors = error.response.data.details
+          .map((err: any) => err.msg)
+          .join(', ')
+        setMessage({ type: 'error', text: `Validierungsfehler: ${validationErrors}` })
+      } else if (error.response?.data?.error) {
+        setMessage({ type: 'error', text: error.response.data.error })
+      } else {
+        setMessage({ type: 'error', text: 'Fehler beim Erstellen des Admins' })
+      }
+    }
+  }
+
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'INMATE': return 'bg-red-100 text-red-800'
@@ -431,7 +660,13 @@ const AdminDashboard: React.FC = () => {
   }
 
   const getUserGroups = (userId: number) => {
-    // Verwende die Gruppen-Informationen aus der groups-API
+    // Verwende die Gruppen-Informationen aus der users-API (direkt vom Benutzer)
+    const user = users.find(u => u.id === userId)
+    if (user && user.groups) {
+      return user.groups.map((userGroup: any) => userGroup.group)
+    }
+    
+    // Fallback: Verwende die Gruppen-Informationen aus der groups-API
     return groups.filter(group => 
       group.users.some(groupUser => groupUser.id === userId)
     )
@@ -927,7 +1162,11 @@ const AdminDashboard: React.FC = () => {
                   })
                   .map((group) => (
                     <React.Fragment key={group.id}>
-                      <tr className="hover:bg-gray-50" id={`group-row-${group.id}`}>
+                      <tr 
+                        className="hover:bg-muted/40 data-[open=true]:bg-primary/5 data-[open=true]:border-b-transparent transition-colors" 
+                        data-open={selectedGroup?.id === group.id}
+                        id={`group-row-${group.id}`}
+                      >
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                                                          <button
@@ -1001,21 +1240,21 @@ const AdminDashboard: React.FC = () => {
                        {selectedGroup?.id === group.id && (group.category !== 'SYSTEM' || group.name === 'PS All Users') && (
                         <tr>
                           <td colSpan={5} className="px-0 py-0">
-                                                         <div 
-                               id={`group-details-${group.id}`}
-                               className="bg-gray-50 border-t border-gray-200 overflow-hidden"
-                               style={{
-                                 maxHeight: '800px',
-                                 opacity: 1,
-                                 transform: 'translateY(0)',
-                                 transition: prefersReducedMotion ? 'none' : 'all 300ms ease-in-out'
-                               }}
-                               aria-labelledby={`group-row-${group.id}`}
-                             >
-                                                                                                                           <div className="px-6 py-4">
+                            <div 
+                              id={`group-details-${group.id}`}
+                              className="-mt-px rounded-t-none border bg-white shadow-sm ring-0 focus-within:ring-1 focus-within:ring-primary/20 overflow-hidden"
+                              style={{
+                                maxHeight: selectedGroup?.id === group.id ? '60vh' : '0px',
+                                opacity: selectedGroup?.id === group.id ? 1 : 0,
+                                transition: prefersReducedMotion ? 'none' : 'all 800ms cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+                              }}
+                              aria-labelledby={`group-row-${group.id}`}
+                            >
+                              <span aria-hidden className="absolute inset-y-0 left-0 w-1 rounded-l-lg bg-primary/70" />
+                              <div className="px-6 py-4 pl-4">
 
                                  {/* Toolbar */}
-                                 <div className="flex flex-col sm:flex-row gap-4 mb-4 p-3 bg-gray-50 rounded-lg">
+                                 <div className="flex flex-col sm:flex-row gap-4 mb-4 p-3 bg-gray-50 rounded-lg sticky top-0 z-10 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b shadow-[0_1px_0_rgba(0,0,0,0.04)]">
                                    {/* Suchfeld */}
                                    <div className="flex-1">
                                      <div className="relative">
@@ -1063,7 +1302,7 @@ const AdminDashboard: React.FC = () => {
 
                                                                    {/* Mitglieder-Tabelle */}
                                   <div className="bg-white border border-gray-200 rounded-lg overflow-hidden max-h-96">
-                                    <div className="overflow-x-auto overflow-y-auto max-h-80">
+                                    <div className="max-h-[60vh] overflow-auto">
                                      <table className="min-w-full table-fixed">
                                                                                <thead className="bg-gray-50 sticky top-0">
                                           <tr>
@@ -1369,6 +1608,24 @@ const AdminDashboard: React.FC = () => {
                    >
                      <UserPlus className="w-4 h-4" />
                      Insassen hinzufügen
+                   </button>
+                 )}
+                 {activeUserTab === 'allUsers' && (
+                   <button
+                     onClick={() => setShowAddStaffModal(true)}
+                     className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+                   >
+                     <UserPlus className="w-4 h-4" />
+                     Verwaltungsbenutzer hinzufügen
+                   </button>
+                 )}
+                 {activeUserTab === 'admins' && (
+                   <button
+                     onClick={() => setShowAddAdminModal(true)}
+                     className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+                   >
+                     <UserPlus className="w-4 h-4" />
+                     Admin hinzufügen
                    </button>
                  )}
                </div>
@@ -2131,6 +2388,393 @@ const AdminDashboard: React.FC = () => {
                         >
                           Insassen hinzufügen
                         </button>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+             </div>
+           )}
+
+           {/* Modal für Verwaltungsbenutzer hinzufügen */}
+           {showAddStaffModal && (
+             <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+               <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                 <div className="mt-3">
+                   <h3 className="text-lg font-medium text-gray-900 mb-4">
+                     Neuen Verwaltungsbenutzer hinzufügen
+                   </h3>
+                   <div className="space-y-4">
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-1">
+                         Vorname
+                       </label>
+                       <input
+                         type="text"
+                         value={newStaffData.firstName}
+                         onChange={(e) => {
+                           setNewStaffData({...newStaffData, firstName: e.target.value})
+                           if (staffValidationErrors.firstName) {
+                             setStaffValidationErrors({...staffValidationErrors, firstName: ''})
+                           }
+                         }}
+                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                           staffValidationErrors.firstName ? 'border-red-500' : 'border-gray-300'
+                         }`}
+                       />
+                       {staffValidationErrors.firstName && (
+                         <p className="mt-1 text-sm text-red-600">{staffValidationErrors.firstName}</p>
+                       )}
+                     </div>
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-1">
+                         Nachname
+                       </label>
+                       <input
+                         type="text"
+                         value={newStaffData.lastName}
+                         onChange={(e) => {
+                           setNewStaffData({...newStaffData, lastName: e.target.value})
+                           if (staffValidationErrors.lastName) {
+                             setStaffValidationErrors({...staffValidationErrors, lastName: ''})
+                           }
+                         }}
+                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                           staffValidationErrors.lastName ? 'border-red-500' : 'border-gray-300'
+                         }`}
+                       />
+                       {staffValidationErrors.lastName && (
+                         <p className="mt-1 text-sm text-red-600">{staffValidationErrors.lastName}</p>
+                       )}
+                     </div>
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-1">
+                         Benutzername
+                       </label>
+                       <input
+                         type="text"
+                         value={newStaffData.username}
+                         onChange={(e) => {
+                           setNewStaffData({...newStaffData, username: e.target.value})
+                           if (staffValidationErrors.username) {
+                             setStaffValidationErrors({...staffValidationErrors, username: ''})
+                           }
+                         }}
+                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                           staffValidationErrors.username ? 'border-red-500' : 'border-gray-300'
+                         }`}
+                       />
+                       {staffValidationErrors.username && (
+                         <p className="mt-1 text-sm text-red-600">{staffValidationErrors.username}</p>
+                       )}
+                     </div>
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-1">
+                         E-Mail
+                       </label>
+                       <input
+                         type="email"
+                         value={newStaffData.email}
+                         onChange={(e) => {
+                           setNewStaffData({...newStaffData, email: e.target.value})
+                           if (staffValidationErrors.email) {
+                             setStaffValidationErrors({...staffValidationErrors, email: ''})
+                           }
+                         }}
+                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                           staffValidationErrors.email ? 'border-red-500' : 'border-gray-300'
+                         }`}
+                       />
+                       {staffValidationErrors.email && (
+                         <p className="mt-1 text-sm text-red-600">{staffValidationErrors.email}</p>
+                       )}
+                     </div>
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-1">
+                         Passwort
+                       </label>
+                       <input
+                         type="password"
+                         value={newStaffData.password}
+                         onChange={(e) => {
+                           setNewStaffData({...newStaffData, password: e.target.value})
+                           if (staffValidationErrors.password) {
+                             setStaffValidationErrors({...staffValidationErrors, password: ''})
+                           }
+                           // Passwort-Bestätigung auch validieren
+                           if (staffValidationErrors.confirmPassword && e.target.value !== newStaffData.confirmPassword) {
+                             setStaffValidationErrors({...staffValidationErrors, confirmPassword: 'Passwörter stimmen nicht überein'})
+                           } else if (staffValidationErrors.confirmPassword) {
+                             setStaffValidationErrors({...staffValidationErrors, confirmPassword: ''})
+                           }
+                         }}
+                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                           staffValidationErrors.password ? 'border-red-500' : 'border-gray-300'
+                         }`}
+                         placeholder="Mindestens 6 Zeichen"
+                       />
+                       {staffValidationErrors.password ? (
+                         <p className="mt-1 text-sm text-red-600">{staffValidationErrors.password}</p>
+                       ) : (
+                         <p className="mt-1 text-xs text-gray-500">
+                           Das Passwort muss mindestens 6 Zeichen lang sein
+                         </p>
+                       )}
+                     </div>
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-1">
+                         Passwort bestätigen
+                       </label>
+                       <input
+                         type="password"
+                         value={newStaffData.confirmPassword}
+                         onChange={(e) => {
+                           setNewStaffData({...newStaffData, confirmPassword: e.target.value})
+                           if (staffValidationErrors.confirmPassword) {
+                             setStaffValidationErrors({...staffValidationErrors, confirmPassword: ''})
+                           }
+                         }}
+                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                           staffValidationErrors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                         }`}
+                         placeholder="Passwort wiederholen"
+                       />
+                       {staffValidationErrors.confirmPassword && (
+                         <p className="mt-1 text-sm text-red-600">{staffValidationErrors.confirmPassword}</p>
+                       )}
+                     </div>
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-1">
+                         Staff-Gruppe
+                       </label>
+                       <select
+                         value={newStaffData.selectedGroup}
+                         onChange={(e) => {
+                           setNewStaffData({...newStaffData, selectedGroup: e.target.value})
+                           if (staffValidationErrors.selectedGroup) {
+                             setStaffValidationErrors({...staffValidationErrors, selectedGroup: ''})
+                           }
+                         }}
+                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                           staffValidationErrors.selectedGroup ? 'border-red-500' : 'border-gray-300'
+                         }`}
+                       >
+                         <option value="">Staff-Gruppe auswählen...</option>
+                         {groups
+                           .filter(group => group.category === 'STAFF')
+                           .map(group => (
+                             <option key={group.id} value={group.id}>
+                               {group.description}
+                             </option>
+                           ))
+                         }
+                       </select>
+                       {staffValidationErrors.selectedGroup && (
+                         <p className="mt-1 text-sm text-red-600">{staffValidationErrors.selectedGroup}</p>
+                       )}
+                     </div>
+                     <div className="flex justify-end space-x-3">
+                       <button
+                         onClick={() => {
+                           setShowAddStaffModal(false)
+                           setNewStaffData({
+                             firstName: '',
+                             lastName: '',
+                             username: '',
+                             email: '',
+                             password: '',
+                             confirmPassword: '',
+                             selectedGroup: ''
+                           })
+                           setStaffValidationErrors({})
+                         }}
+                         className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                       >
+                         Abbrechen
+                       </button>
+                       <button
+                         onClick={handleAddStaff}
+                         className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                       >
+                         Verwaltungsbenutzer hinzufügen
+                       </button>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+             </div>
+           )}
+
+           {/* Modal für Admin hinzufügen */}
+           {showAddAdminModal && (
+             <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+               <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                 <div className="mt-3">
+                   <h3 className="text-lg font-medium text-gray-900 mb-4">
+                     Neuen Admin hinzufügen
+                   </h3>
+                   <div className="space-y-4">
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-1">
+                         Vorname
+                       </label>
+                       <input
+                         type="text"
+                         value={newAdminData.firstName}
+                         onChange={(e) => {
+                           setNewAdminData({...newAdminData, firstName: e.target.value})
+                           if (adminValidationErrors.firstName) {
+                             setAdminValidationErrors({...adminValidationErrors, firstName: ''})
+                           }
+                         }}
+                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                           adminValidationErrors.firstName ? 'border-red-500' : 'border-gray-300'
+                         }`}
+                       />
+                       {adminValidationErrors.firstName && (
+                         <p className="mt-1 text-sm text-red-600">{adminValidationErrors.firstName}</p>
+                       )}
+                     </div>
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-1">
+                         Nachname
+                       </label>
+                       <input
+                         type="text"
+                         value={newAdminData.lastName}
+                         onChange={(e) => {
+                           setNewAdminData({...newAdminData, lastName: e.target.value})
+                           if (adminValidationErrors.lastName) {
+                             setAdminValidationErrors({...adminValidationErrors, lastName: ''})
+                           }
+                         }}
+                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                           adminValidationErrors.lastName ? 'border-red-500' : 'border-gray-300'
+                         }`}
+                       />
+                       {adminValidationErrors.lastName && (
+                         <p className="mt-1 text-sm text-red-600">{adminValidationErrors.lastName}</p>
+                       )}
+                     </div>
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-1">
+                         Benutzername
+                       </label>
+                       <input
+                         type="text"
+                         value={newAdminData.username}
+                         onChange={(e) => {
+                           setNewAdminData({...newAdminData, username: e.target.value})
+                           if (adminValidationErrors.username) {
+                             setAdminValidationErrors({...adminValidationErrors, username: ''})
+                           }
+                         }}
+                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                           adminValidationErrors.username ? 'border-red-500' : 'border-gray-300'
+                         }`}
+                       />
+                       {adminValidationErrors.username && (
+                         <p className="mt-1 text-sm text-red-600">{adminValidationErrors.username}</p>
+                       )}
+                     </div>
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-1">
+                         E-Mail
+                       </label>
+                       <input
+                         type="email"
+                         value={newAdminData.email}
+                         onChange={(e) => {
+                           setNewAdminData({...newAdminData, email: e.target.value})
+                           if (adminValidationErrors.email) {
+                             setAdminValidationErrors({...adminValidationErrors, email: ''})
+                           }
+                         }}
+                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                           adminValidationErrors.email ? 'border-red-500' : 'border-gray-300'
+                         }`}
+                       />
+                       {adminValidationErrors.email && (
+                         <p className="mt-1 text-sm text-red-600">{adminValidationErrors.email}</p>
+                       )}
+                     </div>
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-1">
+                         Passwort
+                       </label>
+                       <input
+                         type="password"
+                         value={newAdminData.password}
+                         onChange={(e) => {
+                           setNewAdminData({...newAdminData, password: e.target.value})
+                           if (adminValidationErrors.password) {
+                             setAdminValidationErrors({...adminValidationErrors, password: ''})
+                           }
+                           // Passwort-Bestätigung auch validieren
+                           if (adminValidationErrors.confirmPassword && e.target.value !== newAdminData.confirmPassword) {
+                             setAdminValidationErrors({...adminValidationErrors, confirmPassword: 'Passwörter stimmen nicht überein'})
+                           } else if (adminValidationErrors.confirmPassword) {
+                             setAdminValidationErrors({...adminValidationErrors, confirmPassword: ''})
+                           }
+                         }}
+                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                           adminValidationErrors.password ? 'border-red-500' : 'border-gray-300'
+                         }`}
+                         placeholder="Mindestens 6 Zeichen"
+                       />
+                       {adminValidationErrors.password ? (
+                         <p className="mt-1 text-sm text-red-600">{adminValidationErrors.password}</p>
+                       ) : (
+                         <p className="mt-1 text-xs text-gray-500">
+                           Das Passwort muss mindestens 6 Zeichen lang sein
+                         </p>
+                       )}
+                     </div>
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-1">
+                         Passwort bestätigen
+                       </label>
+                       <input
+                         type="password"
+                         value={newAdminData.confirmPassword}
+                         onChange={(e) => {
+                           setNewAdminData({...newAdminData, confirmPassword: e.target.value})
+                           if (adminValidationErrors.confirmPassword) {
+                             setAdminValidationErrors({...adminValidationErrors, confirmPassword: ''})
+                           }
+                         }}
+                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                           adminValidationErrors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                         }`}
+                         placeholder="Passwort wiederholen"
+                       />
+                       {adminValidationErrors.confirmPassword && (
+                         <p className="mt-1 text-sm text-red-600">{adminValidationErrors.confirmPassword}</p>
+                       )}
+                     </div>
+                     <div className="flex justify-end space-x-3">
+                       <button
+                         onClick={() => {
+                           setShowAddAdminModal(false)
+                           setNewAdminData({
+                             firstName: '',
+                             lastName: '',
+                             username: '',
+                             email: '',
+                             password: '',
+                             confirmPassword: ''
+                           })
+                           setAdminValidationErrors({})
+                         }}
+                         className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                       >
+                         Abbrechen
+                       </button>
+                       <button
+                         onClick={handleAddAdmin}
+                         className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                       >
+                         Admin hinzufügen
+                       </button>
                      </div>
                    </div>
                  </div>

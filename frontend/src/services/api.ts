@@ -162,4 +162,31 @@ export const createInmate = async (inmateData: {
   return response.data
 }
 
+// Staff API
+export const createStaff = async (staffData: {
+  firstName: string
+  lastName: string
+  username: string
+  email: string
+  password: string
+  confirmPassword: string
+  selectedGroup: string
+}) => {
+  const response = await api.post('/users/staff', staffData)
+  return response.data
+}
+
+// Admin API
+export const createAdmin = async (adminData: {
+  firstName: string
+  lastName: string
+  username: string
+  email: string
+  password: string
+  confirmPassword: string
+}) => {
+  const response = await api.post('/users/admins', adminData)
+  return response.data
+}
+
 export default api
