@@ -307,4 +307,111 @@ router.get('/user/:userId', authenticateToken, checkPermission(['read']), async 
   }
 });
 
+// Gruppenmitglieder mit Pagination, Suche, Filter und Sortierung abrufen
+router.get('/:id/members', authenticateToken, checkAdmin(), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { 
+      page = 1, 
+      pageSize = 25, 
+      search = '', 
+      sortField = 'firstName', 
+      sortDirection = 'asc',
+      role = '',
+      status = ''
+    } = req.query;
+
+    const pageNum = Number(page);
+    const pageSizeNum = Number(pageSize);
+    const skip = (pageNum - 1) * pageSizeNum;
+
+    // Basis-Where-Klausel
+    let whereClause: any = {
+      groupId: Number(id)
+    };
+
+    // Suchfilter
+    if (search) {
+      whereClause.OR = [
+        {
+          user: {
+            OR: [
+              { firstName: { contains: search as string } },
+              { lastName: { contains: search as string } },
+              { username: { contains: search as string } }
+            ]
+          }
+        }
+      ];
+    }
+
+    // Rollenfilter
+    if (role) {
+      whereClause.role = role;
+    }
+
+    // Statusfilter (vereinfacht - alle Benutzer sind aktiv)
+    // In einer echten Anwendung würde hier ein Status-Feld verwendet werden
+    if (status) {
+      // Für jetzt ignorieren wir den Status-Filter, da wir kein Status-Feld haben
+      // whereClause.user.status = status;
+    }
+
+    // Sortierung
+    let orderBy: any = {};
+    if (sortField === 'firstName' || sortField === 'lastName' || sortField === 'username') {
+      orderBy.user = { [sortField]: sortDirection };
+    } else if (sortField === 'role') {
+      orderBy.role = sortDirection;
+    } else {
+      orderBy.user = { firstName: 'asc' }; // Standard-Sortierung
+    }
+
+    // Gesamtanzahl abrufen
+    const total = await prisma.userGroup.count({
+      where: whereClause
+    });
+
+    // Mitglieder mit Pagination abrufen
+    const members = await prisma.userGroup.findMany({
+      where: whereClause,
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true
+          }
+        }
+      },
+      orderBy,
+      skip,
+      take: pageSizeNum
+    });
+
+    // Daten für Frontend transformieren
+    const transformedMembers = members.map(member => ({
+      id: member.user.id,
+      username: member.user.username,
+      firstName: member.user.firstName,
+      lastName: member.user.lastName,
+      role: member.role,
+      status: 'active' // Standard-Status, da wir kein Status-Feld haben
+    }));
+
+    res.json({
+      members: transformedMembers,
+      total,
+      page: pageNum,
+      pageSize: pageSizeNum,
+      totalPages: Math.ceil(total / pageSizeNum)
+    });
+
+  } catch (error: any) {
+    console.error('Get group members error:', error);
+    res.status(500).json({ error: 'Fehler beim Abrufen der Gruppenmitglieder' });
+  }
+});
+
 export default router;

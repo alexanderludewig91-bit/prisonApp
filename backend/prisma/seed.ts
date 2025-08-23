@@ -203,6 +203,28 @@ async function main() {
     }
   ]
 
+  // 50 zusätzliche Insassen erstellen
+  const additionalInmates = []
+  const firstNames = ['Lukas', 'Felix', 'Jan', 'Tim', 'Niklas', 'Tom', 'Paul', 'Jonas', 'David', 'Simon', 'Andreas', 'Christian', 'Michael', 'Stefan', 'Martin', 'Daniel', 'Thomas', 'Alexander', 'Markus', 'Sebastian', 'Florian', 'Matthias', 'Patrick', 'Kevin', 'Dennis', 'Benjamin', 'Tobias', 'Dominik', 'Philipp', 'Marcel', 'Sven', 'Björn', 'Thorsten', 'Ralf', 'Uwe', 'Klaus', 'Wolfgang', 'Dieter', 'Günther', 'Heinz', 'Werner', 'Manfred', 'Jürgen', 'Horst', 'Gerhard', 'Karl', 'Ernst', 'Walter', 'Herbert', 'Franz', 'Josef']
+  const lastNames = ['Müller', 'Schmidt', 'Schneider', 'Fischer', 'Weber', 'Meyer', 'Wagner', 'Becker', 'Schulz', 'Hoffmann', 'Schäfer', 'Koch', 'Bauer', 'Richter', 'Klein', 'Wolf', 'Schröder', 'Neumann', 'Schwarz', 'Zimmermann', 'Braun', 'Krüger', 'Hofmann', 'Hartmann', 'Lange', 'Schmitt', 'Werner', 'Krause', 'Meier', 'Lehmann', 'Schmid', 'Schulze', 'Maier', 'Köhler', 'Herrmann', 'König', 'Walter', 'Mayer', 'Huber', 'Kaiser', 'Fuchs', 'Peters', 'Lang', 'Scholz', 'Möller', 'Weiß', 'Jung', 'Hahn', 'Schubert', 'Vogel', 'Friedrich']
+
+  for (let i = 1; i <= 50; i++) {
+    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)]
+    const lastName = lastNames[Math.floor(Math.random() * lastNames.length)]
+    
+    additionalInmates.push({
+      username: `inmate${String(i + 1).padStart(3, '0')}`,
+      email: `inmate${String(i + 1).padStart(3, '0')}@prison.com`,
+      password: hashedPassword,
+      firstName,
+      lastName,
+      groups: ['PS All Users', 'PS Inmates']
+    })
+  }
+
+  // Alle Benutzer zusammenführen
+  const allUsers = [...testUsers, ...additionalInmates]
+
   // Bestehende Benutzer löschen (außer admin und inmate falls sie existieren)
   console.log('🗑️ Lösche bestehende Test-Benutzer...')
   
@@ -215,13 +237,13 @@ async function main() {
   await prisma.user.deleteMany({
     where: {
       username: {
-        in: testUsers.map(u => u.username)
+        in: allUsers.map(u => u.username)
       }
     }
   })
 
   // Benutzer erstellen und Gruppen zuordnen
-  for (const userData of testUsers) {
+  for (const userData of allUsers) {
     console.log(`👤 Erstelle Benutzer: ${userData.username}`)
     
     const user = await prisma.user.create({
@@ -256,7 +278,7 @@ async function main() {
   console.log('📋 Login-Daten:')
   console.log('   Alle Benutzer haben das Passwort: "test"')
   console.log('   Verfügbare Benutzer:')
-  testUsers.forEach(user => {
+  allUsers.forEach(user => {
     console.log(`   - ${user.username} (${user.firstName} ${user.lastName})`)
   })
 }
