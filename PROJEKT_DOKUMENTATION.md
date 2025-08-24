@@ -4,6 +4,70 @@
 
 Diese Dokumentation beschreibt die neu implementierten Features der **Hausverwaltung** und **Insassen-Übersicht** in der Prisoner Services Web Application.
 
+## 🚀 Installation & Setup
+
+### Voraussetzungen
+- Node.js (Version 18 oder höher)
+- npm oder yarn
+- SQLite (wird automatisch installiert)
+
+### Vollständige Installation
+
+1. **Backend einrichten:**
+   ```bash
+   cd backend
+   npm install
+   npx prisma generate
+   npx prisma db push
+   npm run db:seed  # Testdaten erstellen (Benutzer, Gruppen, Services)
+   npx db:seed      # Alternative für Windows (falls npx prisma db seed nicht funktioniert)
+   npx ts-node prisma/seed-houses.ts  # Hausverwaltung-Testdaten erstellen
+   ```
+
+2. **Frontend einrichten:**
+   ```bash
+   cd frontend
+   npm install
+   ```
+
+3. **Anwendung starten:**
+   ```bash
+   # Backend (Terminal 1)
+   cd backend
+   npm run dev
+   
+   # Frontend (Terminal 2)
+   cd frontend
+   npm run dev
+   ```
+
+### Testdaten
+
+Das System wird mit folgenden Testdaten initialisiert:
+
+**Benutzer (Passwort: "test"):**
+- `admin` - System-Administrator
+- `inmate001` - Insasse
+- `avd001` - Allgemeiner Vollzugsdienst
+- `val001` - Vollzugsabteilungsleitung
+- `vl001` - Vollzugsleitung
+- `al001` - Anstaltsleitung
+- `zahlstelle001` - Zahlstelle
+- `arzt001` - Ärztliches Personal
+
+**Hausverwaltung-Testdaten:**
+- **Häuser:** Haus A, Haus B, Haus C
+- **Stationen:** Verschiedene Stationen pro Haus
+- **Zellen:** Zellen mit unterschiedlichen Kapazitäten (1-4 Insassen)
+- **Keine Zuweisungen:** Insassen werden nicht automatisch zugewiesen
+
+### Datenbank-Setup
+
+```bash
+cd backend
+npx prisma studio  # Öffnet Prisma Studio für Datenbankverwaltung
+```
+
 ## 🏠 Hausverwaltung
 
 ### 🎯 Zweck
@@ -341,6 +405,67 @@ npm run build
 - **API-Response-Times:** Monitoring der API-Antwortzeiten
 - **Fehler-Raten:** Überwachung von Fehlern und Exceptions
 
+## 🔧 Entwicklung & Deployment
+
+### Entwicklung
+
+#### Backend-Entwicklung
+```bash
+cd backend
+npm run dev          # Entwicklungsserver starten
+npm run build        # TypeScript kompilieren
+npm run start        # Produktionsserver starten
+```
+
+#### Frontend-Entwicklung
+```bash
+cd frontend
+npm run dev          # Entwicklungsserver starten
+npm run build        # Produktionsbuild erstellen
+npm run preview      # Produktionsbuild testen
+```
+
+#### Datenbank-Entwicklung
+```bash
+cd backend
+npx prisma studio    # Datenbank-GUI öffnen
+npx prisma generate  # Prisma Client generieren
+npx prisma db push   # Schema zur Datenbank pushen
+npm run db:seed      # Testdaten erstellen (Benutzer, Gruppen, Services)
+npx db:seed          # Alternative für Windows
+npx ts-node prisma/seed-houses.ts  # Hausverwaltung-Testdaten erstellen
+```
+
+### Deployment
+
+#### Backend-Deployment
+```bash
+cd backend
+npm run build
+npm start
+```
+
+#### Frontend-Deployment
+```bash
+cd frontend
+npm run build
+# dist/ Ordner auf Webserver deployen
+```
+
+### Testing
+
+#### Backend-Tests
+```bash
+cd backend
+npm test
+```
+
+#### Frontend-Tests
+```bash
+cd frontend
+npm test
+```
+
 ## 🔮 Zukünftige Erweiterungen
 
 ### Geplante Features
@@ -355,6 +480,50 @@ npm run build
 - **Offline-Support:** Service Worker für Offline-Funktionalität
 - **Mobile App:** Native Mobile-Anwendung
 - **API-Versioning:** Versionierte APIs für bessere Kompatibilität
+
+## 📁 Projektstruktur
+
+```
+prisoner-services-web/
+├── backend/                 # Node.js + Express API
+│   ├── src/
+│   │   ├── routes/         # API Routen
+│   │   │   ├── auth.ts     # Authentifizierung
+│   │   │   ├── services.ts # Service-Management
+│   │   │   ├── users.ts    # Benutzerverwaltung
+│   │   │   ├── groups.ts   # Gruppen-Management
+│   │   │   ├── adminLogs.ts # Admin-Logs
+│   │   │   └── houses.ts   # Hausverwaltung & Zellen-Management
+│   │   ├── middleware/     # Middleware
+│   │   │   ├── auth.ts     # Authentifizierung & Berechtigungen
+│   │   │   └── adminLogging.ts # Admin-Logging
+│   │   └── app.ts          # Hauptanwendung
+│   ├── prisma/             # Datenbankschema
+│   │   ├── schema.prisma   # Datenbankschema
+│   │   ├── seed.ts         # Testdaten (Benutzer, Gruppen, Services)
+│   │   ├── seed-houses.ts  # Testdaten (Häuser, Stationen, Zellen)
+│   │   └── migrations/     # Datenbank-Migrationen
+│   └── package.json
+├── frontend/               # React + TypeScript
+│   ├── src/
+│   │   ├── components/     # React Komponenten
+│   │   │   ├── Navbar.tsx  # Navigation
+│   │   │   ├── DraggableInmate.tsx # Drag & Drop Insassen-Karten
+│   │   │   ├── TransferModal.tsx # Insassen-Verlegung
+│   │   │   └── ...         # Weitere Komponenten
+│   │   ├── pages/         # Seitenkomponenten
+│   │   │   ├── HouseManagement.tsx # Hausverwaltung
+│   │   │   ├── InmatesOverview.tsx # Insassen-Übersicht
+│   │   │   ├── AdminDashboard.tsx # Admin-Dashboard
+│   │   │   └── ...         # Weitere Seiten
+│   │   ├── contexts/      # React Contexts
+│   │   │   └── AuthContext.tsx # Authentifizierung
+│   │   └── services/      # API Services
+│   └── package.json
+├── README.md               # Hauptdokumentation
+├── PROJEKT_DOKUMENTATION.md # Detaillierte Projektdokumentation
+└── .gitignore
+```
 
 ---
 

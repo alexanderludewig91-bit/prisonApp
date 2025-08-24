@@ -31,16 +31,29 @@ prisoner-services-web/
 │   │   └── app.ts          # Hauptanwendung
 │   ├── prisma/             # Datenbankschema
 │   │   ├── schema.prisma   # Datenbankschema
-│   │   └── seed.ts         # Testdaten
+│   │   ├── seed.ts         # Testdaten (Benutzer, Gruppen, Services)
+│   │   ├── seed-houses.ts  # Testdaten (Häuser, Stationen, Zellen)
+│   │   └── migrations/     # Datenbank-Migrationen
 │   └── package.json
 ├── frontend/               # React + TypeScript
 │   ├── src/
 │   │   ├── components/     # React Komponenten
+│   │   │   ├── Navbar.tsx  # Navigation
+│   │   │   ├── DraggableInmate.tsx # Drag & Drop Insassen-Karten
+│   │   │   ├── TransferModal.tsx # Insassen-Verlegung
+│   │   │   └── ...         # Weitere Komponenten
 │   │   ├── pages/         # Seitenkomponenten
+│   │   │   ├── HouseManagement.tsx # Hausverwaltung
+│   │   │   ├── InmatesOverview.tsx # Insassen-Übersicht
+│   │   │   ├── AdminDashboard.tsx # Admin-Dashboard
+│   │   │   └── ...         # Weitere Seiten
 │   │   ├── contexts/      # React Contexts
+│   │   │   └── AuthContext.tsx # Authentifizierung
 │   │   └── services/      # API Services
 │   └── package.json
-└── README.md
+├── README.md               # Hauptdokumentation
+├── PROJEKT_DOKUMENTATION.md # Detaillierte Projektdokumentation
+└── .gitignore
 ```
 
 ## 🚀 Schnellstart
@@ -58,8 +71,9 @@ prisoner-services-web/
    npm install
    npx prisma generate
    npx prisma db push
-   npm run db:seed  # Testdaten erstellen
+   npm run db:seed  # Testdaten erstellen (Benutzer, Gruppen, Services)
    npx db:seed      # Alternative für Windows (falls npx prisma db seed nicht funktioniert)
+   npx ts-node prisma/seed-houses.ts  # Hausverwaltung-Testdaten erstellen
    ```
 
 2. **Frontend einrichten:**
@@ -104,7 +118,8 @@ Das System wird mit vordefinierten Testdaten initialisiert:
 
 ```bash
 cd backend
-npm run db:seed
+npm run db:seed  # Benutzer, Gruppen, Services
+npx ts-node prisma/seed-houses.ts  # Häuser, Stationen, Zellen
 ```
 
 **Verfügbare Test-Benutzer (Passwort: "test"):**
@@ -116,6 +131,12 @@ npm run db:seed
 - `al001` - Anstaltsleitung
 - `zahlstelle001` - Zahlstelle
 - `arzt001` - Ärztliches Personal
+
+**Verfügbare Test-Daten für Hausverwaltung:**
+- **Häuser:** Haus A, Haus B, Haus C
+- **Stationen:** Verschiedene Stationen pro Haus
+- **Zellen:** Zellen mit unterschiedlichen Kapazitäten (1-4 Insassen)
+- **Keine Zuweisungen:** Insassen werden nicht automatisch zugewiesen
 
 ## 🔐 Authentifizierung & Berechtigungen
 
@@ -330,8 +351,9 @@ cd backend
 npx prisma studio    # Datenbank-GUI öffnen
 npx prisma generate  # Prisma Client generieren
 npx prisma db push   # Schema zur Datenbank pushen
-npm run db:seed      # Testdaten erstellen
+npm run db:seed      # Testdaten erstellen (Benutzer, Gruppen, Services)
 npx db:seed          # Alternative für Windows
+npx ts-node prisma/seed-houses.ts  # Hausverwaltung-Testdaten erstellen
 ```
 
 ## 🧪 Testing
