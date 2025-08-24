@@ -230,7 +230,23 @@ router.post('/inmates', [
 // Alle Benutzer abrufen
 router.get('/', async (req: Request, res: Response) => {
   try {
+    const { group } = req.query;
+    
+    const where: any = {};
+    
+    // Filter nach Gruppe
+    if (group) {
+      where.groups = {
+        some: {
+          group: {
+            name: group
+          }
+        }
+      };
+    }
+
     const users = await prisma.user.findMany({
+      where,
       select: {
         id: true,
         username: true,
