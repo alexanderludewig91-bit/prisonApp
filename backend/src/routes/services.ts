@@ -178,13 +178,14 @@ const assignServiceToAvailableStaff = async (serviceId: number, role: string) =>
 // Alle Services abrufen
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const { page = 1, limit = 10, status, priority, search } = req.query;
+    const { page = 1, limit = 10, status, priority, search, userId } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
 
     const where: any = {};
     
     if (status) where.status = status;
     if (priority) where.priority = priority;
+    if (userId) where.createdBy = Number(userId);
     if (search) {
       where.OR = [
         { title: { contains: String(search) } },
