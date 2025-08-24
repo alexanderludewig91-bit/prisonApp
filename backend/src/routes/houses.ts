@@ -7,6 +7,24 @@ import { AuthenticatedRequest } from '../middleware/auth';
 const router = express.Router();
 const prisma = new PrismaClient();
 
+// Hilfsfunktion zum Speichern der Zuweisungshistorie
+const saveAssignmentHistory = async (action: string, cellId: number, userId: number, notes?: string, assignedBy?: number | null) => {
+  try {
+    await prisma.cellAssignmentHistory.create({
+      data: {
+        action,
+        cellId,
+        userId,
+        notes,
+        assignedBy: assignedBy || undefined,
+      },
+    });
+    console.log('Historie gespeichert:', { action, cellId, userId, notes, assignedBy });
+  } catch (error) {
+    console.error('Fehler beim Speichern der Zuweisungshistorie:', error);
+  }
+};
+
 // ===== HAUS ROUTES =====
 
 // Alle Häuser abrufen
@@ -810,27 +828,42 @@ router.post('/cells/:cellId/assignments', [
       });
     }
 
-         const assignment = await prisma.cellAssignment.create({
-       data: {
-         cellId: Number(cellId),
-         userId: Number(userId),
-         assignedBy: authReq.user?.userId || null,
-         notes,
-         isActive: true
-       },
-       include: {
-         user: {
-           select: {
-             id: true,
-             firstName: true,
-             lastName: true,
-             username: true
-           }
-         }
-       }
-     });
+                   const assignmentData: any = {
+            cellId: Number(cellId),
+            userId: Number(userId),
+            notes,
+            isActive: true
+          };
 
-    // Admin-Aktion loggen
+          // assignedBy nur setzen, wenn ein User existiert
+          if (authReq.user?.userId) {
+            assignmentData.assignedBy = authReq.user.userId;
+          }
+
+                    const assignment = await prisma.cellAssignment.create({
+            data: assignmentData,
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  username: true
+                }
+              }
+            }
+          });
+
+          // Historie speichern
+          await saveAssignmentHistory(
+            'ASSIGNED',
+            Number(cellId),
+            Number(userId),
+            notes,
+            authReq.user?.userId || null
+          );
+
+          // Admin-Aktion loggen
     if (authReq.user) {
       await logAdminActionManually(
         authReq,
@@ -892,12 +925,23 @@ router.delete('/assignments/:id', async (req: Request, res: Response) => {
        return res.status(404).json({ error: 'Zellen-Zuweisung nicht gefunden' });
      }
 
-     // Zuweisung komplett löschen
-     await prisma.cellAssignment.delete({
-       where: { id: Number(id) }
-     });
+     
 
-     const assignment = existingAssignment;
+           // Historie speichern vor dem Löschen
+      await saveAssignmentHistory(
+        'REMOVED',
+        existingAssignment.cellId,
+        existingAssignment.userId,
+        'Zuweisung entfernt',
+        authReq.user?.userId || null
+      );
+
+      // Zuweisung komplett löschen
+      await prisma.cellAssignment.delete({
+        where: { id: Number(id) }
+      });
+
+      const assignment = existingAssignment;
 
     // Admin-Aktion loggen
     if (authReq.user) {
@@ -925,6 +969,90 @@ router.delete('/assignments/:id', async (req: Request, res: Response) => {
     
     res.status(500).json({ 
       error: 'Fehler beim Entfernen der Zellen-Zuweisung',
+      details: error instanceof Error ? error.message : 'Unbekannter Fehler'
+    });
+  }
+});
+
+// Zuweisungshistorie für einen Insassen abrufen
+router.get('/assignments/history/:userId', async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    
+    const history = await prisma.cellAssignmentHistory.findMany({
+      where: {
+        userId: Number(userId)
+      },
+      include: {
+        cell: {
+          include: {
+            station: {
+              include: {
+                house: true
+              }
+            }
+          }
+        },
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            username: true
+          }
+        },
+        assignedByUser: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            username: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    res.json({ history });
+  } catch (error) {
+    console.error('Fehler beim Laden der Zuweisungshistorie:', error);
+    res.status(500).json({ 
+      error: 'Fehler beim Laden der Zuweisungshistorie',
+      details: error instanceof Error ? error.message : 'Unbekannter Fehler'
+    });
+  }
+});
+
+// Aktuelle Zuweisung eines Insassen abrufen
+router.get('/assignments/current/:userId', async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    
+    const assignment = await prisma.cellAssignment.findFirst({
+      where: {
+        userId: Number(userId),
+        isActive: true
+      },
+      include: {
+        cell: {
+          include: {
+            station: {
+              include: {
+                house: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    res.json({ assignment });
+  } catch (error) {
+    console.error('Fehler beim Laden der aktuellen Zuweisung:', error);
+    res.status(500).json({ 
+      error: 'Fehler beim Laden der aktuellen Zuweisung',
       details: error instanceof Error ? error.message : 'Unbekannter Fehler'
     });
   }

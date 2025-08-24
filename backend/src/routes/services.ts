@@ -131,11 +131,20 @@ const assignServiceToAvailableStaff = async (serviceId: number, role: string) =>
     // Verfügbaren Mitarbeiter mit der geringsten Arbeitslast finden
     const availableStaff = await prisma.user.findFirst({
       where: {
-        role: role,
-        isActive: true
+        isActive: true,
+        groups: {
+          some: {
+            group: {
+              category: role
+            }
+          }
+        }
+      },
+      include: {
+        assignedServices: true
       },
       orderBy: {
-        services: {
+        assignedServices: {
           _count: 'asc'
         }
       }

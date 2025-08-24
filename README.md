@@ -7,8 +7,10 @@ Eine moderne Webanwendung für die Verwaltung von Gefängnisdiensten, entwickelt
 Diese Anwendung ist ein Nachbau des ursprünglichen Appian-Systems "Prisoner Services" und bietet:
 
 - **Insassen-Features:** Antragstellung, Status-Abfragen, persönliche Übersicht
-- **Mitarbeiter-Features:** Antragsbearbeitung, Workflow-Management, Kommentare
-- **Admin-Features:** Gruppenverwaltung, System-Überwachung, Audit-Logs
+- **Mitarbeiter-Features:** Antragsbearbeitung, Workflow-Management, Kommentare, Insassen-Übersicht
+- **Admin-Features:** Gruppenverwaltung, System-Überwachung, Audit-Logs, Hausverwaltung
+- **Hausverwaltung:** Zellen-Management, Insassen-Zuweisungen, Drag & Drop, Automatische Zuweisung
+- **Insassen-Übersicht:** Zentrale Insassen-Verwaltung mit vollständigen Details und Historie
 
 ## 🏗️ Projektstruktur
 
@@ -21,7 +23,8 @@ prisoner-services-web/
 │   │   │   ├── services.ts # Service-Management
 │   │   │   ├── users.ts    # Benutzerverwaltung
 │   │   │   ├── groups.ts   # Gruppen-Management
-│   │   │   └── adminLogs.ts # Admin-Logs
+│   │   │   ├── adminLogs.ts # Admin-Logs
+│   │   │   └── houses.ts   # Hausverwaltung & Zellen-Management
 │   │   ├── middleware/     # Middleware
 │   │   │   ├── auth.ts     # Authentifizierung & Berechtigungen
 │   │   │   └── adminLogging.ts # Admin-Logging
@@ -56,6 +59,7 @@ prisoner-services-web/
    npx prisma generate
    npx prisma db push
    npm run db:seed  # Testdaten erstellen
+   npx db:seed      # Alternative für Windows (falls npx prisma db seed nicht funktioniert)
    ```
 
 2. **Frontend einrichten:**
@@ -158,6 +162,7 @@ Die Anwendung verwendet ein flexibles Gruppen-basiertes Berechtigungssystem:
 - [x] Aktivitätsverlauf für jeden Service
 - [x] Workflow-Engine mit automatischen Status-Übergängen
 - [x] Task-Zuweisung für Mitarbeiter
+- [x] **Insassen-Übersicht** - Zentrale Insassen-Verwaltung mit vollständigen Details
 
 #### 🛡️ Admin-Features
 - [x] Admin-Dashboard mit KPIs und System-Status
@@ -168,12 +173,35 @@ Die Anwendung verwendet ein flexibles Gruppen-basiertes Berechtigungssystem:
 - [x] Klickbare Gruppenzeilen (ausklappbare Mitgliederlisten)
 - [x] Kategoriebasierte Sortierung
 - [x] In-App Modals statt Browser-Dialoge
+- [x] **Hausverwaltung** - Vollständiges Zellen-Management-System
+
+#### 🏠 Hausverwaltung (Admin)
+- [x] **Haus-Übersicht** - Alle Häuser mit Belegungsstatistiken
+- [x] **Station-Management** - Stationen pro Haus verwalten
+- [x] **Zellen-Management** - Zellen pro Station mit Kapazitäten
+- [x] **Drag & Drop Zuweisungen** - Intuitive Insassen-Zuweisung
+- [x] **Automatische Zuweisung** - Intelligente Zuweisung unzugewiesener Insassen
+- [x] **Zuweisungshistorie** - Vollständige Historie aller Zellen-Zuweisungen
+- [x] **Insassen-Verlegung** - Insassen zwischen Zellen verlegen
+- [x] **Farbkodierung** - Visuelle Belegungsanzeige (frei/teilweise belegt/voll)
+- [x] **Suchfunktionen** - Erweiterte Filter für Häuser, Stationen, Zellen
+- [x] **Ausstehende Zuweisungen** - Übersicht unzugewiesener Insassen
+
+#### 👥 Insassen-Übersicht (Mitarbeiter)
+- [x] **Zentrale Insassen-Liste** - Alle Insassen mit Suchfunktion
+- [x] **Detail-Ansicht** - Vollständige Insassen-Informationen in Tabs
+- [x] **Persönliche Daten** - Name, E-Mail, Registrierungsdatum
+- [x] **Anträge-Übersicht** - Alle Services des Insassen mit Status
+- [x] **Aktuelle Zuweisung** - Aktuelle Zelle, Station, Haus
+- [x] **Zuweisungshistorie** - Vollständige Historie mit Datum/Uhrzeit
+- [x] **Responsive Design** - Optimiert für alle Geräte
 
 #### 🔄 Workflow & Automatisierung
 - [x] Automatische Status-Übergänge
 - [x] Task-Zuweisung für Mitarbeiter
 - [x] Workflow-Statistiken
 - [x] Aktivitätsprotokollierung
+- [x] **Automatische Zellen-Zuweisung** - Intelligente Platzierung
 
 #### 🎨 UI/UX
 - [x] Responsive Benutzeroberfläche
@@ -181,6 +209,9 @@ Die Anwendung verwendet ein flexibles Gruppen-basiertes Berechtigungssystem:
 - [x] Intuitive Navigation
 - [x] Sofortige UI-Aktualisierung
 - [x] System-Gruppen-Schutz
+- [x] **Drag & Drop Interface** - Intuitive Zuweisungen
+- [x] **Farbkodierte Belegung** - Visuelle Status-Anzeige
+- [x] **Tab-basierte Detail-Ansicht** - Übersichtliche Informationsdarstellung
 
 ### 🚧 Geplant
 - [ ] E-Mail-Benachrichtigungen
@@ -188,6 +219,9 @@ Die Anwendung verwendet ein flexibles Gruppen-basiertes Berechtigungssystem:
 - [ ] Erweiterte Berichte und Statistiken
 - [ ] Session-Management für Admin-Sessions
 - [ ] Erweiterte Insassen-Features (Kontoinformationen)
+- [ ] Erweiterte Hausverwaltung (Mehrere Gefängnisse)
+- [ ] Zellen-Wartung und -Instandhaltung
+- [ ] Insassen-Statistiken und -Berichte
 
 ## 🛠️ Technologie-Stack
 
@@ -252,6 +286,26 @@ Die Anwendung verwendet ein flexibles Gruppen-basiertes Berechtigungssystem:
 - `GET /api/users/:id` - Benutzer nach ID abrufen
 - `PUT /api/users/:id` - Benutzer aktualisieren
 
+### Hausverwaltung
+- `GET /api/houses` - Alle Häuser abrufen
+- `GET /api/houses/:id` - Haus nach ID abrufen
+- `POST /api/houses` - Neues Haus erstellen
+- `PUT /api/houses/:id` - Haus aktualisieren
+- `DELETE /api/houses/:id` - Haus deaktivieren
+- `GET /api/houses/:houseId/stations` - Stationen eines Hauses abrufen
+- `POST /api/houses/:houseId/stations` - Neue Station erstellen
+- `PUT /api/houses/stations/:id` - Station aktualisieren
+- `DELETE /api/houses/stations/:id` - Station deaktivieren
+- `GET /api/houses/stations/:stationId/cells` - Zellen einer Station abrufen
+- `POST /api/houses/stations/:stationId/cells` - Neue Zelle erstellen
+- `PUT /api/houses/cells/:id` - Zelle aktualisieren
+- `DELETE /api/houses/cells/:id` - Zelle deaktivieren
+- `GET /api/houses/cells/:cellId/assignments` - Zellen-Zuweisungen abrufen
+- `POST /api/houses/cells/:cellId/assignments` - Insasse zu Zelle zuweisen
+- `DELETE /api/houses/assignments/:id` - Zellen-Zuweisung entfernen
+- `GET /api/houses/assignments/current/:userId` - Aktuelle Zuweisung eines Insassen
+- `GET /api/houses/assignments/history/:userId` - Zuweisungshistorie eines Insassen
+
 ## 🔧 Entwicklung
 
 ### Backend-Entwicklung
@@ -277,6 +331,7 @@ npx prisma studio    # Datenbank-GUI öffnen
 npx prisma generate  # Prisma Client generieren
 npx prisma db push   # Schema zur Datenbank pushen
 npm run db:seed      # Testdaten erstellen
+npx db:seed          # Alternative für Windows
 ```
 
 ## 🧪 Testing
@@ -324,6 +379,23 @@ npm run build
 - **Kategoriebasierte Sortierung:** Logische Hierarchie
 - **In-App Modals:** Konsistente Benutzerführung
 
+### Hausverwaltung
+- **Haus-Übersicht:** Alle Häuser mit Belegungsstatistiken
+- **Drag & Drop:** Intuitive Insassen-Zuweisung per Drag & Drop
+- **Farbkodierung:** Visuelle Belegungsanzeige (grau=leer, blau=teilweise, türkis=voll)
+- **Automatische Zuweisung:** Intelligente Zuweisung unzugewiesener Insassen
+- **Zuweisungshistorie:** Vollständige Historie aller Zellen-Zuweisungen
+- **Suchfunktionen:** Erweiterte Filter für Häuser, Stationen, Zellen, Insassen
+- **Ausstehende Zuweisungen:** Übersicht und Verwaltung unzugewiesener Insassen
+
+### Insassen-Übersicht
+- **Zentrale Liste:** Alle Insassen mit Suchfunktion
+- **Detail-Ansicht:** Vollständige Informationen in übersichtlichen Tabs
+- **Persönliche Daten:** Name, E-Mail, Registrierungsdatum
+- **Anträge:** Alle Services des Insassen mit Status und Priorität
+- **Aktuelle Zuweisung:** Zelle, Station, Haus
+- **Zuweisungshistorie:** Vollständige Historie mit Datum und Uhrzeit
+
 ### Workflow-Engine
 - **Automatische Status-Übergänge:** Intelligente Prozesssteuerung
 - **Task-Zuweisung:** Automatische Mitarbeiter-Zuweisung
@@ -369,6 +441,18 @@ Bei Fragen oder Problemen:
 
 ## 🔄 Updates
 
+### Version 3.0.0 (Dezember 2024)
+- ✅ **Hausverwaltung** - Vollständiges Zellen-Management-System
+- ✅ **Drag & Drop Zuweisungen** - Intuitive Insassen-Zuweisung
+- ✅ **Automatische Zuweisung** - Intelligente Zuweisung unzugewiesener Insassen
+- ✅ **Zuweisungshistorie** - Vollständige Historie aller Zellen-Zuweisungen
+- ✅ **Insassen-Übersicht** - Zentrale Insassen-Verwaltung mit vollständigen Details
+- ✅ **Farbkodierte Belegung** - Visuelle Status-Anzeige (grau/blau/türkis)
+- ✅ **Erweiterte Suchfunktionen** - Filter für Häuser, Stationen, Zellen, Insassen
+- ✅ **Ausstehende Zuweisungen** - Übersicht und Verwaltung unzugewiesener Insassen
+- ✅ **Insassen-Verlegung** - Insassen zwischen Zellen verlegen
+- ✅ **Tab-basierte Detail-Ansicht** - Übersichtliche Informationsdarstellung
+
 ### Version 2.0.0 (Dezember 2024)
 - ✅ Vollständige Insassen-Features
 - ✅ Vollständige Mitarbeiter-Features
@@ -390,4 +474,4 @@ Bei Fragen oder Problemen:
 
 **Entwickelt mit ❤️ für die Gefängnisverwaltung**
 
-**Status:** ✅ Vollständig funktionsfähige Anwendung mit Insassen-, Mitarbeiter- und Admin-Features
+**Status:** ✅ Vollständig funktionsfähige Anwendung mit Insassen-, Mitarbeiter-, Admin-Features, Hausverwaltung und Insassen-Übersicht

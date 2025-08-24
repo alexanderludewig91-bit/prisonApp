@@ -46,17 +46,17 @@ const DraggableInmate: React.FC<DraggableInmateProps> = ({
           </div>
         </div>
       </div>
-             <div className="flex items-center space-x-1">
+             <div className="flex items-center space-x-2">
          {onTransfer && cell && (
            <button
              onClick={(e) => {
                e.stopPropagation();
                onTransfer({ id: assignmentId, user: inmate }, cell);
              }}
-             className="p-1 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+             className="w-8 h-8 flex items-center justify-center text-blue-600 hover:text-blue-700 hover:bg-blue-50 border border-blue-200 hover:border-blue-300 rounded-md transition-colors"
              title="Insasse verlegen"
            >
-             <ArrowRight className="h-3 w-3" />
+             <ArrowRight className="h-4 w-4" />
            </button>
          )}
          {onRemove && cell && (
@@ -65,13 +65,12 @@ const DraggableInmate: React.FC<DraggableInmateProps> = ({
                e.stopPropagation();
                onRemove({ id: assignmentId, user: inmate }, cell.number);
              }}
-             className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+             className="w-8 h-8 flex items-center justify-center text-red-600 hover:text-red-700 hover:bg-red-50 border border-red-200 hover:border-red-300 rounded-md transition-colors"
              title="Zuweisung entfernen"
            >
-             <X className="h-3 w-3" />
+             <X className="h-4 w-4" />
            </button>
          )}
-
        </div>
     </div>
   );

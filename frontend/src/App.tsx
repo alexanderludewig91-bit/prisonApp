@@ -12,6 +12,7 @@ import StaffDashboard from './pages/StaffDashboard'
 import AdminDashboard from './pages/AdminDashboard'
 import AdminLogs from './pages/AdminLogs'
 import HouseManagement from './pages/HouseManagement'
+import InmatesOverview from './pages/InmatesOverview'
 import { AuthProvider } from './contexts/AuthContext'
 import './App.css'
 
@@ -101,6 +102,9 @@ function AppContent() {
           } />
           <Route path="/house-management" element={
             isAuthenticated ? <HouseManagement /> : <Navigate to="/login" replace />
+          } />
+          <Route path="/inmates-overview" element={
+            isAuthenticated ? <InmatesOverview /> : <Navigate to="/login" replace />
           } />
         </Routes>
       </main>

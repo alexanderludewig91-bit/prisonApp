@@ -29,7 +29,9 @@ model User {
   activities Activity[] @relation("ActivityUser")
   adminLogs AdminLog[] @relation("AdminLogs")
   cellAssignments CellAssignment[] @relation("CellAssignments")
+  cellAssignmentHistory CellAssignmentHistory[] @relation("CellAssignmentHistory")
   assignmentCreatedBy CellAssignment[] @relation("AssignmentCreatedBy")
+  historyCreatedBy CellAssignmentHistory[] @relation("HistoryCreatedBy")
 
   @@map("users")
 }
@@ -187,6 +189,7 @@ model Cell {
   stationId   Int
   station     Station  @relation(fields: [stationId], references: [id], onDelete: Cascade)
   assignments CellAssignment[]
+  assignmentHistory CellAssignmentHistory[] @relation("CellAssignmentHistory")
 
   @@unique([stationId, number]) // Zellennummer muss pro Station eindeutig sein
   @@map("cells")
@@ -208,4 +211,22 @@ model CellAssignment {
 
   @@unique([cellId, userId]) // Ein Insasse kann nur einmal einer Zelle zugewiesen sein
   @@map("cell_assignments")
+}
+
+// Zuweisungshistorie für Insassen (Option 2: Separate Tabelle)
+model CellAssignmentHistory {
+  id          Int      @id @default(autoincrement())
+  action      String   // "ASSIGNED", "TRANSFERRED", "REMOVED"
+  notes       String?  // Notizen zur Aktion
+  createdAt   DateTime @default(now())
+  
+  // Beziehungen
+  cellId      Int
+  cell        Cell     @relation("CellAssignmentHistory", fields: [cellId], references: [id], onDelete: Cascade)
+  userId      Int
+  user        User     @relation("CellAssignmentHistory", fields: [userId], references: [id], onDelete: Cascade)
+  assignedBy  Int?     // Admin-ID der die Aktion vorgenommen hat (optional)
+  assignedByUser User? @relation("HistoryCreatedBy", fields: [assignedBy], references: [id])
+
+  @@map("cell_assignment_history")
 }
