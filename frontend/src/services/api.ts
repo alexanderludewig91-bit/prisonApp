@@ -139,6 +139,11 @@ export const getGroups = async () => {
   return response.data
 }
 
+export const getStaffUsers = async () => {
+  const response = await api.get('/users/staff')
+  return response.data
+}
+
 export const addUserToGroup = async (userId: number, groupId: number, role?: string) => {
   const response = await api.post(`/users/${userId}/groups`, { groupId, role })
   return response.data

@@ -5,7 +5,6 @@ import { useAuth } from './contexts/AuthContext'
 
 import Services from './pages/Services'
 import ServiceDetail from './pages/ServiceDetail'
-import Users from './pages/Users'
 import MyServices from './pages/MyServices'
 import NewService from './pages/NewService'
 import StaffDashboard from './pages/StaffDashboard'
@@ -13,6 +12,7 @@ import AdminDashboard from './pages/AdminDashboard'
 import AdminLogs from './pages/AdminLogs'
 import HouseManagement from './pages/HouseManagement'
 import InmatesOverview from './pages/InmatesOverview'
+import UserOverview from './pages/UserOverview'
 import { AuthProvider } from './contexts/AuthContext'
 import './App.css'
 
@@ -82,9 +82,6 @@ function AppContent() {
           <Route path="/services/:id" element={
             isAuthenticated ? <ServiceDetail /> : <Navigate to="/login" replace />
           } />
-          <Route path="/users" element={
-            isAuthenticated ? <Users /> : <Navigate to="/login" replace />
-          } />
           <Route path="/my-services" element={
             isAuthenticated ? <MyServices /> : <Navigate to="/login" replace />
           } />
@@ -105,6 +102,9 @@ function AppContent() {
           } />
           <Route path="/inmates-overview" element={
             isAuthenticated ? <InmatesOverview /> : <Navigate to="/login" replace />
+          } />
+          <Route path="/user-overview" element={
+            isAuthenticated ? <UserOverview /> : <Navigate to="/login" replace />
           } />
         </Routes>
       </main>

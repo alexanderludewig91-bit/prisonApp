@@ -83,69 +83,7 @@ const StaffDashboard = () => {
       setServices(response.data.services || [])
     } catch (error) {
       console.error('Fehler beim Laden der Anträge:', error)
-      // Fallback zu Mock-Daten bei Fehler
-      const mockServices: Service[] = [
-        {
-          id: 1,
-          title: 'Antrag auf Besuchserlaubnis',
-          description: 'Ich möchte meine Familie besuchen dürfen',
-          status: 'PENDING',
-          priority: 'MEDIUM',
-          createdAt: '2024-12-15T10:30:00Z',
-          createdByUser: {
-            id: 1,
-            username: 'inmate001',
-            firstName: 'Max',
-            lastName: 'Mustermann'
-          },
-          assignedToUser: {
-            id: 2,
-            username: 'staff001',
-            firstName: 'Maria',
-            lastName: 'Müller'
-          },
-          activities: [
-            {
-              id: 1,
-              action: 'created',
-              details: 'Antrag erstellt',
-              when: '2024-12-15T10:30:00Z',
-              who: 'inmate001'
-            }
-          ]
-        },
-        {
-          id: 2,
-          title: 'Dringender medizinischer Antrag',
-          description: 'Ich benötige dringend einen Arzttermin',
-          status: 'IN_PROGRESS',
-          priority: 'URGENT',
-          createdAt: '2024-12-14T14:20:00Z',
-          createdByUser: {
-            id: 2,
-            username: 'inmate002',
-            firstName: 'Anna',
-            lastName: 'Schmidt'
-          },
-          activities: [
-            {
-              id: 2,
-              action: 'created',
-              details: 'Antrag erstellt',
-              when: '2024-12-14T14:20:00Z',
-              who: 'inmate002'
-            },
-            {
-              id: 3,
-              action: 'status_changed',
-              details: 'Status zu IN_PROGRESS geändert',
-              when: '2024-12-14T15:00:00Z',
-              who: 'staff001'
-            }
-          ]
-        }
-      ]
-      setServices(mockServices)
+      setServices([])
     } finally {
       setLoading(false)
     }
@@ -161,11 +99,10 @@ const StaffDashboard = () => {
       })
     } catch (error) {
       console.error('Fehler beim Laden der Workflow-Statistiken:', error)
-      // Fallback zu Mock-Daten
       setWorkflowStats({
-        myAssignedServices: 2,
-        autoAssignmentsToday: 1,
-        workflowTransitionsToday: 3
+        myAssignedServices: 0,
+        autoAssignmentsToday: 0,
+        workflowTransitionsToday: 0
       })
     }
   }

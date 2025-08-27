@@ -88,31 +88,7 @@ const ServiceDetail = () => {
       setService(response.data)
     } catch (error) {
       console.error('Fehler beim Laden der Service-Details:', error)
-      // Fallback zu Mock-Daten
-      setService({
-        id: 1,
-        title: 'Antrag auf Besuchserlaubnis',
-        description: 'Ich möchte meine Familie besuchen dürfen. Meine Tochter hat Geburtstag und ich würde gerne dabei sein.',
-        status: 'PENDING',
-        priority: 'MEDIUM',
-        createdAt: '2024-12-15T10:30:00Z',
-        updatedAt: '2024-12-15T10:30:00Z',
-        createdByUser: {
-          id: 1,
-          username: 'inmate001',
-          firstName: 'Max',
-          lastName: 'Mustermann'
-        },
-        activities: [
-          {
-            id: 1,
-            action: 'created',
-            details: 'Antrag erstellt',
-            when: '2024-12-15T10:30:00Z',
-            who: 'inmate001'
-          }
-        ]
-      })
+      setService(null)
     } finally {
       setLoading(false)
     }
@@ -137,20 +113,7 @@ const ServiceDetail = () => {
       setComments(convertedComments)
     } catch (error) {
       console.error('Fehler beim Laden der Kommentare:', error)
-      // Fallback zu Mock-Kommentaren
-      setComments([
-        {
-          id: 1,
-          content: 'Antrag wird geprüft. Dokumente sind vollständig.',
-          createdAt: '2024-12-15T11:00:00Z',
-          user: {
-            id: 2,
-            username: 'staff001',
-            firstName: 'Maria',
-            lastName: 'Müller'
-          }
-        }
-      ])
+      setComments([])
     }
   }
 

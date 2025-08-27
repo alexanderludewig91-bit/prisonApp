@@ -35,7 +35,7 @@ const Navbar = () => {
       const staffNavigation = [
         { name: 'Mitarbeiter-Dashboard', href: '/staff-dashboard' },
         { name: 'Anträge', href: '/services' },
-        { name: 'Benutzer', href: '/users' },
+        { name: 'Benutzerübersicht', href: '/user-overview' },
         { name: 'Insassen-Übersicht', href: '/inmates-overview' }
       ]
       

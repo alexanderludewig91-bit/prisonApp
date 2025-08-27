@@ -665,53 +665,31 @@ const AdminDashboard: React.FC = () => {
     if (user && user.groups) {
       return user.groups.map((userGroup: any) => userGroup.group)
     }
-    
-    // Fallback: Verwende die Gruppen-Informationen aus der groups-API
-    return groups.filter(group => 
-      group.users.some(groupUser => groupUser.id === userId)
-    )
+    return []
   }
 
 
 
-  // Hilfsfunktion: Sammelt alle Benutzer aus Inmate-Gruppen und dedupliziert sie
-  const getInmateUsers = () => {
-    const inmateUserIds = new Set<number>()
-    const inmateUsersList: User[] = []
-    
-    // Alle Inmate-Gruppen durchgehen
-    groups.forEach(group => {
-      if (group.category === 'INMATE') {
-        // Alle Benutzer dieser Inmate-Gruppe sammeln
-        group.users.forEach(groupUser => {
-          if (!inmateUserIds.has(groupUser.id)) {
-            inmateUserIds.add(groupUser.id)
-            // Vollständige Benutzer-Informationen aus der users-Liste holen
-            const fullUser = users.find(u => u.id === groupUser.id)
-            if (fullUser) {
-              inmateUsersList.push(fullUser)
-            }
-          }
-        })
-      }
-    })
-    
-    return inmateUsersList
-  }
+
 
   // Benutzer basierend auf Tab und Suche filtern
   const getFilteredUsers = () => {
     let baseUsers: User[] = []
     
     if (activeUserTab === 'inmates') {
-      baseUsers = getInmateUsers()
-    } else if (activeUserTab === 'allUsers') {
+      // Einfache SQL-Logik: Benutzer in INMATE-Gruppen
       baseUsers = users.filter(user => 
-        !getUserGroups(user.id).some(group => group.category === 'INMATE')
+        user.groups?.some(userGroup => userGroup.group.category === 'INMATE')
+      )
+    } else if (activeUserTab === 'allUsers') {
+      // Einfache SQL-Logik: Benutzer in STAFF-Gruppen (positiver Ansatz)
+      baseUsers = users.filter(user => 
+        user.groups?.some(userGroup => userGroup.group.category === 'STAFF')
       )
     } else if (activeUserTab === 'admins') {
+      // Einfache SQL-Logik: Benutzer in ADMIN-Gruppen
       baseUsers = users.filter(user => 
-        getUserGroups(user.id).some(group => group.name === 'PS Designers')
+        user.groups?.some(userGroup => userGroup.group.name === 'PS Designers')
       )
     }
     

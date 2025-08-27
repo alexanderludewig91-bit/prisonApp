@@ -58,6 +58,52 @@ router.get('/inmates-unassigned', async (req, res) => {
   }
 })
 
+// Neue Route für STAFF-Benutzer (MUSS vor /inmates stehen!)
+router.get('/staff', async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      where: {
+        groups: {
+          some: {
+            group: {
+              category: 'STAFF'
+            }
+          }
+        }
+      },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        isActive: true,
+        createdAt: true,
+        groups: {
+          include: {
+            group: {
+              select: {
+                id: true,
+                name: true,
+                description: true,
+                category: true,
+                permissions: true,
+                isActive: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    })
+
+    res.json({ users })
+  } catch (error) {
+    console.error('Fehler beim Laden der STAFF-Benutzer:', error)
+    res.status(500).json({ error: 'Fehler beim Laden der STAFF-Benutzer' })
+  }
+})
+
 // Neue Route für Inmate-Benutzer (MUSS vor /:id stehen!)
 router.get('/inmates', async (req, res) => {
   try {
