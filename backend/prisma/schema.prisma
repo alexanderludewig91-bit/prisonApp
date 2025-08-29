@@ -71,7 +71,8 @@ model Service {
   id          Int      @id @default(autoincrement())
   title       String
   description String?
-  status      String   @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED, REJECTED
+  status      String   @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED
+  decision    String?  // APPROVED, REJECTED, null (keine Entscheidung)
   priority    String   @default("MEDIUM")  // LOW, MEDIUM, HIGH, URGENT
   number      Float?
   folderId    Int?
@@ -97,6 +98,7 @@ model Activity {
   action    String?  // Aktion (z.B. "created", "updated", "status_changed")
   details   String?  // Details der Aktion
   when      DateTime @default(now())
+  isActive  Boolean  @default(true) // Aktivitätsstatus (für Rückfragen: true=offen, false=beantwortet)
   
   // Beziehungen
   userId    Int?

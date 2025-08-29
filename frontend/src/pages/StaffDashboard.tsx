@@ -9,10 +9,11 @@ import {
   Filter,
   Search,
   Eye,
-  Edit,
   Calendar,
   User,
-  X
+  X,
+  ThumbsUp,
+  ThumbsDown
 } from 'lucide-react'
 import api from '../services/api'
 
@@ -21,6 +22,7 @@ interface Service {
   title: string
   description: string
   status: string
+  decision?: string // Neue Entscheidungs-Spalte
   priority: string
   createdAt: string
   createdByUser: {
@@ -46,6 +48,7 @@ interface Service {
 
 interface FilterState {
   status: string
+  decision: string // Neuer Filter für Entscheidungen
   priority: string
   search: string
   dateFrom: string
@@ -58,11 +61,11 @@ const StaffDashboard = () => {
   const [loading, setLoading] = useState(true)
   const [workflowStats, setWorkflowStats] = useState({
     myAssignedServices: 0,
-    autoAssignmentsToday: 0,
     workflowTransitionsToday: 0
   })
   const [filters, setFilters] = useState<FilterState>({
     status: '',
+    decision: '', // Neuer Filter
     priority: '',
     search: '',
     dateFrom: '',
@@ -94,14 +97,12 @@ const StaffDashboard = () => {
       const response = await api.get('/services/staff/workflow-stats')
       setWorkflowStats(response.data.workflowStats || {
         myAssignedServices: 0,
-        autoAssignmentsToday: 0,
         workflowTransitionsToday: 0
       })
     } catch (error) {
       console.error('Fehler beim Laden der Workflow-Statistiken:', error)
       setWorkflowStats({
         myAssignedServices: 0,
-        autoAssignmentsToday: 0,
         workflowTransitionsToday: 0
       })
     }
@@ -115,8 +116,6 @@ const StaffDashboard = () => {
         return <AlertCircle className="w-4 h-4 text-blue-500" />
       case 'COMPLETED':
         return <CheckCircle className="w-4 h-4 text-green-500" />
-      case 'REJECTED':
-        return <XCircle className="w-4 h-4 text-red-500" />
       default:
         return <Clock className="w-4 h-4 text-gray-500" />
     }
@@ -130,10 +129,31 @@ const StaffDashboard = () => {
         return 'bg-blue-100 text-blue-800'
       case 'COMPLETED':
         return 'bg-green-100 text-green-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  // Neue Funktionen für Entscheidungen
+  const getDecisionIcon = (decision?: string) => {
+    switch (decision) {
+      case 'APPROVED':
+        return <ThumbsUp className="w-4 h-4 text-green-500" />
+      case 'REJECTED':
+        return <ThumbsDown className="w-4 h-4 text-red-500" />
+      default:
+        return <Clock className="w-4 h-4 text-gray-400" />
+    }
+  }
+
+  const getDecisionColor = (decision?: string) => {
+    switch (decision) {
+      case 'APPROVED':
+        return 'bg-green-100 text-green-800'
       case 'REJECTED':
         return 'bg-red-100 text-red-800'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-gray-100 text-gray-600'
     }
   }
 
@@ -165,33 +185,33 @@ const StaffDashboard = () => {
   const handleStatusChange = async (serviceId: number, newStatus: string) => {
     try {
       await api.patch(`/services/${serviceId}/status`, { status: newStatus })
+      setMessage({ type: 'success', text: 'Status erfolgreich geändert' })
       // Service-Liste und Statistiken aktualisieren
       fetchServices()
       fetchWorkflowStats()
     } catch (error) {
       console.error('Fehler beim Ändern des Status:', error)
+      setMessage({ type: 'error', text: 'Fehler beim Ändern des Status' })
     }
   }
 
-  const handleAssignPending = async () => {
+  // Neue Funktion für Entscheidungsänderung
+  const handleDecisionChange = async (serviceId: number, newDecision: string) => {
     try {
-      await api.post('/services/staff/assign-pending')
+      await api.patch(`/services/${serviceId}/decision`, { decision: newDecision })
+      setMessage({ type: 'success', text: 'Entscheidung erfolgreich getroffen' })
       // Service-Liste und Statistiken aktualisieren
       fetchServices()
       fetchWorkflowStats()
-      setMessage({ type: 'success', text: 'PENDING Anträge wurden automatisch zugewiesen!' })
-      // Nach 3 Sekunden die Nachricht ausblenden
-      setTimeout(() => setMessage(null), 3000)
     } catch (error) {
-      console.error('Fehler beim Zuweisen der PENDING Anträge:', error)
-      setMessage({ type: 'error', text: 'Fehler beim Zuweisen der Anträge' })
-      // Nach 5 Sekunden die Fehlermeldung ausblenden
-      setTimeout(() => setMessage(null), 5000)
+      console.error('Fehler beim Treffen der Entscheidung:', error)
+      setMessage({ type: 'error', text: 'Fehler beim Treffen der Entscheidung' })
     }
   }
 
   const filteredServices = services.filter(service => {
     if (filters.status && service.status !== filters.status) return false
+    if (filters.decision && service.decision !== filters.decision) return false // Neuer Filter
     if (filters.priority && service.priority !== filters.priority) return false
     if (filters.search) {
       const searchTerm = filters.search.toLowerCase()
@@ -241,13 +261,6 @@ const StaffDashboard = () => {
              <Filter className="w-4 h-4" />
              <span>Filter</span>
            </button>
-           <button
-             onClick={handleAssignPending}
-             className="btn btn-primary flex items-center space-x-2"
-           >
-             <User className="w-4 h-4" />
-             <span>PENDING Anträge zuweisen</span>
-           </button>
          </div>
       </div>
 
@@ -281,7 +294,7 @@ const StaffDashboard = () => {
       {showFilters && (
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold mb-4">Filter</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Status
@@ -295,6 +308,20 @@ const StaffDashboard = () => {
                 <option value="PENDING">Ausstehend</option>
                 <option value="IN_PROGRESS">In Bearbeitung</option>
                 <option value="COMPLETED">Abgeschlossen</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Entscheidung
+              </label>
+              <select
+                value={filters.decision}
+                onChange={(e) => setFilters({ ...filters, decision: e.target.value })}
+                className="input"
+              >
+                <option value="">Alle Entscheidungen</option>
+                <option value="">Keine Entscheidung</option>
+                <option value="APPROVED">Genehmigt</option>
                 <option value="REJECTED">Abgelehnt</option>
               </select>
             </div>
@@ -355,90 +382,103 @@ const StaffDashboard = () => {
         </div>
       )}
 
-             {/* Statistiken */}
-       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-         <div className="bg-white rounded-lg shadow p-6">
-           <div className="flex items-center">
-             <Clock className="w-8 h-8 text-yellow-500" />
-             <div className="ml-4">
-               <p className="text-sm font-medium text-gray-600">Ausstehend</p>
-               <p className="text-2xl font-bold text-gray-900">
+             {/* Kompakte Statistiken */}
+       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+         {/* Status-Übersicht */}
+         <div className="bg-white rounded-lg shadow p-4">
+           <div className="flex items-center justify-between mb-4">
+             <h3 className="text-base font-semibold text-gray-700">Status</h3>
+             <FileText className="w-5 h-5 text-gray-400" />
+           </div>
+           <div className="space-y-3">
+             <div className="flex items-center justify-between">
+               <div className="flex items-center space-x-2">
+                 <FileText className="w-4 h-4 text-gray-500" />
+                 <span className="text-sm text-gray-600">Alle Anträge</span>
+               </div>
+               <span className="text-base font-bold text-gray-900">
+                 {services.length}
+               </span>
+             </div>
+             <div className="flex items-center justify-between">
+               <div className="flex items-center space-x-2">
+                 <Clock className="w-4 h-4 text-yellow-500" />
+                 <span className="text-sm text-gray-600">Ausstehend</span>
+               </div>
+               <span className="text-base font-bold text-gray-900">
                  {services.filter(s => s.status === 'PENDING').length}
-               </p>
+               </span>
              </div>
-           </div>
-         </div>
-         <div className="bg-white rounded-lg shadow p-6">
-           <div className="flex items-center">
-             <AlertCircle className="w-8 h-8 text-blue-500" />
-             <div className="ml-4">
-               <p className="text-sm font-medium text-gray-600">In Bearbeitung</p>
-               <p className="text-2xl font-bold text-gray-900">
+             <div className="flex items-center justify-between">
+               <div className="flex items-center space-x-2">
+                 <AlertCircle className="w-4 h-4 text-blue-500" />
+                 <span className="text-sm text-gray-600">In Bearbeitung</span>
+               </div>
+               <span className="text-base font-bold text-gray-900">
                  {services.filter(s => s.status === 'IN_PROGRESS').length}
-               </p>
+               </span>
              </div>
-           </div>
-         </div>
-         <div className="bg-white rounded-lg shadow p-6">
-           <div className="flex items-center">
-             <CheckCircle className="w-8 h-8 text-green-500" />
-             <div className="ml-4">
-               <p className="text-sm font-medium text-gray-600">Abgeschlossen</p>
-               <p className="text-2xl font-bold text-gray-900">
+             <div className="flex items-center justify-between">
+               <div className="flex items-center space-x-2">
+                 <CheckCircle className="w-4 h-4 text-green-500" />
+                 <span className="text-sm text-gray-600">Abgeschlossen</span>
+               </div>
+               <span className="text-base font-bold text-gray-900">
                  {services.filter(s => s.status === 'COMPLETED').length}
-               </p>
+               </span>
              </div>
            </div>
          </div>
-         <div className="bg-white rounded-lg shadow p-6">
-           <div className="flex items-center">
-             <XCircle className="w-8 h-8 text-red-500" />
-             <div className="ml-4">
-               <p className="text-sm font-medium text-gray-600">Abgelehnt</p>
-               <p className="text-2xl font-bold text-gray-900">
-                 {services.filter(s => s.status === 'REJECTED').length}
-               </p>
-             </div>
-           </div>
-         </div>
-       </div>
 
-               {/* Workflow-Statistiken */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
-            <div className="flex items-center">
-              <User className="w-8 h-8 text-blue-500" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Meine zugewiesenen Anträge</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {workflowStats.myAssignedServices}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
-            <div className="flex items-center">
-              <CheckCircle className="w-8 h-8 text-green-500" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Auto-Zuweisungen heute</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {workflowStats.autoAssignmentsToday}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6 border-l-4 border-purple-500">
-            <div className="flex items-center">
-              <FileText className="w-8 h-8 text-purple-500" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Workflow-Übergänge heute</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {workflowStats.workflowTransitionsToday}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+         {/* Entscheidungs-Übersicht */}
+         <div className="bg-white rounded-lg shadow p-4">
+           <div className="flex items-center justify-between mb-4">
+             <h3 className="text-base font-semibold text-gray-700">Entscheidungen</h3>
+             <ThumbsUp className="w-5 h-5 text-gray-400" />
+           </div>
+           <div className="space-y-3">
+             <div className="flex items-center justify-between">
+               <div className="flex items-center space-x-2">
+                 <ThumbsUp className="w-4 h-4 text-green-500" />
+                 <span className="text-sm text-gray-600">Genehmigt</span>
+               </div>
+               <span className="text-base font-bold text-gray-900">
+                 {services.filter(s => s.decision === 'APPROVED').length}
+               </span>
+             </div>
+             <div className="flex items-center justify-between">
+               <div className="flex items-center space-x-2">
+                 <ThumbsDown className="w-4 h-4 text-red-500" />
+                 <span className="text-sm text-gray-600">Abgelehnt</span>
+               </div>
+               <span className="text-base font-bold text-gray-900">
+                 {services.filter(s => s.decision === 'REJECTED').length}
+               </span>
+             </div>
+           </div>
+         </div>
+
+         {/* Meine Anträge */}
+         <div className="bg-white rounded-lg shadow p-4">
+           <div className="flex items-center justify-between mb-4">
+             <h3 className="text-base font-semibold text-gray-700">Meine Anträge</h3>
+             <User className="w-5 h-5 text-blue-500" />
+           </div>
+           <div className="space-y-3">
+             <div className="flex items-center justify-between">
+               <div className="flex items-center space-x-2">
+                 <User className="w-4 h-4 text-blue-500" />
+                 <span className="text-sm text-gray-600">Zugewiesene Anträge</span>
+               </div>
+               <span className="text-base font-bold text-gray-900">
+                 {workflowStats.myAssignedServices}
+               </span>
+             </div>
+           </div>
+         </div>
+
+         
+       </div>
 
               {/* Anträge Liste */}
       <div className="bg-white rounded-lg shadow">
@@ -462,7 +502,12 @@ const StaffDashboard = () => {
                         {service.status === 'PENDING' && 'Ausstehend'}
                         {service.status === 'IN_PROGRESS' && 'In Bearbeitung'}
                         {service.status === 'COMPLETED' && 'Abgeschlossen'}
-                        {service.status === 'REJECTED' && 'Abgelehnt'}
+                      </span>
+                      {getDecisionIcon(service.decision)}
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${getDecisionColor(service.decision)}`}>
+                        {!service.decision && 'Keine Entscheidung'}
+                        {service.decision === 'APPROVED' && 'Genehmigt'}
+                        {service.decision === 'REJECTED' && 'Abgelehnt'}
                       </span>
                       <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(service.priority)}`}>
                         {service.priority === 'LOW' && 'Niedrig'}
@@ -510,6 +555,14 @@ const StaffDashboard = () => {
                     <option value="PENDING">Ausstehend</option>
                     <option value="IN_PROGRESS">In Bearbeitung</option>
                     <option value="COMPLETED">Abgeschlossen</option>
+                  </select>
+                  <select
+                    value={service.decision || ''}
+                    onChange={(e) => handleDecisionChange(service.id, e.target.value)}
+                    className="input text-sm"
+                  >
+                    <option value="">Keine Entscheidung</option>
+                    <option value="APPROVED">Genehmigt</option>
                     <option value="REJECTED">Abgelehnt</option>
                   </select>
                 </div>
@@ -528,3 +581,4 @@ const StaffDashboard = () => {
 }
 
 export default StaffDashboard
+

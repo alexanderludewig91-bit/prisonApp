@@ -6,11 +6,9 @@ import {
   CheckCircle, 
   XCircle, 
   AlertCircle,
-  MessageSquare,
   User,
   Calendar,
   Edit,
-  Send,
   FileText
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
@@ -51,34 +49,29 @@ interface Service {
   }>
 }
 
-interface Comment {
-  id: number
-  content: string
-  createdAt: string
-  user: {
-    id: number
-    username: string
-    firstName: string
-    lastName: string
-  }
-}
+
 
 const ServiceDetail = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { user } = useAuth()
   const [service, setService] = useState<Service | null>(null)
-  const [comments, setComments] = useState<Comment[]>([])
   const [loading, setLoading] = useState(true)
-  const [newComment, setNewComment] = useState('')
   const [newStatus, setNewStatus] = useState('')
   const [statusReason, setStatusReason] = useState('')
   const [showStatusModal, setShowStatusModal] = useState(false)
+  
+  // Neue States für Bearbeiter-Aktionen
+  const [selectedAction, setSelectedAction] = useState<'rückfrage' | 'weiterleiten' | 'entscheiden' | 'kommentieren' | null>(null)
+  const [rückfrageText, setRückfrageText] = useState('')
+  const [selectedStaffGroup, setSelectedStaffGroup] = useState('')
+  const [weiterleitungsKommentar, setWeiterleitungsKommentar] = useState('')
+  const [kommentarText, setKommentarText] = useState('')
+  const [savingComment, setSavingComment] = useState(false)
 
   useEffect(() => {
     if (id) {
       fetchServiceDetails()
-      fetchComments()
     }
   }, [id])
 
@@ -94,54 +87,9 @@ const ServiceDetail = () => {
     }
   }
 
-  const fetchComments = async () => {
-    try {
-      const response = await api.get(`/services/${id}/comments`)
-      // Kommentare aus Activity-Format in Comment-Format konvertieren
-      const commentsData = response.data.comments || []
-      const convertedComments = commentsData.map((activity: any) => ({
-        id: activity.id,
-        content: activity.details,
-        createdAt: activity.when,
-        user: activity.user || {
-          id: 0,
-          username: activity.who,
-          firstName: activity.who,
-          lastName: ''
-        }
-      }))
-      setComments(convertedComments)
-    } catch (error) {
-      console.error('Fehler beim Laden der Kommentare:', error)
-      setComments([])
-    }
-  }
 
-  const handleAddComment = async () => {
-    if (!newComment.trim()) return
 
-    try {
-      const response = await api.post(`/services/${id}/comments`, {
-        content: newComment
-      })
-      // Neuen Kommentar in das richtige Format konvertieren
-      const newCommentData = {
-        id: response.data.comment.id,
-        content: response.data.comment.details,
-        createdAt: response.data.comment.when,
-        user: response.data.comment.user || {
-          id: 0,
-          username: response.data.comment.who,
-          firstName: response.data.comment.who,
-          lastName: ''
-        }
-      }
-      setComments([newCommentData, ...comments])
-      setNewComment('')
-    } catch (error) {
-      console.error('Fehler beim Hinzufügen des Kommentars:', error)
-    }
-  }
+
 
   const handleStatusChange = async () => {
     if (!newStatus || !statusReason.trim()) return
@@ -161,9 +109,45 @@ const ServiceDetail = () => {
       setNewStatus('')
       setStatusReason('')
       fetchServiceDetails()
-      fetchComments()
     } catch (error) {
       console.error('Fehler beim Ändern des Status:', error)
+    }
+  }
+
+  const handleSaveComment = async () => {
+    if (!kommentarText.trim()) return
+
+    setSavingComment(true)
+    try {
+      await api.post(`/services/${id}/comments`, {
+        content: kommentarText
+      })
+
+      // Kommentar erfolgreich gespeichert
+      setKommentarText('')
+      setSelectedAction(null) // Aktions-Auswahl zurücksetzen
+      fetchServiceDetails() // Aktivitätsverlauf aktualisieren
+    } catch (error) {
+      console.error('Fehler beim Speichern des Kommentars:', error)
+    } finally {
+      setSavingComment(false)
+    }
+  }
+
+  const handleSendInquiry = async () => {
+    if (!rückfrageText.trim()) return
+
+    try {
+      await api.post(`/services/${id}/inquiries`, {
+        content: rückfrageText
+      })
+
+      // Rückfrage erfolgreich gespeichert
+      setRückfrageText('')
+      setSelectedAction(null) // Aktions-Auswahl zurücksetzen
+      fetchServiceDetails() // Aktivitätsverlauf aktualisieren
+    } catch (error) {
+      console.error('Fehler beim Senden der Rückfrage:', error)
     }
   }
 
@@ -235,6 +219,25 @@ const ServiceDetail = () => {
       hour: '2-digit',
       minute: '2-digit'
     })
+  }
+
+  const getActionText = (action: string) => {
+    switch (action) {
+      case 'comment':
+        return 'Kommentar'
+      case 'inquiry':
+        return 'Rückfrage an Insassen'
+      case 'answer':
+        return 'Antwort des Insassen'
+      case 'workflow_transition':
+        return 'Status-Änderung'
+      case 'decision_made':
+        return 'Entscheidung'
+      case 'status_and_decision_updated':
+        return 'Status und Entscheidung aktualisiert'
+      default:
+        return action
+    }
   }
 
   if (loading) {
@@ -344,54 +347,160 @@ const ServiceDetail = () => {
             </div>
           </div>
 
-          {/* Kommentare */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-              <MessageSquare className="w-5 h-5" />
-              <span>Kommentare ({comments.length})</span>
-            </h2>
-            
-            <div className="space-y-4 mb-6">
-              {comments.map((comment) => (
-                <div key={comment.id} className="border-l-4 border-primary-500 pl-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center space-x-2">
-                      <span className="font-medium text-gray-900">
-                        {comment.user.firstName} {comment.user.lastName}
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        {formatDate(comment.createdAt)}
-                      </span>
+          {/* Bearbeiter-Aktionen */}
+          {(user?.groups?.some(g => g.name.includes('PS General Enforcement Service') || g.name.includes('PS Vollzugsabteilungsleitung') || g.name.includes('PS Vollzugsleitung') || g.name.includes('PS Anstaltsleitung') || g.name.includes('PS Payments Office') || g.name.includes('PS Medical Staff') || g.name === 'PS Designers')) && (
+                         <div className="bg-white rounded-lg shadow p-6">
+               <h2 className="text-xl font-semibold text-gray-900 mb-4">Sie haben folgende Auswahlmöglichkeiten:</h2>
+              
+                             {/* Aktions-Buttons */}
+               <div className="flex space-x-4 mb-6">
+                 <button
+                   onClick={() => setSelectedAction('rückfrage')}
+                   className={`px-4 py-2 rounded-lg border-2 transition-colors ${
+                     selectedAction === 'rückfrage'
+                       ? 'border-blue-500 bg-blue-50 text-blue-700'
+                       : 'border-gray-300 hover:border-gray-400'
+                   }`}
+                 >
+                   Rückfrage an Insasse
+                 </button>
+                 <button
+                   onClick={() => setSelectedAction('weiterleiten')}
+                   className={`px-4 py-2 rounded-lg border-2 transition-colors ${
+                     selectedAction === 'weiterleiten'
+                       ? 'border-blue-500 bg-blue-50 text-blue-700'
+                       : 'border-gray-300 hover:border-gray-400'
+                   }`}
+                 >
+                   Weiterleiten
+                 </button>
+                 <button
+                   onClick={() => setSelectedAction('entscheiden')}
+                   className={`px-4 py-2 rounded-lg border-2 transition-colors ${
+                     selectedAction === 'entscheiden'
+                       ? 'border-blue-500 bg-blue-50 text-blue-700'
+                       : 'border-gray-300 hover:border-gray-400'
+                   }`}
+                 >
+                   Entscheiden
+                 </button>
+                                   <button
+                    onClick={() => setSelectedAction('kommentieren')}
+                    className={`px-4 py-2 rounded-lg border-2 transition-colors ${
+                      selectedAction === 'kommentieren'
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    Kommentar erstellen
+                  </button>
+               </div>
+
+              {/* Rückfrage an Insasse */}
+              {selectedAction === 'rückfrage' && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-gray-900">
+                    Welche Rückfrage möchten Sie an den Insassen stellen?
+                  </h3>
+                  <div className="flex space-x-3">
+                    <textarea
+                      value={rückfrageText}
+                      onChange={(e) => setRückfrageText(e.target.value)}
+                      placeholder="Ihre Rückfrage..."
+                      className="flex-1 input resize-none"
+                      rows={4}
+                    />
+                                         <button
+                       onClick={handleSendInquiry}
+                       className="btn btn-primary self-end"
+                       disabled={!rückfrageText.trim()}
+                     >
+                       Rückfrage absenden
+                     </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Weiterleiten */}
+              {selectedAction === 'weiterleiten' && (
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <h3 className="text-lg font-medium text-gray-900">
+                      An wen möchten Sie den Antrag weiterleiten?
+                    </h3>
+                    <select
+                      value={selectedStaffGroup}
+                      onChange={(e) => setSelectedStaffGroup(e.target.value)}
+                      className="input"
+                    >
+                      <option value="">Staff-Gruppe auswählen</option>
+                      <option value="PS General Enforcement Service">PS General Enforcement Service</option>
+                      <option value="PS Vollzugsabteilungsleitung">PS Vollzugsabteilungsleitung</option>
+                      <option value="PS Vollzugsleitung">PS Vollzugsleitung</option>
+                      <option value="PS Anstaltsleitung">PS Anstaltsleitung</option>
+                      <option value="PS Payments Office">PS Payments Office</option>
+                      <option value="PS Medical Staff">PS Medical Staff</option>
+                    </select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-gray-700">
+                      Ihr Bearbeitungskommentar und Hinweis für den nächsten Bearbeiter
+                    </h4>
+                    <div className="flex space-x-3">
+                      <textarea
+                        value={weiterleitungsKommentar}
+                        onChange={(e) => setWeiterleitungsKommentar(e.target.value)}
+                        placeholder="Ihr Kommentar..."
+                        className="flex-1 input resize-none"
+                        rows={4}
+                      />
+                      <button
+                        className="btn btn-primary self-end"
+                        disabled={!selectedStaffGroup || !weiterleitungsKommentar.trim()}
+                      >
+                        Absenden
+                      </button>
                     </div>
                   </div>
-                  <p className="text-gray-700">{comment.content}</p>
                 </div>
-              ))}
-            </div>
+              )}
 
-            {(user?.groups?.some(g => g.name.includes('PS General Enforcement Service') || g.name.includes('PS Vollzugsabteilungsleitung') || g.name.includes('PS Vollzugsleitung') || g.name.includes('PS Anstaltsleitung') || g.name.includes('PS Payments Office') || g.name.includes('PS Medical Staff') || g.name === 'PS Designers')) && (
-              <div className="border-t pt-4">
-                <h3 className="text-sm font-medium text-gray-700 mb-2">Neuer Kommentar</h3>
-                <div className="flex space-x-2">
-                  <textarea
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Kommentar hinzufügen..."
-                    className="flex-1 input resize-none"
-                    rows={3}
-                  />
-                  <button
-                    onClick={handleAddComment}
-                    disabled={!newComment.trim()}
-                    className="btn btn-primary flex items-center space-x-2 self-end"
-                  >
-                    <Send className="w-4 h-4" />
-                    <span>Senden</span>
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+                             {/* Entscheiden */}
+               {selectedAction === 'entscheiden' && (
+                 <div className="text-center py-8">
+                   <p className="text-gray-600">Entscheidungsfunktion wird später implementiert...</p>
+                 </div>
+               )}
+
+               {/* Kommentieren */}
+               {selectedAction === 'kommentieren' && (
+                 <div className="space-y-4">
+                   <h3 className="text-lg font-medium text-gray-900">
+                     Geben Sie einen Kommentar zum Antrag ein
+                   </h3>
+                   <div className="flex space-x-3">
+                     <textarea
+                       value={kommentarText}
+                       onChange={(e) => setKommentarText(e.target.value)}
+                       placeholder="Ihr Kommentar..."
+                       className="flex-1 input resize-none"
+                       rows={4}
+                     />
+                     <button
+                       onClick={handleSaveComment}
+                       className="btn btn-primary self-end"
+                       disabled={!kommentarText.trim() || savingComment}
+                     >
+                       {savingComment ? 'Speichern...' : 'Kommentar speichern'}
+                     </button>
+                   </div>
+                 </div>
+               )}
+             </div>
+           )}
+
+          
         </div>
 
         {/* Sidebar */}
@@ -400,64 +509,36 @@ const ServiceDetail = () => {
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center space-x-2">
               <FileText className="w-5 h-5" />
-              <span>Aktivitätsverlauf</span>
+              <span>Antragsverlauf</span>
             </h2>
             
-            <div className="space-y-4">
-              {service.activities.map((activity) => (
-                <div key={activity.id} className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 w-2 h-2 bg-primary-500 rounded-full mt-2"></div>
-                  <div className="flex-1">
-                    <p className="text-sm text-gray-900">{activity.details}</p>
-                    <div className="flex items-center space-x-2 mt-1">
-                      <span className="text-xs text-gray-500">{activity.who}</span>
-                      <span className="text-xs text-gray-400">•</span>
-                      <span className="text-xs text-gray-500">{formatDate(activity.when)}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                         <div className="space-y-0">
+                              {service.activities.map((activity, index) => (
+                 <div key={activity.id}>
+                   <div className="flex items-start space-x-3 py-4">
+                     <div className="flex-1">
+                       <div className="flex items-center space-x-2 mb-1">
+                         <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                           {getActionText(activity.action)}
+                         </span>
+                       </div>
+                       <p className="text-sm text-gray-900">{activity.details}</p>
+                       <div className="flex items-center space-x-2 mt-1">
+                         <span className="text-xs text-gray-500">{activity.who}</span>
+                         <span className="text-xs text-gray-400">•</span>
+                         <span className="text-xs text-gray-500">{formatDate(activity.when)}</span>
+                       </div>
+                     </div>
+                   </div>
+                   {index < service.activities.length - 1 && (
+                     <div className="border-t border-gray-200"></div>
+                   )}
+                 </div>
+               ))}
             </div>
           </div>
 
-          {/* Schnellaktionen */}
-          {(user?.groups?.some(g => g.name.includes('PS General Enforcement Service') || g.name.includes('PS Vollzugsabteilungsleitung') || g.name.includes('PS Vollzugsleitung') || g.name.includes('PS Anstaltsleitung') || g.name.includes('PS Payments Office') || g.name.includes('PS Medical Staff') || g.name === 'PS Designers')) && (
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Schnellaktionen</h2>
-              <div className="space-y-2">
-                <button
-                  onClick={() => {
-                    setNewStatus('IN_PROGRESS')
-                    setStatusReason('Antrag wird bearbeitet')
-                    setShowStatusModal(true)
-                  }}
-                  className="w-full btn btn-secondary text-left"
-                >
-                  In Bearbeitung setzen
-                </button>
-                <button
-                  onClick={() => {
-                    setNewStatus('COMPLETED')
-                    setStatusReason('Antrag genehmigt')
-                    setShowStatusModal(true)
-                  }}
-                  className="w-full btn btn-secondary text-left"
-                >
-                  Genehmigen
-                </button>
-                <button
-                  onClick={() => {
-                    setNewStatus('REJECTED')
-                    setStatusReason('')
-                    setShowStatusModal(true)
-                  }}
-                  className="w-full btn btn-secondary text-left"
-                >
-                  Ablehnen
-                </button>
-              </div>
-            </div>
-          )}
+          
         </div>
       </div>
 
