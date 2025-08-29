@@ -74,8 +74,9 @@ model Service {
   title       String
   description String?
   status      String   @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED
-  decision    String?  // APPROVED, REJECTED, null (keine Entscheidung)
+  decision    String?  // APPROVED, REJECTED, RETURNED, null (keine Entscheidung)
   priority    String   @default("MEDIUM")  // LOW, MEDIUM, HIGH, URGENT
+  serviceType String   @default("FREETEXT") // FREETEXT, MEDICAL_APPOINTMENT, ALLOWANCE_REQUEST, etc.
   number      Float?
   folderId    Int?
   assignedTo  Int?     // Personen-Zuweisung

@@ -4,34 +4,42 @@ import { body, validationResult } from 'express-validator';
 import { authenticateToken, checkPermission, checkGroup, AuthenticatedRequest } from '../middleware/auth';
 import { logAdminActionManually } from '../middleware/adminLogging';
 
-// Vereinfachte Workflow-Regeln ohne automatische Zuweisung
+// Workflow-Regeln mit Antragstyp-Unterstützung
 interface WorkflowRule {
   fromStatus: string;
   toStatus: string;
   conditions: string[];
+  serviceType?: string; // Optional: Nur für bestimmte Antragstypen
 }
 
 const workflowRules: WorkflowRule[] = [
+  // Freitextantrag - flexible Workflows
   {
     fromStatus: 'PENDING',
     toStatus: 'IN_PROGRESS',
-    conditions: ['manual_review']
+    conditions: ['manual_review'],
+    serviceType: 'FREETEXT'
   },
   {
     fromStatus: 'PENDING',
     toStatus: 'COMPLETED',
-    conditions: ['direct_approval']
+    conditions: ['direct_approval'],
+    serviceType: 'FREETEXT'
   },
   {
     fromStatus: 'IN_PROGRESS',
     toStatus: 'COMPLETED',
-    conditions: ['all_requirements_met']
+    conditions: ['all_requirements_met'],
+    serviceType: 'FREETEXT'
   },
   {
     fromStatus: 'IN_PROGRESS',
     toStatus: 'REJECTED',
-    conditions: ['requirements_not_met']
+    conditions: ['requirements_not_met'],
+    serviceType: 'FREETEXT'
   }
+  // Hier können später spezielle Antragstypen hinzugefügt werden
+  // z.B. MEDICAL_APPOINTMENT mit strengeren Workflows
 ];
 
 const router = express.Router();
@@ -55,7 +63,7 @@ const checkRole = (allowedRoles: string[]) => {
   };
 };
 
-// Vereinfachte Workflow-Funktionen ohne automatische Zuweisung
+// Workflow-Funktionen mit Antragstyp-Unterstützung
 const checkWorkflowRules = async (serviceId: number, newStatus: string, reason?: string) => {
   try {
     const service = await prisma.service.findUnique({
@@ -65,8 +73,12 @@ const checkWorkflowRules = async (serviceId: number, newStatus: string, reason?:
 
     if (!service) return null;
 
-    // Workflow-Regel für den neuen Status finden
-    const rule = workflowRules.find(r => r.fromStatus === service.status && r.toStatus === newStatus);
+    // Workflow-Regel für den neuen Status und Antragstyp finden
+    const rule = workflowRules.find(r => 
+      r.fromStatus === service.status && 
+      r.toStatus === newStatus &&
+      (!r.serviceType || r.serviceType === (service as any).serviceType)
+    );
     
     if (!rule) return null;
 
@@ -281,7 +293,7 @@ router.post('/:id/forward', [
         recordId: service.id,
         who: who,
         action: 'forward',
-        details: `Weitergeleitet an ${group.name}. Kommentar: ${comment}`,
+        details: `Weitergeleitet an ${group.description || group.name}. Kommentar: ${comment}`,
         userId: user.id,
         groupId: Number(groupId)
       } as any
@@ -543,6 +555,13 @@ router.get('/:id', async (req: Request, res: Response) => {
             lastName: true
           }
         },
+        assignedToGroupRef: {
+          select: {
+            id: true,
+            name: true,
+            description: true
+          }
+        },
         activities: {
           orderBy: { when: 'desc' },
           include: {
@@ -556,7 +575,7 @@ router.get('/:id', async (req: Request, res: Response) => {
             }
           }
         }
-      }
+      } as any // Bypass TypeScript until Prisma client is regenerated
     });
 
     if (!service) {
@@ -615,7 +634,7 @@ router.post('/', [
     await prisma.activity.create({
       data: {
         recordId: service.id,
-        who: service.createdByUser.username,
+        who: `${service.createdByUser.firstName} ${service.createdByUser.lastName} (${service.createdByUser.username})`,
         action: 'created',
         details: `Service "${title}" erstellt`,
         userId: createdBy
@@ -814,9 +833,9 @@ router.patch('/:id/decision', [
     const { decision, reason } = req.body;
 
     // Validierung der gültigen Entscheidungen
-    const validDecisions = ['APPROVED', 'REJECTED'];
+    const validDecisions = ['APPROVED', 'REJECTED', 'RETURNED'];
     if (!validDecisions.includes(decision)) {
-      return res.status(400).json({ error: 'Ungültige Entscheidung. Gültige Werte: APPROVED, REJECTED' });
+      return res.status(400).json({ error: 'Ungültige Entscheidung. Gültige Werte: APPROVED, REJECTED, RETURNED' });
     }
 
     const service = await prisma.service.update({
@@ -864,7 +883,7 @@ router.patch('/:id/update', [
 
     // Validierung der gültigen Werte
     const validStatuses = ['PENDING', 'IN_PROGRESS', 'COMPLETED'];
-    const validDecisions = ['APPROVED', 'REJECTED'];
+    const validDecisions = ['APPROVED', 'REJECTED', 'RETURNED'];
 
     if (status && !validStatuses.includes(status)) {
       return res.status(400).json({ error: 'Ungültiger Status. Gültige Werte: PENDING, IN_PROGRESS, COMPLETED' });
@@ -963,6 +982,15 @@ router.post('/my/services', checkRole(['INMATE']), [
       return res.status(401).json({ error: 'Benutzer nicht authentifiziert' });
     }
 
+    // Benutzerdaten aus der Datenbank abrufen
+    const user = await prisma.user.findUnique({
+      where: { id: userId }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Benutzer nicht gefunden' });
+    }
+
     const service = await prisma.service.create({
       data: {
         title,
@@ -986,7 +1014,7 @@ router.post('/my/services', checkRole(['INMATE']), [
     await prisma.activity.create({
       data: {
         recordId: service.id,
-        who: req.user?.username,
+        who: `${user.firstName} ${user.lastName} (${user.username})`,
         action: 'created',
         details: 'Antrag erstellt',
         userId: userId

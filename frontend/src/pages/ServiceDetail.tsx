@@ -20,6 +20,7 @@ interface Service {
   description: string
   status: string
   priority: string
+  serviceType: string
   createdAt: string
   updatedAt: string
   createdByUser: {
@@ -33,6 +34,11 @@ interface Service {
     username: string
     firstName: string
     lastName: string
+  }
+  assignedToGroupRef?: {
+    id: number
+    name: string
+    description?: string
   }
   activities: Array<{
     id: number
@@ -267,6 +273,8 @@ const ServiceDetail = () => {
 
   const getActionText = (action: string) => {
     switch (action) {
+      case 'created':
+        return 'Antrag gestellt'
       case 'comment':
         return 'Kommentar'
       case 'inquiry':
@@ -281,8 +289,23 @@ const ServiceDetail = () => {
         return 'Entscheidung'
       case 'status_and_decision_updated':
         return 'Status und Entscheidung aktualisiert'
+      case 'returned':
+        return 'Antrag zurückgewiesen'
       default:
         return action
+    }
+  }
+
+  const getDecisionText = (decision: string) => {
+    switch (decision) {
+      case 'APPROVED':
+        return 'Genehmigt'
+      case 'REJECTED':
+        return 'Abgelehnt'
+      case 'RETURNED':
+        return 'Zurückgewiesen'
+      default:
+        return decision
     }
   }
 
@@ -389,6 +412,15 @@ const ServiceDetail = () => {
                      </p>
                    </div>
                  )}
+                 {service.assignedToGroupRef && (
+                   <div>
+                     <h3 className="text-sm font-medium text-gray-700 mb-1">Zugewiesen an Gruppe</h3>
+                     <p className="text-gray-900 flex items-center space-x-1">
+                       <User className="w-4 h-4" />
+                       <span>{service.assignedToGroupRef.description || service.assignedToGroupRef.name}</span>
+                     </p>
+                   </div>
+                 )}
                </div>
             </div>
           </div>
@@ -485,7 +517,7 @@ const ServiceDetail = () => {
                        </option>
                        {staffGroups.map((group) => (
                          <option key={group.id} value={group.id}>
-                           {group.name}
+                           {group.description || group.name}
                          </option>
                        ))}
                      </select>

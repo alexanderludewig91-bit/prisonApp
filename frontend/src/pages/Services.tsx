@@ -99,7 +99,7 @@ const Services = () => {
                     {new Date(service.createdAt).toLocaleDateString('de-DE')}
                     {service.assignedToGroupRef && (
                       <span className="ml-2 text-blue-600">
-                        • Zugewiesen an: {service.assignedToGroupRef.name}
+                        • Zugewiesen an: {service.assignedToGroupRef.description || service.assignedToGroupRef.name}
                       </span>
                     )}
                   </div>
