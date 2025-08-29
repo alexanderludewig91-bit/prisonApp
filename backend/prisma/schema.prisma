@@ -48,6 +48,8 @@ model Group {
 
   // Beziehungen
   users       UserGroup[]
+  assignedServices Service[] @relation("AssignedToGroup")
+  activities  Activity[] @relation("ActivityGroup")
 
   @@map("groups")
 }
@@ -76,12 +78,14 @@ model Service {
   priority    String   @default("MEDIUM")  // LOW, MEDIUM, HIGH, URGENT
   number      Float?
   folderId    Int?
-  assignedTo  Int?     // Neues Feld für Aufgaben-Zuweisung
+  assignedTo  Int?     // Personen-Zuweisung
+  assignedToGroup Int? // Gruppen-Zuweisung
   
   // Beziehungen
   createdBy   Int
   createdByUser User @relation("CreatedBy", fields: [createdBy], references: [id])
   assignedToUser User? @relation("AssignedTo", fields: [assignedTo], references: [id])
+  assignedToGroupRef Group? @relation("AssignedToGroup", fields: [assignedToGroup], references: [id])
   activities  Activity[] @relation("ServiceActivities")
   
   createdAt   DateTime @default(now())
@@ -103,6 +107,8 @@ model Activity {
   // Beziehungen
   userId    Int?
   user      User?    @relation("ActivityUser", fields: [userId], references: [id])
+  groupId   Int?     // Gruppen-Referenz für Gruppen-Aktivitäten
+  group     Group?   @relation("ActivityGroup", fields: [groupId], references: [id])
   service   Service? @relation("ServiceActivities", fields: [recordId], references: [id])
 
   @@map("activities")

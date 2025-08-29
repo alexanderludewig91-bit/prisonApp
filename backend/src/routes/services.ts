@@ -214,6 +214,88 @@ router.post('/:id/inquiries', [
   }
 });
 
+// Service an eine Gruppe weiterleiten
+router.post('/:id/forward', [
+  authenticateToken,
+  body('groupId').isInt().withMessage('Gruppen-ID ist erforderlich'),
+  body('comment').notEmpty().withMessage('Kommentar ist erforderlich')
+], async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { id } = req.params;
+    const { groupId, comment } = req.body;
+
+    // Service finden
+    const service = await prisma.service.findUnique({
+      where: { id: Number(id) },
+      include: { createdByUser: true }
+    });
+
+    if (!service) {
+      return res.status(404).json({ error: 'Service nicht gefunden' });
+    }
+
+    // Gruppe finden
+    const group = await prisma.group.findUnique({
+      where: { id: Number(groupId) }
+    });
+
+    if (!group) {
+      return res.status(404).json({ error: 'Gruppe nicht gefunden' });
+    }
+
+    // Aktuellen Benutzer aus dem Request holen
+    const currentUser = req.user;
+    if (!currentUser) {
+      return res.status(401).json({ error: 'Benutzer nicht authentifiziert' });
+    }
+
+    // Vollständige Benutzerdaten aus der Datenbank abrufen
+    const user = await prisma.user.findUnique({
+      where: { id: currentUser.userId }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Benutzer nicht gefunden' });
+    }
+
+    // Benutzername für Aktivität erstellen
+    const who = `${user.firstName} ${user.lastName} (${user.username})`;
+
+    // Service an Gruppe zuweisen
+    await prisma.service.update({
+      where: { id: Number(id) },
+      data: {
+        assignedToGroup: Number(groupId),
+        assignedTo: null // Personen-Zuweisung entfernen
+      } as any
+    });
+
+    // Weiterleitung als Aktivität speichern
+    const activity = await prisma.activity.create({
+      data: {
+        recordId: service.id,
+        who: who,
+        action: 'forward',
+        details: `Weitergeleitet an ${group.name}. Kommentar: ${comment}`,
+        userId: user.id,
+        groupId: Number(groupId)
+      } as any
+    });
+
+    console.log('Service weitergeleitet:', activity);
+
+    res.json({ message: 'Service erfolgreich weitergeleitet' });
+  } catch (error: any) {
+    console.error('Weiterleitung error:', error);
+    res.status(500).json({ error: 'Fehler beim Weiterleiten des Services' });
+  }
+});
+
 // Antworten auf Rückfragen zu einem Service hinzufügen
 router.post('/:id/answers', [
   authenticateToken,
@@ -288,6 +370,32 @@ router.post('/:id/answers', [
   }
 });
 
+// Verfügbare Staff-Gruppen für Weiterleitung abrufen
+router.get('/staff-groups', [
+  authenticateToken
+], async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    // Nur Staff-Gruppen abrufen (nicht Inmates, Admins, etc.)
+    const staffGroups = await prisma.group.findMany({
+      where: {
+        category: 'STAFF',
+        isActive: true
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true
+      },
+      orderBy: { name: 'asc' }
+    });
+
+    res.json({ groups: staffGroups });
+  } catch (error: any) {
+    console.error('Staff-Gruppen abrufen error:', error);
+    res.status(500).json({ error: 'Fehler beim Abrufen der Staff-Gruppen' });
+  }
+});
+
 // Rückfragen für einen Insassen abrufen
 router.get('/inquiries/:userId', [
   authenticateToken
@@ -358,11 +466,18 @@ router.get('/', async (req: Request, res: Response) => {
             lastName: true
           }
         },
+        assignedToGroupRef: {
+          select: {
+            id: true,
+            name: true,
+            description: true
+          }
+        },
         activities: {
           orderBy: { when: 'desc' },
           take: 5
         }
-      },
+      } as any, // Bypass TypeScript until Prisma client is regenerated
       orderBy: { createdAt: 'desc' },
       skip,
       take: Number(limit)

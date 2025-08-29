@@ -68,12 +68,22 @@ const ServiceDetail = () => {
   const [weiterleitungsKommentar, setWeiterleitungsKommentar] = useState('')
   const [kommentarText, setKommentarText] = useState('')
   const [savingComment, setSavingComment] = useState(false)
+  const [staffGroups, setStaffGroups] = useState<Array<{id: number, name: string, description?: string}>>([])
+  const [loadingStaffGroups, setLoadingStaffGroups] = useState(false)
+  const [forwardingService, setForwardingService] = useState(false)
 
   useEffect(() => {
     if (id) {
       fetchServiceDetails()
     }
   }, [id])
+
+  // Staff-Gruppen laden wenn Weiterleiten ausgewählt wird
+  useEffect(() => {
+    if (selectedAction === 'weiterleiten') {
+      fetchStaffGroups()
+    }
+  }, [selectedAction])
 
   const fetchServiceDetails = async () => {
     try {
@@ -131,6 +141,40 @@ const ServiceDetail = () => {
       console.error('Fehler beim Speichern des Kommentars:', error)
     } finally {
       setSavingComment(false)
+    }
+  }
+
+  const fetchStaffGroups = async () => {
+    setLoadingStaffGroups(true)
+    try {
+      const response = await api.get('/services/staff-groups')
+      setStaffGroups(response.data.groups || [])
+    } catch (error) {
+      console.error('Fehler beim Laden der Staff-Gruppen:', error)
+    } finally {
+      setLoadingStaffGroups(false)
+    }
+  }
+
+  const handleForwardService = async () => {
+    if (!selectedStaffGroup || !weiterleitungsKommentar.trim()) return
+
+    setForwardingService(true)
+    try {
+      await api.post(`/services/${id}/forward`, {
+        groupId: parseInt(selectedStaffGroup),
+        comment: weiterleitungsKommentar
+      })
+
+      // Weiterleitung erfolgreich
+      setSelectedStaffGroup('')
+      setWeiterleitungsKommentar('')
+      setSelectedAction(null) // Aktions-Auswahl zurücksetzen
+      fetchServiceDetails() // Aktivitätsverlauf aktualisieren
+    } catch (error) {
+      console.error('Fehler beim Weiterleiten des Services:', error)
+    } finally {
+      setForwardingService(false)
     }
   }
 
@@ -229,6 +273,8 @@ const ServiceDetail = () => {
         return 'Rückfrage an Insassen'
       case 'answer':
         return 'Antwort des Insassen'
+      case 'forward':
+        return 'Weiterleitung'
       case 'workflow_transition':
         return 'Status-Änderung'
       case 'decision_made':
@@ -421,50 +467,53 @@ const ServiceDetail = () => {
                 </div>
               )}
 
-              {/* Weiterleiten */}
-              {selectedAction === 'weiterleiten' && (
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <h3 className="text-lg font-medium text-gray-900">
-                      An wen möchten Sie den Antrag weiterleiten?
-                    </h3>
-                    <select
-                      value={selectedStaffGroup}
-                      onChange={(e) => setSelectedStaffGroup(e.target.value)}
-                      className="input"
-                    >
-                      <option value="">Staff-Gruppe auswählen</option>
-                      <option value="PS General Enforcement Service">PS General Enforcement Service</option>
-                      <option value="PS Vollzugsabteilungsleitung">PS Vollzugsabteilungsleitung</option>
-                      <option value="PS Vollzugsleitung">PS Vollzugsleitung</option>
-                      <option value="PS Anstaltsleitung">PS Anstaltsleitung</option>
-                      <option value="PS Payments Office">PS Payments Office</option>
-                      <option value="PS Medical Staff">PS Medical Staff</option>
-                    </select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-gray-700">
-                      Ihr Bearbeitungskommentar und Hinweis für den nächsten Bearbeiter
-                    </h4>
-                    <div className="flex space-x-3">
-                      <textarea
-                        value={weiterleitungsKommentar}
-                        onChange={(e) => setWeiterleitungsKommentar(e.target.value)}
-                        placeholder="Ihr Kommentar..."
-                        className="flex-1 input resize-none"
-                        rows={4}
-                      />
-                      <button
-                        className="btn btn-primary self-end"
-                        disabled={!selectedStaffGroup || !weiterleitungsKommentar.trim()}
-                      >
-                        Absenden
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
+                             {/* Weiterleiten */}
+               {selectedAction === 'weiterleiten' && (
+                 <div className="space-y-4">
+                   <div className="flex items-center space-x-3">
+                     <h3 className="text-lg font-medium text-gray-900">
+                       An wen möchten Sie den Antrag weiterleiten?
+                     </h3>
+                     <select
+                       value={selectedStaffGroup}
+                       onChange={(e) => setSelectedStaffGroup(e.target.value)}
+                       className="input"
+                       disabled={loadingStaffGroups}
+                     >
+                       <option value="">
+                         {loadingStaffGroups ? 'Lade Gruppen...' : 'Staff-Gruppe auswählen'}
+                       </option>
+                       {staffGroups.map((group) => (
+                         <option key={group.id} value={group.id}>
+                           {group.name}
+                         </option>
+                       ))}
+                     </select>
+                   </div>
+                   
+                   <div className="space-y-2">
+                     <h4 className="text-sm font-medium text-gray-700">
+                       Ihr Bearbeitungskommentar und Hinweis für den nächsten Bearbeiter
+                     </h4>
+                     <div className="flex space-x-3">
+                       <textarea
+                         value={weiterleitungsKommentar}
+                         onChange={(e) => setWeiterleitungsKommentar(e.target.value)}
+                         placeholder="Ihr Kommentar..."
+                         className="flex-1 input resize-none"
+                         rows={4}
+                       />
+                       <button
+                         onClick={handleForwardService}
+                         className="btn btn-primary self-end"
+                         disabled={!selectedStaffGroup || !weiterleitungsKommentar.trim() || forwardingService}
+                       >
+                         {forwardingService ? 'Weiterleiten...' : 'Absenden'}
+                       </button>
+                     </div>
+                   </div>
+                 </div>
+               )}
 
                              {/* Entscheiden */}
                {selectedAction === 'entscheiden' && (

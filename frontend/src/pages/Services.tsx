@@ -97,6 +97,11 @@ const Services = () => {
                   <div className="mt-2 text-xs text-gray-500">
                     Erstellt von {service.createdByUser?.firstName} {service.createdByUser?.lastName} am{' '}
                     {new Date(service.createdAt).toLocaleDateString('de-DE')}
+                    {service.assignedToGroupRef && (
+                      <span className="ml-2 text-blue-600">
+                        • Zugewiesen an: {service.assignedToGroupRef.name}
+                      </span>
+                    )}
                   </div>
                 </div>
               ))}
