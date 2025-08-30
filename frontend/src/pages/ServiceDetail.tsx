@@ -28,6 +28,8 @@ interface Service {
     username: string
     firstName: string
     lastName: string
+    email: string
+    createdAt: string
   }
   assignedToUser?: {
     id: number
@@ -39,6 +41,17 @@ interface Service {
     id: number
     name: string
     description?: string
+  }
+  createdByUserAssignment?: {
+    cell: {
+      number: string
+      station: {
+        name: string
+        house: {
+          name: string
+        }
+      }
+    }
   }
   activities: Array<{
     id: number
@@ -68,8 +81,10 @@ const ServiceDetail = () => {
   const [showStatusModal, setShowStatusModal] = useState(false)
   
   // Neue States für Bearbeiter-Aktionen
-  const [selectedAction, setSelectedAction] = useState<'rückfrage' | 'weiterleiten' | 'entscheiden' | 'kommentieren' | null>(null)
+  const [selectedAction, setSelectedAction] = useState<'insassen-kontaktieren' | 'weiterleiten' | 'entscheiden' | 'kommentieren' | null>(null)
+  const [selectedContactType, setSelectedContactType] = useState<'rückfrage' | 'information' | null>(null)
   const [rückfrageText, setRückfrageText] = useState('')
+  const [informationText, setInformationText] = useState('')
   const [selectedStaffGroup, setSelectedStaffGroup] = useState('')
   const [weiterleitungsKommentar, setWeiterleitungsKommentar] = useState('')
   const [kommentarText, setKommentarText] = useState('')
@@ -77,6 +92,10 @@ const ServiceDetail = () => {
   const [staffGroups, setStaffGroups] = useState<Array<{id: number, name: string, description?: string}>>([])
   const [loadingStaffGroups, setLoadingStaffGroups] = useState(false)
   const [forwardingService, setForwardingService] = useState(false)
+  const [showStatusChangeDialog, setShowStatusChangeDialog] = useState(false)
+  const [pendingComment, setPendingComment] = useState('')
+  const [selectedDecision, setSelectedDecision] = useState<'APPROVED' | 'REJECTED' | 'RETURNED' | null>(null)
+  const [decisionReason, setDecisionReason] = useState('')
 
   useEffect(() => {
     if (id) {
@@ -133,10 +152,22 @@ const ServiceDetail = () => {
   const handleSaveComment = async () => {
     if (!kommentarText.trim()) return
 
+    // Prüfen ob Status "PENDING" ist und Dialog anzeigen
+    if (service?.status === 'PENDING') {
+      setPendingComment(kommentarText)
+      setShowStatusChangeDialog(true)
+      return
+    }
+
+    // Normaler Kommentar-Speichervorgang
+    await saveComment(kommentarText)
+  }
+
+  const saveComment = async (commentText: string) => {
     setSavingComment(true)
     try {
       await api.post(`/services/${id}/comments`, {
-        content: kommentarText
+        content: commentText
       })
 
       // Kommentar erfolgreich gespeichert
@@ -148,6 +179,28 @@ const ServiceDetail = () => {
     } finally {
       setSavingComment(false)
     }
+  }
+
+  const handleStatusChangeDialog = async (changeStatus: boolean) => {
+    setShowStatusChangeDialog(false)
+    
+    // Kommentar speichern
+    await saveComment(pendingComment)
+    
+    // Status ändern wenn gewünscht
+    if (changeStatus) {
+      try {
+        await api.patch(`/services/${id}/status`, {
+          status: 'IN_PROGRESS',
+          reason: 'Automatische Status-Änderung nach Kommentar'
+        })
+        fetchServiceDetails() // Service-Details aktualisieren
+      } catch (error) {
+        console.error('Fehler beim Ändern des Status:', error)
+      }
+    }
+    
+    setPendingComment('')
   }
 
   const fetchStaffGroups = async () => {
@@ -198,6 +251,24 @@ const ServiceDetail = () => {
       fetchServiceDetails() // Aktivitätsverlauf aktualisieren
     } catch (error) {
       console.error('Fehler beim Senden der Rückfrage:', error)
+    }
+  }
+
+  const handleSendInformation = async () => {
+    if (!informationText.trim()) return
+
+    try {
+      await api.post(`/services/${id}/information`, {
+        information: informationText
+      })
+
+      // Information erfolgreich gespeichert
+      setInformationText('')
+      setSelectedAction(null) // Aktions-Auswahl zurücksetzen
+      setSelectedContactType(null) // Kontakttyp zurücksetzen
+      fetchServiceDetails() // Aktivitätsverlauf aktualisieren
+    } catch (error) {
+      console.error('Fehler beim Senden der Information:', error)
     }
   }
 
@@ -281,10 +352,14 @@ const ServiceDetail = () => {
         return 'Rückfrage an Insassen'
       case 'answer':
         return 'Antwort des Insassen'
+      case 'information':
+        return 'Information an Insassen gesendet'
       case 'forward':
         return 'Weiterleitung'
       case 'workflow_transition':
         return 'Status-Änderung'
+      case 'status_changed':
+        return 'Statusänderung'
       case 'decision_made':
         return 'Entscheidung'
       case 'status_and_decision_updated':
@@ -345,7 +420,7 @@ const ServiceDetail = () => {
           </button>
           <div>
             <h1 className="text-3xl font-bold text-gray-900">{service.title}</h1>
-            <p className="text-gray-600 mt-1">Antrag #{service.id}</p>
+            <p className="text-gray-600 mt-1">Freitextantrag #{service.id} vom {formatDate(service.createdAt)}</p>
           </div>
         </div>
         {(user?.groups?.some(g => g.name.includes('PS General Enforcement Service') || g.name.includes('PS Vollzugsabteilungsleitung') || g.name.includes('PS Vollzugsleitung') || g.name.includes('PS Anstaltsleitung') || g.name.includes('PS Payments Office') || g.name.includes('PS Medical Staff') || g.name === 'PS Designers')) && (
@@ -362,10 +437,18 @@ const ServiceDetail = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Hauptinhalt */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Service Details */}
+                    {/* Service Details */}
           <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Antragsdetails</h2>
+            <div className="flex items-center justify-between mb-6">
+              {/* Gruppenzuweisung oben links */}
+              {service.assignedToGroupRef && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-1">
+                  <span className="text-xs font-medium text-blue-600">Zugewiesen an: </span>
+                  <span className="text-sm text-blue-800">{service.assignedToGroupRef.description || service.assignedToGroupRef.name}</span>
+                </div>
+              )}
+              
+              {/* Status und Priorität oben rechts */}
               <div className="flex items-center space-x-2">
                 {getStatusIcon(service.status)}
                 <span className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(service.status)}`}>
@@ -380,48 +463,56 @@ const ServiceDetail = () => {
               </div>
             </div>
             
-            <div className="space-y-4">
+            <div className="space-y-6">
+              {/* Antragsteller mit allen Informationen kompakt */}
               <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-2">Beschreibung</h3>
-                <p className="text-gray-900 bg-gray-50 p-4 rounded-lg">
-                  {service.description}
-                </p>
+                <h3 className="text-sm font-medium text-gray-700 mb-3">Antragsteller</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <h4 className="text-xs font-medium text-gray-500 mb-1">Name</h4>
+                    <p className="text-sm text-gray-900">{service.createdByUser.firstName} {service.createdByUser.lastName}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-medium text-gray-500 mb-1">Buchnummer</h4>
+                    <p className="text-sm text-gray-900">{service.createdByUser.username}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-medium text-gray-500 mb-1">E-Mail</h4>
+                    <p className="text-sm text-gray-900">{service.createdByUser.email}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-medium text-gray-500 mb-1">Registriert am</h4>
+                    <p className="text-sm text-gray-900">
+                      {new Date(service.createdByUser.createdAt).toLocaleDateString('de-DE')}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-medium text-gray-500 mb-1">Aktuelle Zuweisung</h4>
+                    <p className="text-sm text-gray-900">
+                      {service.createdByUserAssignment ? 
+                        `${service.createdByUserAssignment.cell.number} - ${service.createdByUserAssignment.cell.station.name} ${service.createdByUserAssignment.cell.station.house.name}` : 
+                        'Keine Zuweisung'
+                      }
+                    </p>
+                  </div>
+                </div>
               </div>
-              
-                             <div className="grid grid-cols-2 gap-4">
-                 <div>
-                   <h3 className="text-sm font-medium text-gray-700 mb-1">Antragsteller</h3>
-                   <p className="text-gray-900 flex items-center space-x-1">
-                     <User className="w-4 h-4" />
-                     <span>{service.createdByUser.firstName} {service.createdByUser.lastName}</span>
-                   </p>
-                 </div>
-                 <div>
-                   <h3 className="text-sm font-medium text-gray-700 mb-1">Erstellt am</h3>
-                   <p className="text-gray-900 flex items-center space-x-1">
-                     <Calendar className="w-4 h-4" />
-                     <span>{formatDate(service.createdAt)}</span>
-                   </p>
-                 </div>
-                 {service.assignedToUser && (
-                   <div>
-                     <h3 className="text-sm font-medium text-gray-700 mb-1">Zugewiesen an</h3>
-                     <p className="text-gray-900 flex items-center space-x-1">
-                       <User className="w-4 h-4" />
-                       <span>{service.assignedToUser.firstName} {service.assignedToUser.lastName}</span>
-                     </p>
-                   </div>
-                 )}
-                 {service.assignedToGroupRef && (
-                   <div>
-                     <h3 className="text-sm font-medium text-gray-700 mb-1">Zugewiesen an Gruppe</h3>
-                     <p className="text-gray-900 flex items-center space-x-1">
-                       <User className="w-4 h-4" />
-                       <span>{service.assignedToGroupRef.description || service.assignedToGroupRef.name}</span>
-                     </p>
-                   </div>
-                 )}
-               </div>
+
+              {/* Trennlinie */}
+              <div className="border-t border-gray-200 my-6"></div>
+
+              {/* Antragstitel und Beschreibung ganz unten */}
+              <div>
+                <div className="mb-4">
+                  <span className="text-sm font-medium text-gray-700">Betreff: </span>
+                  <span className="text-gray-900 font-medium">{service.title}</span>
+                </div>
+                
+                <div>
+                  <span className="text-sm font-medium text-gray-700">Beschreibung: </span>
+                  <span className="text-gray-900">{service.description}</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -433,14 +524,14 @@ const ServiceDetail = () => {
                              {/* Aktions-Buttons */}
                <div className="flex space-x-4 mb-6">
                  <button
-                   onClick={() => setSelectedAction('rückfrage')}
+                   onClick={() => setSelectedAction('insassen-kontaktieren')}
                    className={`px-4 py-2 rounded-lg border-2 transition-colors ${
-                     selectedAction === 'rückfrage'
+                     selectedAction === 'insassen-kontaktieren'
                        ? 'border-blue-500 bg-blue-50 text-blue-700'
                        : 'border-gray-300 hover:border-gray-400'
                    }`}
                  >
-                   Rückfrage an Insasse
+                   Insassen kontaktieren
                  </button>
                  <button
                    onClick={() => setSelectedAction('weiterleiten')}
@@ -474,28 +565,84 @@ const ServiceDetail = () => {
                   </button>
                </div>
 
-              {/* Rückfrage an Insasse */}
-              {selectedAction === 'rückfrage' && (
+              {/* Insassen kontaktieren */}
+              {selectedAction === 'insassen-kontaktieren' && (
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium text-gray-900">
-                    Welche Rückfrage möchten Sie an den Insassen stellen?
+                    Wie möchten Sie den Insassen kontaktieren?
                   </h3>
-                  <div className="flex space-x-3">
-                    <textarea
-                      value={rückfrageText}
-                      onChange={(e) => setRückfrageText(e.target.value)}
-                      placeholder="Ihre Rückfrage..."
-                      className="flex-1 input resize-none"
-                      rows={4}
-                    />
-                                         <button
-                       onClick={handleSendInquiry}
-                       className="btn btn-primary self-end"
-                       disabled={!rückfrageText.trim()}
-                     >
-                       Rückfrage absenden
-                     </button>
+                  <div className="flex space-x-4">
+                    <button
+                      onClick={() => setSelectedContactType('rückfrage')}
+                      className={`px-4 py-2 rounded-lg border-2 transition-colors ${
+                        selectedContactType === 'rückfrage'
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      Rückfrage an Insassen
+                    </button>
+                    <button
+                      onClick={() => setSelectedContactType('information')}
+                      className={`px-4 py-2 rounded-lg border-2 transition-colors ${
+                        selectedContactType === 'information'
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      Information an Insassen
+                    </button>
                   </div>
+                  
+                  {/* Rückfrage an Insasse */}
+                  {selectedContactType === 'rückfrage' && (
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-medium text-gray-900">
+                        Welche Rückfrage möchten Sie an den Insassen stellen?
+                      </h3>
+                      <div className="flex space-x-3">
+                        <textarea
+                          value={rückfrageText}
+                          onChange={(e) => setRückfrageText(e.target.value)}
+                          placeholder="Ihre Rückfrage..."
+                          className="flex-1 input resize-none"
+                          rows={4}
+                        />
+                        <button
+                          onClick={handleSendInquiry}
+                          className="btn btn-primary self-end"
+                          disabled={!rückfrageText.trim()}
+                        >
+                          Rückfrage absenden
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Information an Insasse */}
+                  {selectedContactType === 'information' && (
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-medium text-gray-900">
+                        Welche Information möchten Sie an den Insassen senden?
+                      </h3>
+                      <div className="flex space-x-3">
+                        <textarea
+                          value={informationText}
+                          onChange={(e) => setInformationText(e.target.value)}
+                          placeholder="Ihre Information..."
+                          className="flex-1 input resize-none"
+                          rows={4}
+                        />
+                        <button
+                          onClick={handleSendInformation}
+                          className="btn btn-primary self-end"
+                          disabled={!informationText.trim()}
+                        >
+                          Information absenden
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -549,8 +696,75 @@ const ServiceDetail = () => {
 
                              {/* Entscheiden */}
                {selectedAction === 'entscheiden' && (
-                 <div className="text-center py-8">
-                   <p className="text-gray-600">Entscheidungsfunktion wird später implementiert...</p>
+                 <div className="space-y-4">
+                   <h3 className="text-lg font-medium text-gray-900">
+                     Welche Entscheidung möchten Sie treffen?
+                   </h3>
+                   <div className="grid grid-cols-3 gap-3">
+                     <button
+                       onClick={() => setSelectedDecision('APPROVED')}
+                       className={`flex items-center justify-center p-4 border rounded-lg transition-colors ${
+                         selectedDecision === 'APPROVED'
+                           ? 'border-green-500 bg-green-50'
+                           : 'border-gray-200 hover:bg-gray-50'
+                       }`}
+                     >
+                       <div className="flex items-center space-x-3">
+                         <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                         <span className="font-medium text-gray-900">Genehmigen</span>
+                       </div>
+                     </button>
+                     
+                     <button
+                       onClick={() => setSelectedDecision('REJECTED')}
+                       className={`flex items-center justify-center p-4 border rounded-lg transition-colors ${
+                         selectedDecision === 'REJECTED'
+                           ? 'border-red-500 bg-red-50'
+                           : 'border-gray-200 hover:bg-gray-50'
+                       }`}
+                     >
+                       <div className="flex items-center space-x-3">
+                         <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                         <span className="font-medium text-gray-900">Ablehnen</span>
+                       </div>
+                     </button>
+                     
+                     <button
+                       onClick={() => setSelectedDecision('RETURNED')}
+                       className={`flex items-center justify-center p-4 border rounded-lg transition-colors ${
+                         selectedDecision === 'RETURNED'
+                           ? 'border-yellow-500 bg-yellow-50'
+                           : 'border-gray-200 hover:bg-gray-50'
+                       }`}
+                     >
+                       <div className="flex items-center space-x-3">
+                         <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                         <span className="font-medium text-gray-900">Zurückweisen</span>
+                       </div>
+                     </button>
+                   </div>
+                   
+                   {/* Begründungsfeld */}
+                   {selectedDecision && (
+                     <div className="space-y-3">
+                       <div className="flex space-x-3">
+                         <textarea
+                           value={decisionReason}
+                           onChange={(e) => setDecisionReason(e.target.value)}
+                           placeholder="Bitte Begründung angeben"
+                           className="flex-1 input resize-none"
+                           rows={4}
+                         />
+                         <button
+                           onClick={() => {/* TODO: Implementierung */}}
+                           className="btn btn-primary self-end"
+                           disabled={!decisionReason.trim()}
+                         >
+                           Entscheidung speichern
+                         </button>
+                       </div>
+                     </div>
+                   )}
                  </div>
                )}
 
@@ -685,8 +899,39 @@ const ServiceDetail = () => {
           </div>
         </div>
       )}
+
+      {/* Status-Änderung Dialog bei Kommentar */}
+      {showStatusChangeDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Status-Änderung
+            </h3>
+            
+            <p className="text-gray-700 mb-6">
+              Der Status des Antrages ist aktuell <em>ausstehend</em>. Möchten Sie den Antrag auf <em>in Bearbeitung</em> setzen?
+            </p>
+            
+            <div className="flex space-x-3">
+              <button
+                onClick={() => handleStatusChangeDialog(false)}
+                className="btn btn-secondary flex-1"
+              >
+                Nein
+              </button>
+              <button
+                onClick={() => handleStatusChangeDialog(true)}
+                className="btn btn-primary flex-1"
+              >
+                Ja
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
 export default ServiceDetail
+

@@ -13,37 +13,27 @@ interface WorkflowRule {
 }
 
 const workflowRules: WorkflowRule[] = [
-  // Freitextantrag - flexible Workflows
-  {
-    fromStatus: 'PENDING',
-    toStatus: 'IN_PROGRESS',
-    conditions: ['manual_review'],
-    serviceType: 'FREETEXT'
-  },
-  {
-    fromStatus: 'PENDING',
-    toStatus: 'COMPLETED',
-    conditions: ['direct_approval'],
-    serviceType: 'FREETEXT'
-  },
-  {
-    fromStatus: 'IN_PROGRESS',
-    toStatus: 'COMPLETED',
-    conditions: ['all_requirements_met'],
-    serviceType: 'FREETEXT'
-  },
-  {
-    fromStatus: 'IN_PROGRESS',
-    toStatus: 'REJECTED',
-    conditions: ['requirements_not_met'],
-    serviceType: 'FREETEXT'
-  }
-  // Hier können später spezielle Antragstypen hinzugefügt werden
-  // z.B. MEDICAL_APPOINTMENT mit strengeren Workflows
+  // Workflow-Regeln werden später gemeinsam definiert
 ];
 
 const router = express.Router();
 const prisma = new PrismaClient();
+
+// Hilfsfunktion für Status-Text-Übersetzung
+const getStatusText = (status: string) => {
+  switch (status) {
+    case 'PENDING':
+      return 'Ausstehend'
+    case 'IN_PROGRESS':
+      return 'In Bearbeitung'
+    case 'COMPLETED':
+      return 'Abgeschlossen'
+    case 'REJECTED':
+      return 'Abgelehnt'
+    default:
+      return status
+  }
+}
 
 // Middleware für Rollenprüfung (Legacy - wird durch checkPermission ersetzt)
 const checkRole = (allowedRoles: string[]) => {
@@ -83,7 +73,7 @@ const checkWorkflowRules = async (serviceId: number, newStatus: string, reason?:
     if (!rule) return null;
 
     // Aktivität für Workflow-Übergang loggen
-    const workflowDetails = `Status zu "${newStatus}" geändert. ${reason ? `Grund: ${reason}` : ''}`;
+    const workflowDetails = `Der Status wurde auf ${getStatusText(newStatus)} gesetzt. ${reason ? `Grund: ${reason}` : ''}`;
 
     await prisma.activity.create({
       data: {
@@ -382,6 +372,67 @@ router.post('/:id/answers', [
   }
 });
 
+// Information an Insassen senden
+router.post('/:id/information', [
+  authenticateToken,
+  body('information').notEmpty().withMessage('Information ist erforderlich')
+], async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { id } = req.params;
+    const { information } = req.body;
+
+    // Service finden
+    const service = await prisma.service.findUnique({
+      where: { id: Number(id) }
+    });
+
+    if (!service) {
+      return res.status(404).json({ error: 'Service nicht gefunden' });
+    }
+
+    // Aktuellen Benutzer aus dem Request holen
+    const currentUser = req.user;
+    if (!currentUser) {
+      return res.status(401).json({ error: 'Benutzer nicht authentifiziert' });
+    }
+
+    // Vollständige Benutzerdaten aus der Datenbank abrufen
+    const user = await prisma.user.findUnique({
+      where: { id: currentUser.userId }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Benutzer nicht gefunden' });
+    }
+
+    // Benutzername für Aktivität erstellen
+    const who = `${user.firstName} ${user.lastName} (${user.username})`;
+
+    // Information als Aktivität speichern
+    const activity = await prisma.activity.create({
+      data: {
+        recordId: service.id,
+        who: who,
+        action: 'information',
+        details: information,
+        userId: user.id
+      }
+    });
+
+    console.log('Information gespeichert:', activity);
+
+    res.json({ message: 'Information erfolgreich gesendet' });
+  } catch (error: any) {
+    console.error('Information senden error:', error);
+    res.status(500).json({ error: 'Fehler beim Senden der Information' });
+  }
+});
+
 // Verfügbare Staff-Gruppen für Weiterleitung abrufen
 router.get('/staff-groups', [
   authenticateToken
@@ -446,6 +497,45 @@ router.get('/inquiries/:userId', [
   } catch (error: any) {
     console.error('Rückfragen abrufen error:', error);
     res.status(500).json({ error: 'Fehler beim Abrufen der Rückfragen' });
+  }
+});
+
+// Informationen für einen Benutzer abrufen
+router.get('/information/:userId', [
+  authenticateToken
+], async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { userId } = req.params;
+    console.log('Suche Informationen für Benutzer:', userId);
+
+    // Services des Insassen mit Informationen finden
+    const servicesWithInformation = await prisma.service.findMany({
+      where: {
+        createdBy: Number(userId),
+        activities: {
+          some: {
+            action: 'information'
+          } as any
+        }
+      },
+      include: {
+        activities: {
+          where: {
+            action: 'information'
+          } as any,
+          orderBy: { when: 'desc' }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    console.log('Gefundene Services mit Informationen:', servicesWithInformation.length);
+    console.log('Services:', servicesWithInformation);
+
+    res.json({ services: servicesWithInformation });
+  } catch (error: any) {
+    console.error('Informationen abrufen error:', error);
+    res.status(500).json({ error: 'Fehler beim Abrufen der Informationen' });
   }
 });
 
@@ -552,7 +642,9 @@ router.get('/:id', async (req: Request, res: Response) => {
             id: true,
             username: true,
             firstName: true,
-            lastName: true
+            lastName: true,
+            email: true,
+            createdAt: true
           }
         },
         assignedToGroupRef: {
@@ -582,7 +674,37 @@ router.get('/:id', async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Service nicht gefunden' });
     }
 
-    res.json(service);
+    // Aktuelle Zuweisung des Antragsstellers abrufen
+    let currentAssignment = null;
+    try {
+      currentAssignment = await prisma.cellAssignment.findFirst({
+        where: {
+          userId: service.createdBy,
+          isActive: true
+        },
+        include: {
+          cell: {
+            include: {
+              station: {
+                include: {
+                  house: true
+                }
+              }
+            }
+          }
+        }
+      });
+    } catch (assignmentError) {
+      console.log('Keine Zuweisung gefunden für Benutzer:', service.createdBy);
+    }
+
+    // Service mit Zuweisungsinformationen erweitern
+    const serviceWithAssignment = {
+      ...service,
+      createdByUserAssignment: currentAssignment
+    };
+
+    res.json(serviceWithAssignment);
 
   } catch (error: any) {
     console.error('Get service error:', error);
@@ -609,6 +731,37 @@ router.post('/', [
     // TODO: Benutzer-ID aus JWT Token extrahieren
     const createdBy = 1; // Temporär
 
+    // Workflow-Regel: Freitextanträge von Insassen automatisch PS General Enforcement Service zuweisen
+    let assignedToGroup = null;
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: createdBy },
+        include: {
+          userGroups: {
+            include: {
+              group: true
+            }
+          }
+        }
+      } as any);
+
+      // Prüfen ob der Benutzer ein Insasse ist (PS Inmates Gruppe)
+      const isInmate = (user as any)?.userGroups?.some((ug: any) => ug.group.name === 'PS Inmates');
+      
+      if (isInmate) {
+        // Gruppe "PS General Enforcement Service" finden
+        const enforcementGroup = await prisma.group.findFirst({
+          where: { name: 'PS General Enforcement Service' }
+        });
+        
+        if (enforcementGroup) {
+          assignedToGroup = enforcementGroup.id;
+        }
+      }
+    } catch (error) {
+      console.log('Fehler bei Workflow-Regel:', error);
+    }
+
     const service = await prisma.service.create({
       data: {
         title,
@@ -616,7 +769,8 @@ router.post('/', [
         status: status || 'PENDING',
         priority: priority || 'MEDIUM',
         number: number ? Number(number) : null,
-        createdBy
+        createdBy,
+        assignedToGroup: assignedToGroup as any
       },
       include: {
         createdByUser: {
@@ -628,18 +782,36 @@ router.post('/', [
           }
         }
       }
-    });
+    } as any);
 
     // Aktivität loggen
     await prisma.activity.create({
       data: {
         recordId: service.id,
-        who: `${service.createdByUser.firstName} ${service.createdByUser.lastName} (${service.createdByUser.username})`,
+        who: `${(service as any).createdByUser.firstName} ${(service as any).createdByUser.lastName} (${(service as any).createdByUser.username})`,
         action: 'created',
         details: `Service "${title}" erstellt`,
         userId: createdBy
       }
     });
+
+    // Aktivität für automatische Gruppenzuweisung loggen (falls vorhanden)
+    if (assignedToGroup) {
+      const enforcementGroup = await prisma.group.findFirst({
+        where: { name: 'PS General Enforcement Service' }
+      });
+      
+      await prisma.activity.create({
+        data: {
+          recordId: service.id,
+          who: 'System',
+          action: 'forward',
+          details: `Automatisch zugewiesen an ${enforcementGroup?.description || enforcementGroup?.name}`,
+          userId: createdBy,
+          groupId: assignedToGroup as any
+        } as any
+      });
+    }
 
     res.status(201).json(service);
 
@@ -749,9 +921,10 @@ router.delete('/:id', async (req: Request, res: Response) => {
 
 // Status-Änderung
 router.patch('/:id/status', [
+  authenticateToken,
   body('status').notEmpty().withMessage('Status ist erforderlich'),
   body('reason').optional()
-], async (req: Request, res: Response) => {
+], async (req: AuthenticatedRequest, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -760,6 +933,24 @@ router.patch('/:id/status', [
 
     const { id } = req.params;
     const { status, reason } = req.body;
+
+    // Aktuellen Benutzer aus dem Request holen
+    const currentUser = req.user;
+    if (!currentUser) {
+      return res.status(401).json({ error: 'Benutzer nicht authentifiziert' });
+    }
+
+    // Vollständige Benutzerdaten aus der Datenbank abrufen
+    const user = await prisma.user.findUnique({
+      where: { id: currentUser.userId }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Benutzer nicht gefunden' });
+    }
+
+    // Benutzername für Aktivität erstellen
+    const who = `${user.firstName} ${user.lastName} (${user.username})`;
 
     // Validierung der gültigen Status
     const validStatuses = ['PENDING', 'IN_PROGRESS', 'COMPLETED'];
@@ -796,16 +987,16 @@ router.patch('/:id/status', [
     // Wenn keine Workflow-Regel gefunden wurde, normale Aktivität loggen
     if (!workflowRule) {
       const activityDetails = reason 
-        ? `Status zu "${status}" geändert. Grund: ${reason}`
-        : `Status zu "${status}" geändert`;
+        ? `Status geändert zu ${getStatusText(status)}`
+        : `Status geändert zu ${getStatusText(status)}`;
 
       await prisma.activity.create({
         data: {
           recordId: service.id,
-          who: service.createdByUser.username,
+          who: who,
           action: 'status_changed',
           details: activityDetails,
-          userId: service.createdBy
+          userId: user.id
         }
       });
     }
@@ -906,9 +1097,9 @@ router.patch('/:id/update', [
     // Aktivität loggen
     let activityDetails = '';
     if (status && decision) {
-      activityDetails = `Status zu "${status}" und Entscheidung "${decision}" geändert. ${reason ? `Grund: ${reason}` : ''}`;
+      activityDetails = `Der Status wurde auf ${getStatusText(status)} gesetzt und Entscheidung "${decision}" getroffen. ${reason ? `Grund: ${reason}` : ''}`;
     } else if (status) {
-      activityDetails = `Status zu "${status}" geändert. ${reason ? `Grund: ${reason}` : ''}`;
+      activityDetails = `Der Status wurde auf ${getStatusText(status)} gesetzt. ${reason ? `Grund: ${reason}` : ''}`;
     } else if (decision) {
       activityDetails = `Entscheidung "${decision}" getroffen. ${reason ? `Grund: ${reason}` : ''}`;
     }
@@ -991,12 +1182,40 @@ router.post('/my/services', checkRole(['INMATE']), [
       return res.status(404).json({ error: 'Benutzer nicht gefunden' });
     }
 
+    // Workflow-Regel: Freitextanträge von Insassen automatisch PS General Enforcement Service zuweisen
+    let assignedToGroup = null;
+    try {
+      // Prüfen ob der Benutzer ein Insasse ist (PS Inmates Gruppe)
+      const userGroups = await prisma.userGroup.findMany({
+        where: { userId: userId },
+        include: {
+          group: true
+        }
+      } as any);
+      
+      const isInmate = userGroups.some((ug: any) => ug.group.name === 'PS Inmates');
+      
+      if (isInmate) {
+        // Gruppe "PS General Enforcement Service" finden
+        const enforcementGroup = await prisma.group.findFirst({
+          where: { name: 'PS General Enforcement Service' }
+        });
+        
+        if (enforcementGroup) {
+          assignedToGroup = enforcementGroup.id;
+        }
+      }
+    } catch (error) {
+      console.log('Fehler bei Workflow-Regel:', error);
+    }
+
     const service = await prisma.service.create({
       data: {
         title,
         description,
         priority,
-        createdBy: userId
+        createdBy: userId,
+        assignedToGroup: assignedToGroup as any
       },
       include: {
         createdByUser: {
@@ -1008,7 +1227,7 @@ router.post('/my/services', checkRole(['INMATE']), [
           }
         }
       }
-    });
+    } as any);
 
     // Aktivität erstellen
     await prisma.activity.create({
@@ -1020,6 +1239,24 @@ router.post('/my/services', checkRole(['INMATE']), [
         userId: userId
       }
     });
+
+    // Aktivität für automatische Gruppenzuweisung loggen (falls vorhanden)
+    if (assignedToGroup) {
+      const enforcementGroup = await prisma.group.findFirst({
+        where: { name: 'PS General Enforcement Service' }
+      });
+      
+      await prisma.activity.create({
+        data: {
+          recordId: service.id,
+          who: 'System',
+          action: 'forward',
+          details: `Automatisch zugewiesen an ${enforcementGroup?.description || enforcementGroup?.name}`,
+          userId: userId,
+          groupId: assignedToGroup as any
+        } as any
+      });
+    }
 
     res.status(201).json({
       message: 'Antrag erfolgreich erstellt',
@@ -1265,71 +1502,6 @@ router.post('/:id/comments', checkRole(['STAFF', 'ADMIN']), [
   } catch (error: any) {
     console.error('Add comment error:', error);
     res.status(500).json({ error: 'Fehler beim Hinzufügen des Kommentars' });
-  }
-});
-
-// Status-Änderung mit Workflow-Unterstützung
-router.patch('/:id/status', [
-  body('status').notEmpty().withMessage('Status ist erforderlich'),
-  body('reason').optional()
-], async (req: Request, res: Response) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    const { id } = req.params;
-    const { status, reason } = req.body;
-
-    const service = await prisma.service.update({
-      where: { id: Number(id) },
-      data: { status },
-      include: {
-        createdByUser: {
-          select: {
-            id: true,
-            username: true,
-            firstName: true,
-            lastName: true
-          }
-        },
-        assignedToUser: {
-          select: {
-            id: true,
-            username: true,
-            firstName: true,
-            lastName: true
-          }
-        }
-      }
-    });
-
-    // Workflow-Regeln prüfen und anwenden
-    const workflowRule = await checkWorkflowRules(Number(id), status, reason);
-
-    // Wenn keine Workflow-Regel gefunden wurde, normale Aktivität loggen
-    if (!workflowRule) {
-      const activityDetails = reason 
-        ? `Status zu "${status}" geändert. Grund: ${reason}`
-        : `Status zu "${status}" geändert`;
-
-      await prisma.activity.create({
-        data: {
-          recordId: service.id,
-          who: service.createdByUser.username,
-          action: 'status_changed',
-          details: activityDetails,
-          userId: service.createdBy
-        }
-      });
-    }
-
-    res.json(service);
-
-  } catch (error: any) {
-    console.error('Update status error:', error);
-    res.status(500).json({ error: 'Fehler beim Aktualisieren des Status' });
   }
 });
 

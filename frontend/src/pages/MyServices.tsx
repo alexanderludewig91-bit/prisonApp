@@ -31,10 +31,28 @@ interface ServiceWithInquiries {
   }>
 }
 
+interface ServiceWithInformation {
+  id: number
+  title: string
+  description: string
+  status: string
+  priority: string
+  createdAt: string
+  updatedAt: string
+  activities: Array<{
+    id: number
+    action: string
+    details: string
+    when: string
+    who: string
+  }>
+}
+
 const MyServices = () => {
   const { user } = useAuth()
   const [services, setServices] = useState<Service[]>([])
   const [servicesWithInquiries, setServicesWithInquiries] = useState<ServiceWithInquiries[]>([])
+  const [servicesWithInformation, setServicesWithInformation] = useState<ServiceWithInformation[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedInquiry, setSelectedInquiry] = useState<ServiceWithInquiries | null>(null)
   const [inquiryResponse, setInquiryResponse] = useState('')
@@ -66,6 +84,12 @@ const MyServices = () => {
           const inquiriesResponse = await api.get(`/services/inquiries/${user.id}`)
           console.log('Rückfragen geladen:', inquiriesResponse.data)
           setServicesWithInquiries(inquiriesResponse.data.services || [])
+          
+          // Informationen laden
+          console.log('Lade Informationen für Benutzer:', user.id)
+          const informationResponse = await api.get(`/services/information/${user.id}`)
+          console.log('Informationen geladen:', informationResponse.data)
+          setServicesWithInformation(informationResponse.data.services || [])
         }
       } catch (error) {
         console.error('Fehler beim Laden der Daten:', error)
@@ -174,6 +198,43 @@ const MyServices = () => {
           Hier sehen Sie alle Ihre eingereichten Anträge und deren Status.
         </p>
       </div>
+
+      {/* Informationen zu Anträgen */}
+      {servicesWithInformation.length > 0 && (
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
+              <FileText className="h-5 w-5 text-green-500" />
+              <span>Informationen zu Anträgen ({servicesWithInformation.length})</span>
+            </h2>
+          </div>
+          <div className="divide-y divide-gray-200">
+            {servicesWithInformation.map((service) => (
+              <div 
+                key={service.id} 
+                className="px-6 py-4 hover:bg-gray-50"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <FileText className="h-5 w-5 text-green-500" />
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900">
+                        Information zum Antrag "{service.title}"
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {service.activities[0]?.details}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Information erhalten am {new Date(service.activities[0]?.when || '').toLocaleDateString('de-DE')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Rückfragen zu Anträgen */}
       {servicesWithInquiries.length > 0 && (
