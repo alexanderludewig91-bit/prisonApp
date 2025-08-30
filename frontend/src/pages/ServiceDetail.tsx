@@ -18,6 +18,7 @@ interface Service {
   description: string
   status: string
   priority: string
+  decision?: string | null
   serviceType: string
   createdAt: string
   updatedAt: string
@@ -51,6 +52,12 @@ interface Service {
       }
     }
   }
+  decisionDetails?: {
+    decision: string
+    reason: string
+    who: string
+    when: string
+  } | null
   activities: Array<{
     id: number
     action: string
@@ -76,10 +83,12 @@ const ServiceDetail = () => {
   const [loading, setLoading] = useState(true)
   const [newStatus, setNewStatus] = useState('')
   const [statusReason, setStatusReason] = useState('')
+  const [newDecision, setNewDecision] = useState('')
+  const [manualDecisionReason, setManualDecisionReason] = useState('')
   const [showStatusModal, setShowStatusModal] = useState(false)
   
   // Neue States für Bearbeiter-Aktionen
-  const [selectedAction, setSelectedAction] = useState<'insassen-kontaktieren' | 'weiterleiten' | 'entscheiden' | 'kommentieren' | null>(null)
+  const [selectedAction, setSelectedAction] = useState<'insassen-kontaktieren' | 'weiterleiten' | 'entscheiden' | 'kommentieren' | 'personal-notification' | null>(null)
   const [selectedContactType, setSelectedContactType] = useState<'rückfrage' | 'information' | null>(null)
   const [rückfrageText, setRückfrageText] = useState('')
   const [informationText, setInformationText] = useState('')
@@ -96,6 +105,10 @@ const ServiceDetail = () => {
   const [decisionReason, setDecisionReason] = useState('')
   const [showDecisionConfirmationModal, setShowDecisionConfirmationModal] = useState(false)
   const [showAvdNotificationModal, setShowAvdNotificationModal] = useState(false)
+  const [personalNotificationDetails, setPersonalNotificationDetails] = useState('')
+  const [showStatusToInProgressModal, setShowStatusToInProgressModal] = useState(false)
+  const [showPriorityModal, setShowPriorityModal] = useState(false)
+  const [newPriority, setNewPriority] = useState('')
 
   useEffect(() => {
     if (id) {
@@ -127,25 +140,33 @@ const ServiceDetail = () => {
 
 
   const handleStatusChange = async () => {
-    if (!newStatus || !statusReason.trim()) return
+    if ((!newStatus && !newDecision) || (!statusReason.trim() && !manualDecisionReason.trim())) return
 
     try {
-      await api.patch(`/services/${id}/status`, { 
-        status: newStatus,
-        reason: statusReason
-      })
-      
-      // Kommentar hinzufügen
-      await api.post(`/services/${id}/comments`, {
-        content: `Status geändert zu "${getStatusText(newStatus)}". Grund: ${statusReason}`
-      })
+      // Status ändern falls ausgewählt
+      if (newStatus && statusReason.trim()) {
+        await api.patch(`/services/${id}/status`, { 
+          status: newStatus,
+          reason: statusReason
+        })
+      }
+
+      // Entscheidung ändern falls ausgewählt
+      if (newDecision && manualDecisionReason.trim()) {
+        await api.patch(`/services/${id}/decision`, {
+          decision: newDecision,
+          reason: manualDecisionReason
+        })
+      }
 
       setShowStatusModal(false)
       setNewStatus('')
       setStatusReason('')
+      setNewDecision('')
+      setManualDecisionReason('')
       fetchServiceDetails()
     } catch (error) {
-      console.error('Fehler beim Ändern des Status:', error)
+      console.error('Fehler beim Ändern des Status/der Entscheidung:', error)
     }
   }
 
@@ -286,6 +307,79 @@ const ServiceDetail = () => {
     }
   }
 
+  const handlePriorityChange = async () => {
+    try {
+      await api.patch(`/services/${id}/priority`, {
+        priority: newPriority || null
+      })
+
+      // Erfolgreich geändert - UI zurücksetzen
+      setShowPriorityModal(false)
+      setNewPriority('')
+      
+      // Service-Details neu laden
+      fetchServiceDetails()
+      
+    } catch (error) {
+      console.error('Fehler beim Ändern der Priorität:', error)
+      alert('Fehler beim Ändern der Priorität. Bitte versuchen Sie es erneut.')
+    }
+  }
+
+  const handlePersonalNotification = () => {
+    setSelectedAction('personal-notification')
+    setPersonalNotificationDetails('Ich habe dem Insassen die Entscheidung persönlich eröffnet. Seine Reaktion war: ')
+  }
+
+  const confirmPersonalNotification = async () => {
+    if (!personalNotificationDetails.trim()) {
+      alert('Bitte geben Sie Details zur persönlichen Eröffnung an.')
+      return
+    }
+
+    try {
+      await api.post(`/services/${id}/personal-notification-completed`, {
+        details: personalNotificationDetails
+      })
+
+      // Erfolgreich abgeschlossen - UI zurücksetzen
+      setPersonalNotificationDetails('')
+      setSelectedAction(null)
+      
+      // Service-Details neu laden
+      fetchServiceDetails()
+      
+      // Erfolg wird durch das Neuladen der Service-Details angezeigt
+    } catch (error) {
+      console.error('Fehler beim Dokumentieren der persönlichen Eröffnung:', error)
+      alert('Fehler beim Dokumentieren der persönlichen Eröffnung. Bitte versuchen Sie es erneut.')
+    }
+  }
+
+  const handleStatusToInProgress = () => {
+    setShowStatusToInProgressModal(true)
+  }
+
+  const confirmStatusToInProgress = async () => {
+    try {
+      await api.patch(`/services/${id}/status`, {
+        status: 'IN_PROGRESS',
+        reason: 'Status manuell auf In Bearbeitung gesetzt'
+      })
+
+      // Modal schließen
+      setShowStatusToInProgressModal(false)
+      
+      // Service-Details neu laden
+      fetchServiceDetails()
+      
+      // Erfolg wird durch das Neuladen der Service-Details angezeigt
+    } catch (error) {
+      console.error('Fehler beim Ändern des Status:', error)
+      alert('Fehler beim Ändern des Status. Bitte versuchen Sie es erneut.')
+    }
+  }
+
   const fetchStaffGroups = async () => {
     setLoadingStaffGroups(true)
     try {
@@ -402,16 +496,40 @@ const ServiceDetail = () => {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'LOW':
-        return 'bg-gray-100 text-gray-800'
-      case 'MEDIUM':
-        return 'bg-blue-100 text-blue-800'
       case 'HIGH':
         return 'bg-orange-100 text-orange-800'
       case 'URGENT':
         return 'bg-red-100 text-red-800'
       default:
         return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  const getDecisionColor = (decision: string | null) => {
+    if (!decision) return 'bg-gray-100 text-gray-800'
+    switch (decision) {
+      case 'APPROVED':
+        return 'bg-green-100 text-green-800'
+      case 'REJECTED':
+        return 'bg-red-100 text-red-800'
+      case 'RETURNED':
+        return 'bg-yellow-100 text-yellow-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  const getDecisionText = (decision: string | null) => {
+    if (!decision) return 'Keine Entscheidung'
+    switch (decision) {
+      case 'APPROVED':
+        return 'Genehmigt'
+      case 'REJECTED':
+        return 'Abgelehnt'
+      case 'RETURNED':
+        return 'Zurückgewiesen'
+      default:
+        return decision
     }
   }
 
@@ -447,13 +565,22 @@ const ServiceDetail = () => {
         return 'Entscheidung'
       case 'personal_notification':
         return 'Persönliche Eröffnung'
+      case 'personal_notification_completed':
+        return 'Persönliche Eröffnung durchgeführt'
       case 'status_and_decision_updated':
         return 'Status und Entscheidung aktualisiert'
+      case 'priority_changed':
+        return 'Priorität geändert'
       case 'returned':
         return 'Antrag zurückgewiesen'
       default:
         return action
     }
+  }
+
+  // Prüfen ob eine Entscheidung getroffen wurde
+  const hasDecisionBeenMade = () => {
+    return service?.decision !== null && service?.decision !== undefined
   }
 
 
@@ -497,15 +624,29 @@ const ServiceDetail = () => {
             <p className="text-gray-600 mt-1">Freitextantrag #{service.id} vom {formatDate(service.createdAt)}</p>
           </div>
         </div>
-        {(user?.groups?.some(g => g.name.includes('PS General Enforcement Service') || g.name.includes('PS Vollzugsabteilungsleitung') || g.name.includes('PS Vollzugsleitung') || g.name.includes('PS Anstaltsleitung') || g.name.includes('PS Payments Office') || g.name.includes('PS Medical Staff') || g.name === 'PS Designers')) && (
-          <button
-            onClick={() => setShowStatusModal(true)}
-            className="btn btn-primary flex items-center space-x-2"
-          >
-            <Edit className="w-4 h-4" />
-            <span>Status ändern</span>
-          </button>
-        )}
+        <div className="flex space-x-3">
+          {(user?.groups?.some(g => g.name.includes('PS General Enforcement Service') || g.name.includes('PS Vollzugsabteilungsleitung') || g.name.includes('PS Vollzugsleitung') || g.name.includes('PS Anstaltsleitung') || g.name.includes('PS Payments Office') || g.name.includes('PS Medical Staff') || g.name === 'PS Designers')) && (
+            <>
+              <button
+                onClick={() => setShowStatusModal(true)}
+                className="btn btn-primary flex items-center space-x-2"
+              >
+                <Edit className="w-4 h-4" />
+                <span>Status oder Entscheidung ändern</span>
+              </button>
+              <button
+                onClick={() => {
+                  setNewPriority(service.priority || '')
+                  setShowPriorityModal(true)
+                }}
+                className="btn btn-primary flex items-center space-x-2"
+              >
+                <Edit className="w-4 h-4" />
+                <span>Antrag priorisieren</span>
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -515,25 +656,35 @@ const ServiceDetail = () => {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between mb-6">
               {/* Gruppenzuweisung oben links */}
-              {service.assignedToGroupRef && (
+              {service.assignedToGroupRef ? (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-1">
                   <span className="text-xs font-medium text-blue-600">Zugewiesen an: </span>
                   <span className="text-sm text-blue-800">{service.assignedToGroupRef.description || service.assignedToGroupRef.name}</span>
                 </div>
+              ) : (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-1">
+                  <span className="text-xs font-medium text-gray-600">Zugewiesen an: </span>
+                  <span className="text-sm text-gray-800">Antrag nicht zugewiesen</span>
+                </div>
               )}
               
-              {/* Status und Priorität oben rechts */}
+              {/* Entscheidung, Status und Priorität oben rechts */}
               <div className="flex items-center space-x-2">
+                {service.decision && (
+                  <span className={`px-3 py-1 text-sm font-medium rounded-full ${getDecisionColor(service.decision)}`}>
+                    {getDecisionText(service.decision)}
+                  </span>
+                )}
                 {getStatusIcon(service.status)}
                 <span className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(service.status)}`}>
                   {getStatusText(service.status)}
                 </span>
-                <span className={`px-3 py-1 text-sm font-medium rounded-full ${getPriorityColor(service.priority)}`}>
-                  {service.priority === 'LOW' && 'Niedrig'}
-                  {service.priority === 'MEDIUM' && 'Mittel'}
-                  {service.priority === 'HIGH' && 'Hoch'}
-                  {service.priority === 'URGENT' && 'Dringend'}
-                </span>
+                {service.priority && (
+                  <span className={`px-3 py-1 text-sm font-medium rounded-full ${getPriorityColor(service.priority)}`}>
+                    {service.priority === 'HIGH' && 'Hohe Priorität'}
+                    {service.priority === 'URGENT' && 'Höchste Priorität'}
+                  </span>
+                )}
               </div>
             </div>
             
@@ -582,18 +733,49 @@ const ServiceDetail = () => {
                   <span className="text-gray-900 font-medium">{service.title}</span>
                 </div>
                 
-                <div>
+                <div className="mb-4">
                   <span className="text-sm font-medium text-gray-700">Beschreibung: </span>
                   <span className="text-gray-900">{service.description}</span>
                 </div>
+
+                {/* Entscheidungsinformationen */}
+                {service.decisionDetails && (
+                  <div className="border-t border-gray-200 pt-4">
+                    <div className="mb-3">
+                      <span className="text-sm font-medium text-gray-700">Entscheidung: </span>
+                      <span className={`px-2 py-1 text-sm font-medium rounded-full ${getDecisionColor(service.decisionDetails.decision)}`}>
+                        {getDecisionText(service.decisionDetails.decision)}
+                      </span>
+                    </div>
+                    
+                    <div className="mb-3">
+                      <span className="text-sm font-medium text-gray-700">Begründung: </span>
+                      <span className="text-gray-900">{service.decisionDetails.reason}</span>
+                    </div>
+                    
+                    <div className="text-xs text-gray-500">
+                      Entscheidung getroffen von {service.decisionDetails.who} am {formatDate(service.decisionDetails.when)}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
           {/* Bearbeiter-Aktionen */}
-          {(user?.groups?.some(g => g.name.includes('PS General Enforcement Service') || g.name.includes('PS Vollzugsabteilungsleitung') || g.name.includes('PS Vollzugsleitung') || g.name.includes('PS Anstaltsleitung') || g.name.includes('PS Payments Office') || g.name.includes('PS Medical Staff') || g.name === 'PS Designers')) && (
+          {(user?.groups?.some(g => g.name.includes('PS General Enforcement Service') || g.name.includes('PS Vollzugsabteilungsleitung') || g.name.includes('PS Vollzugsleitung') || g.name.includes('PS Anstaltsleitung') || g.name.includes('PS Payments Office') || g.name.includes('PS Medical Staff') || g.name === 'PS Designers')) && service.status !== 'COMPLETED' && (
                          <div className="bg-white rounded-lg shadow p-6">
-               <h2 className="text-xl font-semibold text-gray-900 mb-4">Sie haben folgende Auswahlmöglichkeiten:</h2>
+               <div className="flex items-center justify-between mb-4">
+                 <h2 className="text-xl font-semibold text-gray-900">Sie haben folgende Auswahlmöglichkeiten:</h2>
+                 {service.status === 'PENDING' && (
+                   <button
+                     onClick={handleStatusToInProgress}
+                     className="btn btn-primary text-sm"
+                   >
+                     Status ändern: In Bearbeitung
+                   </button>
+                 )}
+               </div>
               
                              {/* Aktions-Buttons */}
                <div className="flex space-x-4 mb-6">
@@ -617,26 +799,40 @@ const ServiceDetail = () => {
                  >
                    Weiterleiten
                  </button>
-                 <button
-                   onClick={() => setSelectedAction('entscheiden')}
+                 {!service.decision && (
+                   <button
+                     onClick={() => setSelectedAction('entscheiden')}
+                     className={`px-4 py-2 rounded-lg border-2 transition-colors ${
+                       selectedAction === 'entscheiden'
+                         ? 'border-blue-500 bg-blue-50 text-blue-700'
+                         : 'border-gray-300 hover:border-gray-400'
+                     }`}
+                   >
+                     Entscheiden
+                   </button>
+                 )}
+                                                    <button
+                   onClick={() => setSelectedAction('kommentieren')}
                    className={`px-4 py-2 rounded-lg border-2 transition-colors ${
-                     selectedAction === 'entscheiden'
+                     selectedAction === 'kommentieren'
                        ? 'border-blue-500 bg-blue-50 text-blue-700'
                        : 'border-gray-300 hover:border-gray-400'
                    }`}
                  >
-                   Entscheiden
+                   Kommentar erstellen
                  </button>
-                                   <button
-                    onClick={() => setSelectedAction('kommentieren')}
-                    className={`px-4 py-2 rounded-lg border-2 transition-colors ${
-                      selectedAction === 'kommentieren'
-                        ? 'border-blue-500 bg-blue-50 text-blue-700'
-                        : 'border-gray-300 hover:border-gray-400'
-                    }`}
-                  >
-                    Kommentar erstellen
-                  </button>
+                 {hasDecisionBeenMade() && (
+                   <button
+                     onClick={handlePersonalNotification}
+                     className={`px-4 py-2 rounded-lg border-2 transition-colors ${
+                       selectedAction === 'personal-notification'
+                         ? 'border-green-500 bg-green-50 text-green-700'
+                         : 'border-gray-300 hover:border-gray-400'
+                     }`}
+                   >
+                     Persönliche Eröffnung
+                   </button>
+                 )}
                </div>
 
               {/* Insassen kontaktieren */}
@@ -837,23 +1033,23 @@ const ServiceDetail = () => {
                       <h4 className="text-sm font-medium text-gray-700">
                         Was soll als nächstes passieren?
                       </h4>
-                      <div className="space-y-2">
+                      <div className="flex space-x-2">
                         <button
                           onClick={handleCompleteWithDecision}
-                          className="w-full px-4 py-2 text-left border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                          className="btn btn-primary flex-1 text-center"
                         >
                           Ergebnis an den Insassen senden und Bearbeitung abschließen
                         </button>
                         <button
                           onClick={handleAvdNotification}
-                          className="w-full px-4 py-2 text-left border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                          className="btn btn-primary flex-1 text-center"
                         >
                           Ergebnis persönlich durch den AVD eröffnen lassen
                         </button>
                         {(selectedDecision === 'APPROVED' || selectedDecision === 'REJECTED') && (
                           <button
                             onClick={() => {/* TODO: Implementierung */}}
-                            className="w-full px-4 py-2 text-left border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                            className="btn btn-primary flex-1 text-center"
                           >
                             Weiterführende Bearbeitung
                           </button>
@@ -884,6 +1080,31 @@ const ServiceDetail = () => {
                        disabled={!kommentarText.trim() || savingComment}
                      >
                        {savingComment ? 'Speichern...' : 'Kommentar speichern'}
+                     </button>
+                   </div>
+                 </div>
+               )}
+
+               {/* Persönliche Eröffnung */}
+               {selectedAction === 'personal-notification' && (
+                 <div className="space-y-4">
+                   <h3 className="text-lg font-medium text-gray-900">
+                     Dokumentieren Sie die persönliche Eröffnung
+                   </h3>
+                   <div className="flex space-x-3">
+                     <textarea
+                       value={personalNotificationDetails}
+                       onChange={(e) => setPersonalNotificationDetails(e.target.value)}
+                       placeholder="Beschreiben Sie die persönliche Eröffnung..."
+                       className="flex-1 input resize-none"
+                       rows={4}
+                     />
+                     <button
+                       onClick={confirmPersonalNotification}
+                       className="btn btn-primary self-end"
+                       disabled={!personalNotificationDetails.trim()}
+                     >
+                       Antrag abschließen
                      </button>
                    </div>
                  </div>
@@ -933,18 +1154,18 @@ const ServiceDetail = () => {
         </div>
       </div>
 
-      {/* Status-Änderung Modal */}
+      {/* Status- und Entscheidungs-Änderung Modal */}
       {showStatusModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Status ändern
+              Status oder Entscheidung ändern
             </h3>
             
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Neuer Status
+                  Neuer Status (optional)
                 </label>
                 <select
                   value={newStatus}
@@ -955,20 +1176,49 @@ const ServiceDetail = () => {
                   <option value="PENDING">Ausstehend</option>
                   <option value="IN_PROGRESS">In Bearbeitung</option>
                   <option value="COMPLETED">Abgeschlossen</option>
-                  <option value="REJECTED">Abgelehnt</option>
                 </select>
               </div>
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Begründung
+                  Begründung für Status-Änderung
                 </label>
                 <textarea
                   value={statusReason}
                   onChange={(e) => setStatusReason(e.target.value)}
                   placeholder="Grund für die Status-Änderung..."
                   className="input w-full resize-none"
-                  rows={3}
+                  rows={2}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Neue Entscheidung (optional)
+                </label>
+                <select
+                  value={newDecision}
+                  onChange={(e) => setNewDecision(e.target.value)}
+                  className="input w-full"
+                >
+                  <option value="">Entscheidung auswählen</option>
+                  <option value="APPROVED">Genehmigen</option>
+                  <option value="REJECTED">Ablehnen</option>
+                  <option value="RETURNED">Zurückweisen</option>
+                  <option value="RESET">Entscheidung zurücksetzen</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Begründung für Entscheidungs-Änderung
+                </label>
+                <textarea
+                  value={manualDecisionReason}
+                  onChange={(e) => setManualDecisionReason(e.target.value)}
+                  placeholder="Grund für die Entscheidungs-Änderung..."
+                  className="input w-full resize-none"
+                  rows={2}
                 />
               </div>
             </div>
@@ -979,6 +1229,8 @@ const ServiceDetail = () => {
                   setShowStatusModal(false)
                   setNewStatus('')
                   setStatusReason('')
+                  setNewDecision('')
+                  setManualDecisionReason('')
                 }}
                 className="btn btn-secondary flex-1"
               >
@@ -986,10 +1238,56 @@ const ServiceDetail = () => {
               </button>
               <button
                 onClick={handleStatusChange}
-                disabled={!newStatus || !statusReason.trim()}
+                disabled={(!newStatus && !newDecision) || (!statusReason.trim() && !manualDecisionReason.trim())}
                 className="btn btn-primary flex-1"
               >
-                Status ändern
+                Änderungen speichern
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Prioritäts-Änderung Modal */}
+      {showPriorityModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Antrag priorisieren
+            </h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Priorität
+                </label>
+                <select
+                  value={newPriority}
+                  onChange={(e) => setNewPriority(e.target.value)}
+                  className="input w-full"
+                >
+                  <option value="">Keine besondere Priorität</option>
+                  <option value="HIGH">Hohe Priorität</option>
+                  <option value="URGENT">Höchste Priorität</option>
+                </select>
+              </div>
+            </div>
+            
+            <div className="flex space-x-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowPriorityModal(false)
+                  setNewPriority('')
+                }}
+                className="btn btn-secondary flex-1"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={handlePriorityChange}
+                className="btn btn-primary flex-1"
+              >
+                Priorität speichern
               </button>
             </div>
           </div>
@@ -1077,6 +1375,38 @@ const ServiceDetail = () => {
               </button>
               <button
                 onClick={confirmAvdNotification}
+                className="btn btn-primary flex-1"
+              >
+                Ja
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+
+      {/* Status zu In Bearbeitung Modal */}
+      {showStatusToInProgressModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Status ändern
+            </h3>
+            
+            <p className="text-gray-700 mb-6">
+              Möchten Sie den Status des Antrages auf In Bearbeitung ändern?
+            </p>
+            
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowStatusToInProgressModal(false)}
+                className="btn btn-secondary flex-1"
+              >
+                Nein
+              </button>
+              <button
+                onClick={confirmStatusToInProgress}
                 className="btn btn-primary flex-1"
               >
                 Ja

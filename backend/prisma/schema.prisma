@@ -75,7 +75,7 @@ model Service {
   description String?
   status      String   @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED
   decision    String?  // APPROVED, REJECTED, RETURNED, null (keine Entscheidung)
-  priority    String   @default("MEDIUM")  // LOW, MEDIUM, HIGH, URGENT
+  priority    String?  // HIGH, URGENT, null (keine Priorität)
   serviceType String   @default("FREETEXT") // FREETEXT, MEDICAL_APPOINTMENT, ALLOWANCE_REQUEST, etc.
   number      Float?
   folderId    Int?

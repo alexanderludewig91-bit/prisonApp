@@ -6,11 +6,45 @@ Eine moderne Webanwendung für die Verwaltung von Gefängnisdiensten, entwickelt
 
 Diese Anwendung ist ein Nachbau des ursprünglichen Appian-Systems "Prisoner Services" und bietet:
 
-- **Insassen-Features:** Antragstellung, Status-Abfragen, persönliche Übersicht
-- **Mitarbeiter-Features:** Antragsbearbeitung, Workflow-Management, Kommentare, Insassen-Übersicht
+- **Insassen-Features:** Antragstellung, Status-Abfragen, persönliche Übersicht, Rückfragen beantworten
+- **Mitarbeiter-Features:** Antragsbearbeitung, Workflow-Management, Kommentare, Insassen-Übersicht, neue Bearbeiter-Aktionen
 - **Admin-Features:** Gruppenverwaltung, System-Überwachung, Audit-Logs, Hausverwaltung
 - **Hausverwaltung:** Zellen-Management, Insassen-Zuweisungen, Drag & Drop, Automatische Zuweisung
 - **Insassen-Übersicht:** Zentrale Insassen-Verwaltung mit vollständigen Details und Historie
+
+## 🆕 **Neue Features (Version 2.0)**
+
+### 🔄 **Neue Architektur: Status und Entscheidung getrennt**
+- **Status:** Workflow-Phase (Ausstehend, In Bearbeitung, Abgeschlossen)
+- **Entscheidung:** Ergebnis (Genehmigt, Abgelehnt, Zurückgewiesen)
+- **Unabhängige Verwaltung:** Status und Entscheidung können unabhängig voneinander gesetzt werden
+
+### 🎯 **Vereinfachte Prioritäten**
+- **Nur noch 2 Prioritäten:** "Hohe Priorität" (HIGH) und "Höchste Priorität" (URGENT)
+- **Keine Priorität:** Standardwert `null` - wird nicht angezeigt
+- **Prioritätsänderung:** Staff kann Prioritäten über "Antrag priorisieren" Button ändern
+
+### 🚫 **Entfernte Features**
+- **Automatische Zuweisung:** Workflow-Regeln für automatische Service-Zuweisung entfernt
+- **Process Management:** Komplette Entfernung von Prozess-Management-Features
+- **ApplicationProcessing.tsx:** Ungenutzte Komponente entfernt
+
+### ✅ **Neue Bearbeiter-Aktionen**
+- **Insassen kontaktieren:** Rückfragen und Informationen an Insassen senden
+- **Weiterleiten:** Anträge an andere Staff-Gruppen weiterleiten
+- **Kommentar erstellen:** Kommentare zum Antrag hinzufügen
+- **Entscheiden:** Anträge genehmigen, ablehnen oder zurückweisen
+- **Persönliche Eröffnung:** Dokumentation persönlicher Entscheidungsmitteilung
+
+### 🔄 **Entscheidungs-Workflow**
+- **Ergebnis an Insassen senden:** Direkte Entscheidungsmitteilung
+- **AVD-Eröffnung:** Zuweisung an AVD für persönliche Eröffnung
+- **Weiterführende Bearbeitung:** Option für komplexere Anträge
+
+### 🛠️ **Manuelle Änderungen**
+- **Status oder Entscheidung ändern:** Flexibles Ändern beider Felder
+- **Antrag priorisieren:** Prioritätsänderung über Modal
+- **Status zu "In Bearbeitung":** Schnelle Statusänderung für ausstehende Anträge
 
 ## 🏗️ Projektstruktur
 
@@ -20,7 +54,7 @@ prisoner-services-web/
 │   ├── src/
 │   │   ├── routes/         # API Routen
 │   │   │   ├── auth.ts     # Authentifizierung
-│   │   │   ├── services.ts # Service-Management
+│   │   │   ├── services.ts # Service-Management (erweitert)
 │   │   │   ├── users.ts    # Benutzerverwaltung
 │   │   │   ├── groups.ts   # Gruppen-Management
 │   │   │   ├── adminLogs.ts # Admin-Logs
@@ -30,7 +64,7 @@ prisoner-services-web/
 │   │   │   └── adminLogging.ts # Admin-Logging
 │   │   └── app.ts          # Hauptanwendung
 │   ├── prisma/             # Datenbankschema
-│   │   ├── schema.prisma   # Datenbankschema
+│   │   ├── schema.prisma   # Datenbankschema (aktualisiert)
 │   │   ├── seed.ts         # Testdaten (Benutzer, Gruppen, Services)
 │   │   ├── seed-houses.ts  # Testdaten (Häuser, Stationen, Zellen)
 │   │   └── migrations/     # Datenbank-Migrationen
@@ -46,13 +80,15 @@ prisoner-services-web/
 │   │   │   ├── HouseManagement.tsx # Hausverwaltung
 │   │   │   ├── InmatesOverview.tsx # Insassen-Übersicht
 │   │   │   ├── AdminDashboard.tsx # Admin-Dashboard
+│   │   │   ├── ServiceDetail.tsx # Service-Details (erweitert)
+│   │   │   ├── StaffDashboard.tsx # Staff-Dashboard (erweitert)
 │   │   │   └── ...         # Weitere Seiten
 │   │   ├── contexts/      # React Contexts
 │   │   │   └── AuthContext.tsx # Authentifizierung
 │   │   └── services/      # API Services
 │   └── package.json
 ├── README.md               # Hauptdokumentation
-├── PROJEKT_DOKUMENTATION.md # Detaillierte Projektdokumentation
+├── PROJECT_DOCUMENTATION.md # Detaillierte Projektdokumentation
 └── .gitignore
 ```
 
@@ -98,153 +134,97 @@ prisoner-services-web/
    ```
    Frontend läuft auf: http://localhost:3000
 
-## 🗄️ Datenbank
-
-Die Anwendung verwendet SQLite für die lokale Entwicklung:
-
-- **Datenbankdatei:** `backend/prisma/dev.db`
-- **Schema:** `backend/prisma/schema.prisma`
-
-### Datenbank-Setup
-
-```bash
-cd backend
-npx prisma studio  # Öffnet Prisma Studio für Datenbankverwaltung
-```
+## 🔐 Authentifizierung
 
 ### Testdaten
 
-Das System wird mit vordefinierten Testdaten initialisiert:
+Das System wird mit folgenden Testdaten initialisiert:
 
-```bash
-cd backend
-npm run db:seed  # Benutzer, Gruppen, Services
-npx ts-node prisma/seed-houses.ts  # Häuser, Stationen, Zellen
-```
+#### Benutzer (Passwort: "test")
+- **Insassen:** 10 Test-Insassen (PS Inmates Gruppe)
+- **Mitarbeiter:** 5 Test-Mitarbeiter (verschiedene Staff-Gruppen)
+- **Admins:** 2 Test-Admins (PS Designers Gruppe)
 
-**Verfügbare Test-Benutzer (Passwort: "test"):**
-- `admin` - System-Administrator
-- `inmate001` - Insasse
-- `avd001` - Allgemeiner Vollzugsdienst
-- `val001` - Vollzugsabteilungsleitung
-- `vl001` - Vollzugsleitung
-- `al001` - Anstaltsleitung
-- `zahlstelle001` - Zahlstelle
-- `arzt001` - Ärztliches Personal
+#### Gruppen
+- **PS Inmates** - Insassen-Gruppe
+- **PS General Enforcement Service** - Allgemeine Vollzugsdienste
+- **PS Vollzugsabteilungsleitung** - Vollzugsleitung
+- **PS Vollzugsleitung** - Höhere Vollzugsleitung
+- **PS Anstaltsleitung** - Anstaltsleitung
+- **PS Payments Office** - Zahlungsabteilung
+- **PS Medical Staff** - Medizinisches Personal
+- **PS Designers** - Administratoren
 
-**Verfügbare Test-Daten für Hausverwaltung:**
-- **Häuser:** Haus A, Haus B, Haus C
-- **Stationen:** Verschiedene Stationen pro Haus
-- **Zellen:** Zellen mit unterschiedlichen Kapazitäten (1-4 Insassen)
-- **Keine Zuweisungen:** Insassen werden nicht automatisch zugewiesen
+## 📊 Service-Management
 
-## 🔐 Authentifizierung & Berechtigungen
+### Service-Lebenszyklus
+1. **Erstellung:** Insasse erstellt Antrag
+2. **Automatische Zuweisung:** PS General Enforcement Service
+3. **Bearbeitung:** Staff bearbeitet und kommentiert
+4. **Entscheidung:** Genehmigung, Ablehnung oder Zurückweisung
+5. **Abschluss:** Status auf "Abgeschlossen" setzen
 
-Die Anwendung verwendet ein flexibles Gruppen-basiertes Berechtigungssystem:
+### Status-System
+- **Ausstehend (PENDING):** Neuer Antrag
+- **In Bearbeitung (IN_PROGRESS):** Wird bearbeitet
+- **Abgeschlossen (COMPLETED):** Finaler Status
 
-### Gruppen-System
-- **Alle Benutzer** (SYSTEM) - Basis-Berechtigungen
-- **Insassen** (INMATE) - Antragstellung und -verfolgung
-- **Allgemeiner Vollzugsdienst (AVD)** (STAFF) - Erste Bearbeitung
-- **Vollzugsabteilungsleitung (VAL)** (STAFF) - Erweiterte Genehmigungen
-- **Vollzugsleitung (VL)** (STAFF) - Höhere Genehmigungen
-- **Anstaltsleitung (AL)** (STAFF) - Höchste Genehmigungen
-- **Zahlstelle** (STAFF) - Zahlungsanträge
-- **Ärztliches Personal** (STAFF) - Gesundheitsanträge
-- **Administratoren** (ADMIN) - Vollzugriff
+### Entscheidungs-System
+- **Genehmigt (APPROVED):** Antrag genehmigt
+- **Abgelehnt (REJECTED):** Antrag abgelehnt
+- **Zurückgewiesen (RETURNED):** Antrag zurückgewiesen (fehlerhafte Angaben)
 
-### Authentifizierung
-- **JWT-Token** basierte Authentifizierung
-- **Token-Speicherung:** LocalStorage
-- **Token-Gültigkeit:** 24 Stunden
-- **Passwort-Hashing:** bcryptjs mit Salt 12
+### Prioritäts-System
+- **Keine Priorität (null):** Standard, wird nicht angezeigt
+- **Hohe Priorität (HIGH):** Orange markiert
+- **Höchste Priorität (URGENT):** Rot markiert
 
-## 📋 Features
+## 🔄 Workflow-Features
 
-### ✅ Vollständig implementiert
+### Bearbeiter-Aktionen
+- **Insassen kontaktieren:** Rückfragen und Informationen senden
+- **Weiterleiten:** Anträge an andere Gruppen weiterleiten
+- **Kommentar erstellen:** Kommentare zum Antrag hinzufügen
+- **Entscheiden:** Anträge genehmigen, ablehnen oder zurückweisen
+- **Persönliche Eröffnung:** Dokumentation persönlicher Entscheidungsmitteilung
 
-#### 🔐 Authentifizierung & Sicherheit
-- [x] JWT-Token-basierte Authentifizierung
-- [x] Gruppen-basierte Zugriffskontrolle (RBAC)
-- [x] Admin-Berechtigungsprüfung
-- [x] Passwort-Hashing mit bcryptjs
-- [x] Automatische Token-Erneuerung
+### Entscheidungs-Workflow
+- **Ergebnis an Insassen senden:** Direkte Entscheidungsmitteilung
+- **AVD-Eröffnung:** Zuweisung an AVD für persönliche Eröffnung
+- **Weiterführende Bearbeitung:** Option für komplexere Anträge
 
-#### 👥 Insassen-Features
-- [x] Antragstellung (Neuer Antrag)
-- [x] Antragsübersicht (Meine Anträge)
-- [x] Status-Abfragen
-- [x] Rollenbasierte Navigation
+### Automatische Features
+- **Gruppenzuweisung:** Freitextanträge automatisch zugewiesen
+- **Aktivitätsprotokollierung:** Alle Aktionen werden geloggt
+- **Status-Übergänge:** Workflow-basierte Status-Änderungen
 
-#### 👨‍💼 Mitarbeiter-Features
-- [x] Mitarbeiter-Dashboard mit Service-Übersicht
-- [x] Erweiterte Service-Details mit Kommentaren
-- [x] Status-Änderungen mit Begründungen
-- [x] Aktivitätsverlauf für jeden Service
-- [x] Workflow-Engine mit automatischen Status-Übergängen
-- [x] Task-Zuweisung für Mitarbeiter
-- [x] **Insassen-Übersicht** - Zentrale Insassen-Verwaltung mit vollständigen Details
+## 🏠 Hausverwaltung
 
-#### 🛡️ Admin-Features
-- [x] Admin-Dashboard mit KPIs und System-Status
-- [x] Gruppen-Management (Benutzer hinzufügen/entfernen)
-- [x] Admin-Logs für Audit-Zwecke
-- [x] Service-Übersicht mit Lösch-Funktion
-- [x] Benutzerfreundliche Gruppennamen
-- [x] Klickbare Gruppenzeilen (ausklappbare Mitgliederlisten)
-- [x] Kategoriebasierte Sortierung
-- [x] In-App Modals statt Browser-Dialoge
-- [x] **Hausverwaltung** - Vollständiges Zellen-Management-System
+### Zellen-Management
+- **Häuser:** Organisatorische Einheiten
+- **Stationen:** Untereinheiten innerhalb der Häuser
+- **Zellen:** Einzelne Zellen mit Kapazität
+- **Insassen-Zuweisungen:** Drag & Drop Zuweisung
 
-#### 🏠 Hausverwaltung (Admin)
-- [x] **Haus-Übersicht** - Alle Häuser mit Belegungsstatistiken
-- [x] **Station-Management** - Stationen pro Haus verwalten
-- [x] **Zellen-Management** - Zellen pro Station mit Kapazitäten
-- [x] **Drag & Drop Zuweisungen** - Intuitive Insassen-Zuweisung
-- [x] **Automatische Zuweisung** - Intelligente Zuweisung unzugewiesener Insassen
-- [x] **Zuweisungshistorie** - Vollständige Historie aller Zellen-Zuweisungen
-- [x] **Insassen-Verlegung** - Insassen zwischen Zellen verlegen
-- [x] **Farbkodierung** - Visuelle Belegungsanzeige (frei/teilweise belegt/voll)
-- [x] **Suchfunktionen** - Erweiterte Filter für Häuser, Stationen, Zellen
-- [x] **Ausstehende Zuweisungen** - Übersicht unzugewiesener Insassen
+### Features
+- **Drag & Drop:** Visuelle Insassen-Zuweisung
+- **Automatische Zuweisung:** Intelligente Zellen-Zuweisung
+- **Zellen-Übersicht:** Vollständige Belegungsübersicht
+- **Transfer-Funktion:** Insassen zwischen Zellen verlegen
 
-#### 👥 Insassen-Übersicht (Mitarbeiter)
-- [x] **Zentrale Insassen-Liste** - Alle Insassen mit Suchfunktion
-- [x] **Detail-Ansicht** - Vollständige Insassen-Informationen in Tabs
-- [x] **Persönliche Daten** - Name, E-Mail, Registrierungsdatum
-- [x] **Anträge-Übersicht** - Alle Services des Insassen mit Status
-- [x] **Aktuelle Zuweisung** - Aktuelle Zelle, Station, Haus
-- [x] **Zuweisungshistorie** - Vollständige Historie mit Datum/Uhrzeit
-- [x] **Responsive Design** - Optimiert für alle Geräte
+## 📈 Dashboard & Statistiken
 
-#### 🔄 Workflow & Automatisierung
-- [x] Automatische Status-Übergänge
-- [x] Task-Zuweisung für Mitarbeiter
-- [x] Workflow-Statistiken
-- [x] Aktivitätsprotokollierung
-- [x] **Automatische Zellen-Zuweisung** - Intelligente Platzierung
+### Staff-Dashboard
+- **Antrags-Statistiken:** Status, Entscheidungen, Prioritäten
+- **Service-Übersicht:** Filterbare Antragsliste
+- **Schnellaktionen:** Direkte Status- und Entscheidungsänderungen
 
-#### 🎨 UI/UX
-- [x] Responsive Benutzeroberfläche
-- [x] Moderne Tailwind CSS Gestaltung
-- [x] Intuitive Navigation
-- [x] Sofortige UI-Aktualisierung
-- [x] System-Gruppen-Schutz
-- [x] **Drag & Drop Interface** - Intuitive Zuweisungen
-- [x] **Farbkodierte Belegung** - Visuelle Status-Anzeige
-- [x] **Tab-basierte Detail-Ansicht** - Übersichtliche Informationsdarstellung
+### Admin-Dashboard
+- **System-KPIs:** Benutzer, Services, Gruppen
+- **Admin-Logs:** Audit-Trail für alle Admin-Aktionen
+- **Gruppen-Management:** Benutzer zu Gruppen zuweisen
 
-### 🚧 Geplant
-- [ ] E-Mail-Benachrichtigungen
-- [ ] Dokumenten-Upload für Anträge
-- [ ] Erweiterte Berichte und Statistiken
-- [ ] Session-Management für Admin-Sessions
-- [ ] Erweiterte Insassen-Features (Kontoinformationen)
-- [ ] Erweiterte Hausverwaltung (Mehrere Gefängnisse)
-- [ ] Zellen-Wartung und -Instandhaltung
-- [ ] Insassen-Statistiken und -Berichte
-
-## 🛠️ Technologie-Stack
+## 🔧 Technologie-Stack
 
 ### Backend
 - **Node.js** mit **Express**
@@ -264,165 +244,28 @@ Die Anwendung verwendet ein flexibles Gruppen-basiertes Berechtigungssystem:
 - **Lucide React** für Icons
 - **React Hook Form** für Formulare
 
-## 📁 API-Endpunkte
+## 📝 Changelog
 
-### Authentifizierung
-- `POST /api/auth/login` - Benutzeranmeldung
-- `POST /api/auth/register` - Benutzerregistrierung
-- `GET /api/auth/verify` - Token-Verifizierung
-- `GET /api/auth/hash-password/:password` - Passwort hashen (DEV)
+### Version 2.0 (Januar 2025)
+- ✅ **Neue Status/Entscheidungs-Architektur:** Trennung von Workflow-Phase und Ergebnis
+- ✅ **Vereinfachte Prioritäten:** Nur noch HIGH und URGENT, null als Standard
+- ✅ **Neue Bearbeiter-Aktionen:** Insassen kontaktieren, weiterleiten, entscheiden, persönliche Eröffnung
+- ✅ **Entscheidungs-Workflow:** Ergebnis an Insassen senden, AVD-Eröffnung, weiterführende Bearbeitung
+- ✅ **Manuelle Änderungen:** Status/Entscheidung ändern, Priorität ändern
+- ✅ **Rückfragen-System:** Staff kann Insassen Rückfragen stellen, Insassen können antworten
+- ✅ **Informations-System:** Staff kann Informationen an Insassen senden
+- ✅ **Weiterleitung:** Anträge an andere Staff-Gruppen weiterleiten
+- ✅ **Persönliche Eröffnung:** Dokumentation persönlicher Entscheidungsmitteilung
+- ✅ **Aktivitätslog erweitert:** Neue Aktivitätstypen für alle neuen Features
+- ✅ **UI-Verbesserungen:** Kompakte Statistiken, bessere Anzeige, blaue Buttons
+- ✅ **Code-Bereinigung:** Entfernung ungenutzter Features (ProcessManagement, ApplicationProcessing)
 
-### Services
-- `GET /api/services` - Alle Services abrufen
-- `GET /api/services/:id` - Service nach ID abrufen
-- `POST /api/services` - Neuen Service erstellen
-- `PUT /api/services/:id` - Service aktualisieren
-- `DELETE /api/services/:id` - Service löschen
-- `PATCH /api/services/:id/status` - Status ändern
-- `DELETE /api/services/all` - Alle Services löschen (nur Admin)
-
-### Insassen-spezifische Services
-- `GET /api/services/my/services` - Eigene Services abrufen (nur INMATE)
-- `POST /api/services/my/services` - Neuen Antrag erstellen (nur INMATE)
-
-### Mitarbeiter-spezifische Services
-- `GET /api/services/staff/all` - Alle Services für Mitarbeiter
-- `GET /api/services/staff/statistics` - Service-Statistiken
-- `GET /api/services/staff/workflow-stats` - Workflow-Statistiken
-- `POST /api/services/staff/assign-pending` - Ausstehende Anträge zuweisen
-
-### Gruppen-Management (Admin)
-- `GET /api/groups` - Alle Gruppen abrufen
-- `GET /api/groups/:id` - Gruppe nach ID abrufen
-- `POST /api/groups/:id/users` - Benutzer zu Gruppe hinzufügen
-- `DELETE /api/groups/:id/users/:userId` - Benutzer aus Gruppe entfernen
-
-### Admin-Logs (Admin)
-- `GET /api/admin-logs` - Admin-Logs abrufen (mit Pagination und Filtern)
-- `GET /api/admin-logs/statistics` - Admin-Log Statistiken
-- `GET /api/admin-logs/:id` - Spezifischen Admin-Log abrufen
-
-### Benutzer
-- `GET /api/users` - Alle Benutzer abrufen
-- `GET /api/users/:id` - Benutzer nach ID abrufen
-- `PUT /api/users/:id` - Benutzer aktualisieren
-
-### Hausverwaltung
-- `GET /api/houses` - Alle Häuser abrufen
-- `GET /api/houses/:id` - Haus nach ID abrufen
-- `POST /api/houses` - Neues Haus erstellen
-- `PUT /api/houses/:id` - Haus aktualisieren
-- `DELETE /api/houses/:id` - Haus deaktivieren
-- `GET /api/houses/:houseId/stations` - Stationen eines Hauses abrufen
-- `POST /api/houses/:houseId/stations` - Neue Station erstellen
-- `PUT /api/houses/stations/:id` - Station aktualisieren
-- `DELETE /api/houses/stations/:id` - Station deaktivieren
-- `GET /api/houses/stations/:stationId/cells` - Zellen einer Station abrufen
-- `POST /api/houses/stations/:stationId/cells` - Neue Zelle erstellen
-- `PUT /api/houses/cells/:id` - Zelle aktualisieren
-- `DELETE /api/houses/cells/:id` - Zelle deaktivieren
-- `GET /api/houses/cells/:cellId/assignments` - Zellen-Zuweisungen abrufen
-- `POST /api/houses/cells/:cellId/assignments` - Insasse zu Zelle zuweisen
-- `DELETE /api/houses/assignments/:id` - Zellen-Zuweisung entfernen
-- `GET /api/houses/assignments/current/:userId` - Aktuelle Zuweisung eines Insassen
-- `GET /api/houses/assignments/history/:userId` - Zuweisungshistorie eines Insassen
-
-## 🔧 Entwicklung
-
-### Backend-Entwicklung
-```bash
-cd backend
-npm run dev          # Entwicklungsserver starten
-npm run build        # TypeScript kompilieren
-npm run start        # Produktionsserver starten
-```
-
-### Frontend-Entwicklung
-```bash
-cd frontend
-npm run dev          # Entwicklungsserver starten
-npm run build        # Produktionsbuild erstellen
-npm run preview      # Produktionsbuild testen
-```
-
-### Datenbank-Entwicklung
-```bash
-cd backend
-npx prisma studio    # Datenbank-GUI öffnen
-npx prisma generate  # Prisma Client generieren
-npx prisma db push   # Schema zur Datenbank pushen
-npm run db:seed      # Testdaten erstellen (Benutzer, Gruppen, Services)
-npx db:seed          # Alternative für Windows
-npx ts-node prisma/seed-houses.ts  # Hausverwaltung-Testdaten erstellen
-```
-
-## 🧪 Testing
-
-### Backend-Tests
-```bash
-cd backend
-npm test
-```
-
-### Frontend-Tests
-```bash
-cd frontend
-npm test
-```
-
-## 📦 Deployment
-
-### Backend-Deployment
-```bash
-cd backend
-npm run build
-npm start
-```
-
-### Frontend-Deployment
-```bash
-cd frontend
-npm run build
-# dist/ Ordner auf Webserver deployen
-```
-
-## 🎨 UI/UX Features
-
-### Moderne Benutzeroberfläche
-- **Responsive Design:** Optimiert für Desktop und Mobile
-- **Tailwind CSS:** Konsistente Gestaltung
-- **Lucide Icons:** Moderne Icon-Bibliothek
-- **Intuitive Navigation:** Rollenbasierte Menüs
-
-### Admin-Dashboard
-- **KPIs:** Übersichtliche Kennzahlen
-- **Gruppen-Management:** Intuitive Benutzerverwaltung
-- **Klickbare Gruppenzeilen:** Ausklappbare Mitgliederlisten
-- **Kategoriebasierte Sortierung:** Logische Hierarchie
-- **In-App Modals:** Konsistente Benutzerführung
-
-### Hausverwaltung
-- **Haus-Übersicht:** Alle Häuser mit Belegungsstatistiken
-- **Drag & Drop:** Intuitive Insassen-Zuweisung per Drag & Drop
-- **Farbkodierung:** Visuelle Belegungsanzeige (grau=leer, blau=teilweise, türkis=voll)
-- **Automatische Zuweisung:** Intelligente Zuweisung unzugewiesener Insassen
-- **Zuweisungshistorie:** Vollständige Historie aller Zellen-Zuweisungen
-- **Suchfunktionen:** Erweiterte Filter für Häuser, Stationen, Zellen, Insassen
-- **Ausstehende Zuweisungen:** Übersicht und Verwaltung unzugewiesener Insassen
-
-### Insassen-Übersicht
-- **Zentrale Liste:** Alle Insassen mit Suchfunktion
-- **Detail-Ansicht:** Vollständige Informationen in übersichtlichen Tabs
-- **Persönliche Daten:** Name, E-Mail, Registrierungsdatum
-- **Anträge:** Alle Services des Insassen mit Status und Priorität
-- **Aktuelle Zuweisung:** Zelle, Station, Haus
-- **Zuweisungshistorie:** Vollständige Historie mit Datum und Uhrzeit
-
-### Workflow-Engine
-- **Automatische Status-Übergänge:** Intelligente Prozesssteuerung
-- **Task-Zuweisung:** Automatische Mitarbeiter-Zuweisung
-- **Aktivitätsverlauf:** Vollständige Historie
-- **Kommentar-System:** Kommunikation zwischen Beteiligten
+### Version 1.0 (Dezember 2024)
+- ✅ Basis-System mit Authentifizierung
+- ✅ Insassen- und Mitarbeiter-Features
+- ✅ Admin-Dashboard und Gruppen-Management
+- ✅ Hausverwaltung mit Zellen-Management
+- ✅ Workflow-Engine mit automatischer Zuweisung
 
 ## 🔒 Sicherheit
 
@@ -436,64 +279,34 @@ npm run build
 - Admin-Berechtigungsprüfung (Frontend und Backend)
 - Admin-Aktions-Logging für Audit-Zwecke
 
-### Geplant
-- API-Rate-Limiting
-- Session-Management für Admin-Sessions
-- Erweiterte Audit-Logs
+## 🎯 Nächste Schritte
+
+- **E-Mail-Benachrichtigungen** (Workflow-Engine erweitern)
+- **Dokumenten-Upload** für Anträge
+- **Erweiterte Berichte** und Statistiken
+- **Mehrere Gefängnisse** (Hausverwaltung erweitern)
+- **Zellen-Wartung** (Wartungs- und Instandhaltungs-Features)
 
 ## 🤝 Beitragen
 
-1. Fork das Repository
-2. Erstelle einen Feature-Branch (`git checkout -b feature/AmazingFeature`)
-3. Committe deine Änderungen (`git commit -m 'Add some AmazingFeature'`)
-4. Push zum Branch (`git push origin feature/AmazingFeature`)
-5. Öffne einen Pull Request
+### Entwicklungsumgebung
+1. Repository klonen
+2. Dependencies installieren
+3. Datenbank einrichten
+4. Entwicklungsserver starten
+
+### Coding Standards
+- TypeScript für alle neuen Features
+- Tailwind CSS für Styling
+- ESLint und Prettier für Code-Qualität
+- Dokumentation für neue Features
 
 ## 📄 Lizenz
 
-Dieses Projekt ist unter der MIT-Lizenz lizenziert.
-
-## 🆘 Support
-
-Bei Fragen oder Problemen:
-
-1. Überprüfe die [Issues](../../issues) auf GitHub
-2. Erstelle ein neues Issue mit detaillierter Beschreibung
-3. Kontaktiere das Entwicklungsteam
-
-## 🔄 Updates
-
-### Version 3.0.0 (Dezember 2024)
-- ✅ **Hausverwaltung** - Vollständiges Zellen-Management-System
-- ✅ **Drag & Drop Zuweisungen** - Intuitive Insassen-Zuweisung
-- ✅ **Automatische Zuweisung** - Intelligente Zuweisung unzugewiesener Insassen
-- ✅ **Zuweisungshistorie** - Vollständige Historie aller Zellen-Zuweisungen
-- ✅ **Insassen-Übersicht** - Zentrale Insassen-Verwaltung mit vollständigen Details
-- ✅ **Farbkodierte Belegung** - Visuelle Status-Anzeige (grau/blau/türkis)
-- ✅ **Erweiterte Suchfunktionen** - Filter für Häuser, Stationen, Zellen, Insassen
-- ✅ **Ausstehende Zuweisungen** - Übersicht und Verwaltung unzugewiesener Insassen
-- ✅ **Insassen-Verlegung** - Insassen zwischen Zellen verlegen
-- ✅ **Tab-basierte Detail-Ansicht** - Übersichtliche Informationsdarstellung
-
-### Version 2.0.0 (Dezember 2024)
-- ✅ Vollständige Insassen-Features
-- ✅ Vollständige Mitarbeiter-Features
-- ✅ Vollständige Admin-Features
-- ✅ Workflow-Engine
-- ✅ UI/UX Verbesserungen
-- ✅ Benutzerfreundliche Gruppennamen
-- ✅ Klickbare Gruppenzeilen
-- ✅ Kategoriebasierte Sortierung
-- ✅ In-App Modals
-
-### Version 1.0.0
-- Grundlegende CRUD-Funktionalitäten
-- Benutzerauthentifizierung
-- Responsive UI
-- SQLite-Datenbank
+Dieses Projekt ist für interne Zwecke entwickelt und nicht zur öffentlichen Verwendung bestimmt.
 
 ---
 
-**Entwickelt mit ❤️ für die Gefängnisverwaltung**
-
-**Status:** ✅ Vollständig funktionsfähige Anwendung mit Insassen-, Mitarbeiter-, Admin-Features, Hausverwaltung und Insassen-Übersicht
+**Entwickelt für:** Prisoner Services System  
+**Version:** 2.0  
+**Letzte Aktualisierung:** Januar 2025

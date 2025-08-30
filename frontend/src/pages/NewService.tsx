@@ -104,10 +104,9 @@ const NewService = () => {
               onChange={handleChange}
               className="input"
             >
-              <option value="LOW">Niedrig</option>
-              <option value="MEDIUM">Mittel</option>
-              <option value="HIGH">Hoch</option>
-              <option value="URGENT">Dringend</option>
+              <option value="">Keine besondere Priorität</option>
+              <option value="HIGH">Hohe Priorität</option>
+              <option value="URGENT">Höchste Priorität</option>
             </select>
           </div>
 

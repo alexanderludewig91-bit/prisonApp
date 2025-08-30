@@ -698,10 +698,23 @@ router.get('/:id', async (req: Request, res: Response) => {
       console.log('Keine Zuweisung gefunden für Benutzer:', service.createdBy);
     }
 
-    // Service mit Zuweisungsinformationen erweitern
+    // Entscheidungsinformationen aus Aktivitäten extrahieren
+    let decisionDetails = null;
+    const decisionActivity = (service as any).activities?.find((activity: any) => activity.action === 'decision_made');
+    if (decisionActivity) {
+      decisionDetails = {
+        decision: (service as any).decision,
+        reason: decisionActivity.details,
+        who: decisionActivity.who,
+        when: decisionActivity.when
+      };
+    }
+
+    // Service mit Zuweisungsinformationen und Entscheidungsdetails erweitern
     const serviceWithAssignment = {
       ...service,
-      createdByUserAssignment: currentAssignment
+      createdByUserAssignment: currentAssignment,
+      decisionDetails: decisionDetails
     };
 
     res.json(serviceWithAssignment);
@@ -1030,9 +1043,9 @@ router.post('/:id/complete-with-decision', [
     }
 
     // Validierung der gültigen Entscheidungen
-    const validDecisions = ['APPROVED', 'REJECTED', 'RETURNED'];
+    const validDecisions = ['APPROVED', 'REJECTED', 'RETURNED', 'RESET'];
     if (!validDecisions.includes(decision)) {
-      return res.status(400).json({ error: 'Ungültige Entscheidung. Gültige Werte: APPROVED, REJECTED, RETURNED' });
+      return res.status(400).json({ error: 'Ungültige Entscheidung. Gültige Werte: APPROVED, REJECTED, RETURNED, RESET' });
     }
 
     // Benutzer-Details abrufen
@@ -1055,10 +1068,11 @@ router.post('/:id/complete-with-decision', [
       return res.status(404).json({ error: 'Service nicht gefunden' });
     }
 
-    // Entscheidung setzen
+    // Entscheidung setzen oder zurücksetzen
+    const decisionValue = decision === 'RESET' ? null : decision;
     await prisma.service.update({
       where: { id: Number(id) },
-      data: { decision: decision as any }
+      data: { decision: decisionValue as any }
     });
 
     // Entscheidung im Aktivitätsverlauf loggen
@@ -1128,9 +1142,9 @@ router.post('/:id/complete-with-avd-notification', [
     }
 
     // Validierung der gültigen Entscheidungen
-    const validDecisions = ['APPROVED', 'REJECTED', 'RETURNED'];
+    const validDecisions = ['APPROVED', 'REJECTED', 'RETURNED', 'RESET'];
     if (!validDecisions.includes(decision)) {
-      return res.status(400).json({ error: 'Ungültige Entscheidung. Gültige Werte: APPROVED, REJECTED, RETURNED' });
+      return res.status(400).json({ error: 'Ungültige Entscheidung. Gültige Werte: APPROVED, REJECTED, RETURNED, RESET' });
     }
 
     // Benutzer-Details abrufen
@@ -1162,10 +1176,11 @@ router.post('/:id/complete-with-avd-notification', [
       return res.status(404).json({ error: 'AVD-Gruppe nicht gefunden' });
     }
 
-    // Entscheidung setzen
+    // Entscheidung setzen oder zurücksetzen
+    const decisionValue = decision === 'RESET' ? null : decision;
     await prisma.service.update({
       where: { id: Number(id) },
-      data: { decision: decision as any }
+      data: { decision: decisionValue as any }
     });
 
     // Entscheidung im Aktivitätsverlauf loggen
@@ -1210,6 +1225,92 @@ router.post('/:id/complete-with-avd-notification', [
   }
 });
 
+// Persönliche Eröffnung dokumentieren
+router.post('/:id/personal-notification-completed', [
+  authenticateToken,
+  body('details').notEmpty().withMessage('Details zur Eröffnung sind erforderlich')
+], async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { id } = req.params;
+    const { details } = req.body;
+    const currentUser = req.user;
+
+    if (!currentUser) {
+      return res.status(401).json({ error: 'Benutzer nicht authentifiziert' });
+    }
+
+    // Benutzer-Details abrufen
+    const user = await prisma.user.findUnique({
+      where: { id: currentUser.userId }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Benutzer nicht gefunden' });
+    }
+
+    const who = `${user.firstName} ${user.lastName} (${user.username})`;
+
+    // Service abrufen
+    const service = await prisma.service.findUnique({
+      where: { id: Number(id) }
+    });
+
+    if (!service) {
+      return res.status(404).json({ error: 'Service nicht gefunden' });
+    }
+
+    // Prüfen ob eine Entscheidung getroffen wurde
+    if (!service.decision) {
+      return res.status(400).json({ error: 'Keine Entscheidung für diesen Antrag verfügbar' });
+    }
+
+    // Persönliche Eröffnung als abgeschlossen dokumentieren
+    await prisma.activity.create({
+      data: {
+        recordId: Number(id),
+        who: who,
+        action: 'personal_notification_completed',
+        details: details,
+        userId: currentUser.userId
+      }
+    });
+
+    // Status auf "Abgeschlossen" setzen und Gruppenzuweisung aufheben
+    await prisma.service.update({
+      where: { id: Number(id) },
+      data: { 
+        status: 'COMPLETED',
+        assignedToGroup: null
+      } as any
+    });
+
+    // Statusänderung im Aktivitätsverlauf loggen
+    await prisma.activity.create({
+      data: {
+        recordId: Number(id),
+        who: who,
+        action: 'status_changed',
+        details: 'Antrag abgeschlossen, persönliche Eröffnung durchgeführt',
+        userId: currentUser.userId
+      }
+    });
+
+    res.json({ 
+      message: 'Persönliche Eröffnung erfolgreich dokumentiert',
+      status: 'COMPLETED'
+    });
+
+  } catch (error: any) {
+    console.error('Personal notification completed error:', error);
+    res.status(500).json({ error: 'Fehler beim Dokumentieren der persönlichen Eröffnung' });
+  }
+});
+
 // Entscheidung treffen
 router.patch('/:id/decision', [
   body('decision').notEmpty().withMessage('Entscheidung ist erforderlich'),
@@ -1225,20 +1326,29 @@ router.patch('/:id/decision', [
     const { decision, reason } = req.body;
 
     // Validierung der gültigen Entscheidungen
-    const validDecisions = ['APPROVED', 'REJECTED', 'RETURNED'];
+    const validDecisions = ['APPROVED', 'REJECTED', 'RETURNED', 'RESET'];
     if (!validDecisions.includes(decision)) {
-      return res.status(400).json({ error: 'Ungültige Entscheidung. Gültige Werte: APPROVED, REJECTED, RETURNED' });
+      return res.status(400).json({ error: 'Ungültige Entscheidung. Gültige Werte: APPROVED, REJECTED, RETURNED, RESET' });
     }
 
+    // Entscheidung setzen oder zurücksetzen
+    const decisionValue = decision === 'RESET' ? null : decision;
     const service = await prisma.service.update({
       where: { id: Number(id) },
-      data: { decision: decision as any }
+      data: { decision: decisionValue as any }
     });
 
     // Aktivität loggen
-    const activityDetails = reason 
-      ? `Entscheidung "${decision}" getroffen. Grund: ${reason}`
-      : `Entscheidung "${decision}" getroffen`;
+    let activityDetails = '';
+    if (decision === 'RESET') {
+      activityDetails = reason 
+        ? `Entscheidung zurückgesetzt. Grund: ${reason}`
+        : 'Entscheidung zurückgesetzt';
+    } else {
+      activityDetails = reason 
+        ? `Entscheidung "${decision}" getroffen. Grund: ${reason}`
+        : `Entscheidung "${decision}" getroffen`;
+    }
 
     await prisma.activity.create({
       data: {
@@ -1355,11 +1465,75 @@ router.get('/my/services', checkRole(['INMATE']), async (req: AuthenticatedReque
   }
 });
 
+// Priorität ändern
+router.patch('/:id/priority', [
+  authenticateToken,
+  body('priority').optional().custom((value) => {
+    if (value === '' || value === null || value === undefined) {
+      return true; // Leere Werte sind erlaubt
+    }
+    if (!['HIGH', 'URGENT'].includes(value)) {
+      throw new Error('Ungültige Priorität. Gültige Werte: HIGH, URGENT');
+    }
+    return true;
+  })
+], async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { id } = req.params;
+    const { priority } = req.body;
+    const currentUser = req.user;
+
+    if (!currentUser) {
+      return res.status(401).json({ error: 'Benutzer nicht authentifiziert' });
+    }
+
+    // Benutzerdaten abrufen
+    const user = await prisma.user.findUnique({
+      where: { id: currentUser.userId }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Benutzer nicht gefunden' });
+    }
+
+    const who = `${user.firstName} ${user.lastName} (${user.username})`;
+
+    // Service aktualisieren
+    const service = await prisma.service.update({
+      where: { id: Number(id) },
+      data: { priority: (priority && priority.trim() !== '') ? priority : null }
+    });
+
+    // Aktivität loggen
+    const priorityText = priority ? (priority === 'HIGH' ? 'Hohe Priorität' : 'Höchste Priorität') : 'Keine besondere Priorität';
+    await prisma.activity.create({
+      data: {
+        recordId: service.id,
+        who: who,
+        action: 'priority_changed',
+        details: `Priorität geändert zu: ${priorityText}`,
+        userId: currentUser.userId
+      }
+    });
+
+    res.json({ message: 'Priorität erfolgreich geändert', priority: priority });
+
+  } catch (error: any) {
+    console.error('Priority change error:', error);
+    res.status(500).json({ error: 'Fehler beim Ändern der Priorität' });
+  }
+});
+
 // Neuen Service erstellen (nur für Insassen)
 router.post('/my/services', checkRole(['INMATE']), [
   body('title').notEmpty().withMessage('Titel ist erforderlich'),
   body('description').notEmpty().withMessage('Beschreibung ist erforderlich'),
-  body('priority').isIn(['LOW', 'MEDIUM', 'HIGH', 'URGENT']).withMessage('Ungültige Priorität')
+  body('priority').optional().isIn(['HIGH', 'URGENT']).withMessage('Ungültige Priorität. Gültige Werte: HIGH, URGENT')
 ], async (req: AuthenticatedRequest, res: Response) => {
   try {
     const errors = validationResult(req);

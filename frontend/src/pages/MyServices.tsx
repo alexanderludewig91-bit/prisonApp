@@ -167,10 +167,6 @@ const MyServices = () => {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'LOW':
-        return 'bg-gray-100 text-gray-800'
-      case 'MEDIUM':
-        return 'bg-blue-100 text-blue-800'
       case 'HIGH':
         return 'bg-orange-100 text-orange-800'
       case 'URGENT':
@@ -320,9 +316,12 @@ const MyServices = () => {
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(service.priority)}`}>
-                      {service.priority}
-                    </span>
+                    {service.priority && (
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(service.priority)}`}>
+                        {service.priority === 'HIGH' && 'Hohe Priorität'}
+                        {service.priority === 'URGENT' && 'Höchste Priorität'}
+                      </span>
+                    )}
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                       {getStatusText(service.status)}
                     </span>

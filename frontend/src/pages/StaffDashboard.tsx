@@ -159,10 +159,6 @@ const StaffDashboard = () => {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'LOW':
-        return 'bg-gray-100 text-gray-800'
-      case 'MEDIUM':
-        return 'bg-blue-100 text-blue-800'
       case 'HIGH':
         return 'bg-orange-100 text-orange-800'
       case 'URGENT':
@@ -335,10 +331,9 @@ const StaffDashboard = () => {
                 className="input"
               >
                 <option value="">Alle Prioritäten</option>
-                <option value="LOW">Niedrig</option>
-                <option value="MEDIUM">Mittel</option>
-                <option value="HIGH">Hoch</option>
-                <option value="URGENT">Dringend</option>
+                <option value="">Alle Prioritäten</option>
+                <option value="HIGH">Hohe Priorität</option>
+                <option value="URGENT">Höchste Priorität</option>
               </select>
             </div>
             <div>
@@ -509,12 +504,12 @@ const StaffDashboard = () => {
                         {service.decision === 'APPROVED' && 'Genehmigt'}
                         {service.decision === 'REJECTED' && 'Abgelehnt'}
                       </span>
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(service.priority)}`}>
-                        {service.priority === 'LOW' && 'Niedrig'}
-                        {service.priority === 'MEDIUM' && 'Mittel'}
-                        {service.priority === 'HIGH' && 'Hoch'}
-                        {service.priority === 'URGENT' && 'Dringend'}
-                      </span>
+                                              {service.priority && (
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(service.priority)}`}>
+                            {service.priority === 'HIGH' && 'Hohe Priorität'}
+                            {service.priority === 'URGENT' && 'Höchste Priorität'}
+                          </span>
+                        )}
                     </div>
                   </div>
                   <p className="text-gray-600 mb-3">{service.description}</p>
