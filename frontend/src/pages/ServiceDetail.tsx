@@ -6,8 +6,6 @@ import {
   CheckCircle, 
   XCircle, 
   AlertCircle,
-  User,
-  Calendar,
   Edit,
   FileText
 } from 'lucide-react'
@@ -371,18 +369,7 @@ const ServiceDetail = () => {
     }
   }
 
-  const getDecisionText = (decision: string) => {
-    switch (decision) {
-      case 'APPROVED':
-        return 'Genehmigt'
-      case 'REJECTED':
-        return 'Abgelehnt'
-      case 'RETURNED':
-        return 'Zurückgewiesen'
-      default:
-        return decision
-    }
-  }
+
 
   if (loading) {
     return (

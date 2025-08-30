@@ -4,14 +4,10 @@ import { Navigate } from 'react-router-dom'
 import api from '../services/api'
 import { 
   Shield, 
-  Search, 
   Filter,
-  Calendar,
   User,
   Activity,
-  Eye,
   Clock,
-  Globe,
   Monitor
 } from 'lucide-react'
 
