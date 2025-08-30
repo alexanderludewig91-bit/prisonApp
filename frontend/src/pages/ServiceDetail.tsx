@@ -94,6 +94,7 @@ const ServiceDetail = () => {
   const [pendingComment, setPendingComment] = useState('')
   const [selectedDecision, setSelectedDecision] = useState<'APPROVED' | 'REJECTED' | 'RETURNED' | null>(null)
   const [decisionReason, setDecisionReason] = useState('')
+  const [showDecisionConfirmationModal, setShowDecisionConfirmationModal] = useState(false)
 
   useEffect(() => {
     if (id) {
@@ -199,6 +200,56 @@ const ServiceDetail = () => {
     }
     
     setPendingComment('')
+  }
+
+  const handleDecisionSelect = (decision: 'APPROVED' | 'REJECTED' | 'RETURNED') => {
+    setSelectedDecision(decision)
+    
+    // Standardbegründungen vorausfüllen
+    switch (decision) {
+      case 'APPROVED':
+        setDecisionReason('Ihr Antrag wurde genehmigt')
+        break
+      case 'REJECTED':
+        setDecisionReason('Ihr Antrag wurde abgelehnt')
+        break
+      case 'RETURNED':
+        setDecisionReason('Ihr Antrag enthält fehlerhafte Angaben und wurde zurückgewiesen. Bitte stellen Sie einen neuen Antrag')
+        break
+    }
+  }
+
+  const handleCompleteWithDecision = async () => {
+    if (!selectedDecision || !decisionReason.trim()) {
+      alert('Bitte wählen Sie eine Entscheidung und geben Sie eine Begründung an.')
+      return
+    }
+
+    // Bestätigungsmodal anzeigen
+    setShowDecisionConfirmationModal(true)
+  }
+
+  const confirmCompleteWithDecision = async () => {
+    try {
+      await api.post(`/services/${id}/complete-with-decision`, {
+        decision: selectedDecision,
+        reason: decisionReason
+      })
+
+      // Erfolgreich abgeschlossen - UI zurücksetzen
+      setSelectedDecision(null)
+      setDecisionReason('')
+      setSelectedAction(null)
+      setShowDecisionConfirmationModal(false)
+      
+      // Service-Details neu laden
+      fetchServiceDetails()
+      
+      // Erfolg wird durch das Neuladen der Service-Details und das Verschwinden der Entscheidungsoptionen angezeigt
+    } catch (error) {
+      console.error('Fehler beim Abschließen der Entscheidung:', error)
+      alert('Fehler beim Abschließen der Entscheidung. Bitte versuchen Sie es erneut.')
+    }
   }
 
   const fetchStaffGroups = async () => {
@@ -687,71 +738,93 @@ const ServiceDetail = () => {
                    <h3 className="text-lg font-medium text-gray-900">
                      Welche Entscheidung möchten Sie treffen?
                    </h3>
-                   <div className="grid grid-cols-3 gap-3">
-                     <button
-                       onClick={() => setSelectedDecision('APPROVED')}
-                       className={`flex items-center justify-center p-4 border rounded-lg transition-colors ${
-                         selectedDecision === 'APPROVED'
-                           ? 'border-green-500 bg-green-50'
-                           : 'border-gray-200 hover:bg-gray-50'
-                       }`}
-                     >
-                       <div className="flex items-center space-x-3">
-                         <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                         <span className="font-medium text-gray-900">Genehmigen</span>
-                       </div>
-                     </button>
-                     
-                     <button
-                       onClick={() => setSelectedDecision('REJECTED')}
-                       className={`flex items-center justify-center p-4 border rounded-lg transition-colors ${
-                         selectedDecision === 'REJECTED'
-                           ? 'border-red-500 bg-red-50'
-                           : 'border-gray-200 hover:bg-gray-50'
-                       }`}
-                     >
-                       <div className="flex items-center space-x-3">
-                         <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                         <span className="font-medium text-gray-900">Ablehnen</span>
-                       </div>
-                     </button>
-                     
-                     <button
-                       onClick={() => setSelectedDecision('RETURNED')}
-                       className={`flex items-center justify-center p-4 border rounded-lg transition-colors ${
-                         selectedDecision === 'RETURNED'
-                           ? 'border-yellow-500 bg-yellow-50'
-                           : 'border-gray-200 hover:bg-gray-50'
-                       }`}
-                     >
-                       <div className="flex items-center space-x-3">
-                         <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                         <span className="font-medium text-gray-900">Zurückweisen</span>
-                       </div>
-                     </button>
-                   </div>
+                                     <div className="flex space-x-4">
+                    <button
+                      onClick={() => handleDecisionSelect('APPROVED')}
+                      className={`px-4 py-2 rounded-lg border-2 transition-colors ${
+                        selectedDecision === 'APPROVED'
+                          ? 'border-green-500 bg-green-50 text-green-700'
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span>Genehmigen</span>
+                      </div>
+                    </button>
+                    
+                    <button
+                      onClick={() => handleDecisionSelect('REJECTED')}
+                      className={`px-4 py-2 rounded-lg border-2 transition-colors ${
+                        selectedDecision === 'REJECTED'
+                          ? 'border-red-500 bg-red-50 text-red-700'
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                        <span>Ablehnen</span>
+                      </div>
+                    </button>
+                    
+                    <button
+                      onClick={() => handleDecisionSelect('RETURNED')}
+                      className={`px-4 py-2 rounded-lg border-2 transition-colors ${
+                        selectedDecision === 'RETURNED'
+                          ? 'border-yellow-500 bg-yellow-50 text-yellow-700'
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                        <span>Zurückweisen</span>
+                      </div>
+                    </button>
+                  </div>
                    
-                   {/* Begründungsfeld */}
-                   {selectedDecision && (
-                     <div className="space-y-3">
-                       <div className="flex space-x-3">
-                         <textarea
-                           value={decisionReason}
-                           onChange={(e) => setDecisionReason(e.target.value)}
-                           placeholder="Bitte Begründung angeben"
-                           className="flex-1 input resize-none"
-                           rows={4}
-                         />
-                         <button
-                           onClick={() => {/* TODO: Implementierung */}}
-                           className="btn btn-primary self-end"
-                           disabled={!decisionReason.trim()}
-                         >
-                           Entscheidung speichern
-                         </button>
-                       </div>
-                     </div>
-                   )}
+                                     {/* Begründungsfeld */}
+                  {selectedDecision && (
+                    <div className="space-y-3">
+                      <textarea
+                        value={decisionReason}
+                        onChange={(e) => setDecisionReason(e.target.value)}
+                        placeholder="Bitte Begründung angeben"
+                        className="w-full input resize-none"
+                        rows={4}
+                      />
+                    </div>
+                  )}
+
+                  {/* Weitere Optionen */}
+                  {selectedDecision && (
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-medium text-gray-700">
+                        Was soll als nächstes passieren?
+                      </h4>
+                      <div className="space-y-2">
+                        <button
+                          onClick={handleCompleteWithDecision}
+                          className="w-full px-4 py-2 text-left border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                        >
+                          Ergebnis an den Insassen senden und Bearbeitung abschließen
+                        </button>
+                        <button
+                          onClick={() => {/* TODO: Implementierung */}}
+                          className="w-full px-4 py-2 text-left border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                        >
+                          Ergebnis persönlich durch den AVD eröffnen lassen
+                        </button>
+                        {(selectedDecision === 'APPROVED' || selectedDecision === 'REJECTED') && (
+                          <button
+                            onClick={() => {/* TODO: Implementierung */}}
+                            className="w-full px-4 py-2 text-left border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                          >
+                            Weiterführende Bearbeitung
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
                  </div>
                )}
 
@@ -908,6 +981,36 @@ const ServiceDetail = () => {
               </button>
               <button
                 onClick={() => handleStatusChangeDialog(true)}
+                className="btn btn-primary flex-1"
+              >
+                Ja
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Entscheidungs-Bestätigungsmodal */}
+      {showDecisionConfirmationModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Entscheidung bestätigen
+            </h3>
+            
+            <p className="text-gray-700 mb-6">
+              Möchten Sie das Ergebnis an den Insassen senden und die Bearbeitung abschließen?
+            </p>
+            
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowDecisionConfirmationModal(false)}
+                className="btn btn-secondary flex-1"
+              >
+                Nein
+              </button>
+              <button
+                onClick={confirmCompleteWithDecision}
                 className="btn btn-primary flex-1"
               >
                 Ja

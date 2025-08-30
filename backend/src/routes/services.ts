@@ -1009,6 +1009,104 @@ router.patch('/:id/status', [
   }
 });
 
+// Ergebnis an Insassen senden und Bearbeitung abschließen
+router.post('/:id/complete-with-decision', [
+  authenticateToken,
+  body('decision').notEmpty().withMessage('Entscheidung ist erforderlich'),
+  body('reason').notEmpty().withMessage('Begründung ist erforderlich')
+], async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { id } = req.params;
+    const { decision, reason } = req.body;
+    const currentUser = req.user;
+
+    if (!currentUser) {
+      return res.status(401).json({ error: 'Benutzer nicht authentifiziert' });
+    }
+
+    // Validierung der gültigen Entscheidungen
+    const validDecisions = ['APPROVED', 'REJECTED', 'RETURNED'];
+    if (!validDecisions.includes(decision)) {
+      return res.status(400).json({ error: 'Ungültige Entscheidung. Gültige Werte: APPROVED, REJECTED, RETURNED' });
+    }
+
+    // Benutzer-Details abrufen
+    const user = await prisma.user.findUnique({
+      where: { id: currentUser.userId }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Benutzer nicht gefunden' });
+    }
+
+    const who = `${user.firstName} ${user.lastName} (${user.username})`;
+
+    // Service abrufen
+    const service = await prisma.service.findUnique({
+      where: { id: Number(id) }
+    });
+
+    if (!service) {
+      return res.status(404).json({ error: 'Service nicht gefunden' });
+    }
+
+    // Entscheidung setzen
+    await prisma.service.update({
+      where: { id: Number(id) },
+      data: { decision: decision as any }
+    });
+
+    // Entscheidung im Aktivitätsverlauf loggen
+    const decisionText = decision === 'APPROVED' ? 'Genehmigt' : 
+                        decision === 'REJECTED' ? 'Abgelehnt' : 'Zurückgewiesen';
+
+    await prisma.activity.create({
+      data: {
+        recordId: Number(id),
+        who: who,
+        action: 'decision_made',
+        details: reason,
+        userId: currentUser.userId
+      }
+    });
+
+    // Status auf "Abgeschlossen" setzen und Gruppenzuweisung aufheben
+    await prisma.service.update({
+      where: { id: Number(id) },
+      data: { 
+        status: 'COMPLETED',
+        assignedToGroup: null
+      } as any
+    });
+
+    // Statusänderung im Aktivitätsverlauf loggen
+    await prisma.activity.create({
+      data: {
+        recordId: Number(id),
+        who: who,
+        action: 'status_changed',
+        details: 'Antrag abgeschlossen, Entscheidung direkt an den Insassen übermittelt',
+        userId: currentUser.userId
+      }
+    });
+
+    res.json({ 
+      message: 'Entscheidung getroffen und Antrag abgeschlossen',
+      decision: decision,
+      status: 'COMPLETED'
+    });
+
+  } catch (error: any) {
+    console.error('Complete with decision error:', error);
+    res.status(500).json({ error: 'Fehler beim Abschließen der Entscheidung' });
+  }
+});
+
 // Entscheidung treffen
 router.patch('/:id/decision', [
   body('decision').notEmpty().withMessage('Entscheidung ist erforderlich'),
