@@ -1107,6 +1107,109 @@ router.post('/:id/complete-with-decision', [
   }
 });
 
+// Ergebnis speichern und AVD für persönliche Eröffnung zuweisen
+router.post('/:id/complete-with-avd-notification', [
+  authenticateToken,
+  body('decision').notEmpty().withMessage('Entscheidung ist erforderlich'),
+  body('reason').notEmpty().withMessage('Begründung ist erforderlich')
+], async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { id } = req.params;
+    const { decision, reason } = req.body;
+    const currentUser = req.user;
+
+    if (!currentUser) {
+      return res.status(401).json({ error: 'Benutzer nicht authentifiziert' });
+    }
+
+    // Validierung der gültigen Entscheidungen
+    const validDecisions = ['APPROVED', 'REJECTED', 'RETURNED'];
+    if (!validDecisions.includes(decision)) {
+      return res.status(400).json({ error: 'Ungültige Entscheidung. Gültige Werte: APPROVED, REJECTED, RETURNED' });
+    }
+
+    // Benutzer-Details abrufen
+    const user = await prisma.user.findUnique({
+      where: { id: currentUser.userId }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Benutzer nicht gefunden' });
+    }
+
+    const who = `${user.firstName} ${user.lastName} (${user.username})`;
+
+    // Service abrufen
+    const service = await prisma.service.findUnique({
+      where: { id: Number(id) }
+    });
+
+    if (!service) {
+      return res.status(404).json({ error: 'Service nicht gefunden' });
+    }
+
+    // AVD-Gruppe finden
+    const avdGroup = await prisma.group.findFirst({
+      where: { name: 'PS General Enforcement Service' }
+    });
+
+    if (!avdGroup) {
+      return res.status(404).json({ error: 'AVD-Gruppe nicht gefunden' });
+    }
+
+    // Entscheidung setzen
+    await prisma.service.update({
+      where: { id: Number(id) },
+      data: { decision: decision as any }
+    });
+
+    // Entscheidung im Aktivitätsverlauf loggen
+    await prisma.activity.create({
+      data: {
+        recordId: Number(id),
+        who: who,
+        action: 'decision_made',
+        details: reason,
+        userId: currentUser.userId
+      }
+    });
+
+    // AVD-Gruppe zuweisen
+    await prisma.service.update({
+      where: { id: Number(id) },
+      data: { 
+        assignedToGroup: avdGroup.id as any
+      } as any
+    });
+
+    // Persönliche Eröffnung im Aktivitätsverlauf loggen
+    await prisma.activity.create({
+      data: {
+        recordId: Number(id),
+        who: who,
+        action: 'personal_notification',
+        details: 'Bitte eröffnen Sie dem Insassen das Ergebnis',
+        userId: currentUser.userId
+      }
+    });
+
+    res.json({ 
+      message: 'Entscheidung getroffen und AVD für persönliche Eröffnung zugewiesen',
+      decision: decision,
+      assignedToGroup: avdGroup.id
+    });
+
+  } catch (error: any) {
+    console.error('Complete with AVD notification error:', error);
+    res.status(500).json({ error: 'Fehler beim Zuweisen an AVD' });
+  }
+});
+
 // Entscheidung treffen
 router.patch('/:id/decision', [
   body('decision').notEmpty().withMessage('Entscheidung ist erforderlich'),

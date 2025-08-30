@@ -95,6 +95,7 @@ const ServiceDetail = () => {
   const [selectedDecision, setSelectedDecision] = useState<'APPROVED' | 'REJECTED' | 'RETURNED' | null>(null)
   const [decisionReason, setDecisionReason] = useState('')
   const [showDecisionConfirmationModal, setShowDecisionConfirmationModal] = useState(false)
+  const [showAvdNotificationModal, setShowAvdNotificationModal] = useState(false)
 
   useEffect(() => {
     if (id) {
@@ -249,6 +250,39 @@ const ServiceDetail = () => {
     } catch (error) {
       console.error('Fehler beim Abschließen der Entscheidung:', error)
       alert('Fehler beim Abschließen der Entscheidung. Bitte versuchen Sie es erneut.')
+    }
+  }
+
+  const handleAvdNotification = async () => {
+    if (!selectedDecision || !decisionReason.trim()) {
+      alert('Bitte wählen Sie eine Entscheidung und geben Sie eine Begründung an.')
+      return
+    }
+
+    // Bestätigungsmodal anzeigen
+    setShowAvdNotificationModal(true)
+  }
+
+  const confirmAvdNotification = async () => {
+    try {
+      await api.post(`/services/${id}/complete-with-avd-notification`, {
+        decision: selectedDecision,
+        reason: decisionReason
+      })
+
+      // Erfolgreich abgeschlossen - UI zurücksetzen
+      setSelectedDecision(null)
+      setDecisionReason('')
+      setSelectedAction(null)
+      setShowAvdNotificationModal(false)
+      
+      // Service-Details neu laden
+      fetchServiceDetails()
+      
+      // Erfolg wird durch das Neuladen der Service-Details und das Verschwinden der Entscheidungsoptionen angezeigt
+    } catch (error) {
+      console.error('Fehler beim Zuweisen an AVD:', error)
+      alert('Fehler beim Zuweisen an AVD. Bitte versuchen Sie es erneut.')
     }
   }
 
@@ -411,6 +445,8 @@ const ServiceDetail = () => {
         return 'Statusänderung'
       case 'decision_made':
         return 'Entscheidung'
+      case 'personal_notification':
+        return 'Persönliche Eröffnung'
       case 'status_and_decision_updated':
         return 'Status und Entscheidung aktualisiert'
       case 'returned':
@@ -809,7 +845,7 @@ const ServiceDetail = () => {
                           Ergebnis an den Insassen senden und Bearbeitung abschließen
                         </button>
                         <button
-                          onClick={() => {/* TODO: Implementierung */}}
+                          onClick={handleAvdNotification}
                           className="w-full px-4 py-2 text-left border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                         >
                           Ergebnis persönlich durch den AVD eröffnen lassen
@@ -1011,6 +1047,36 @@ const ServiceDetail = () => {
               </button>
               <button
                 onClick={confirmCompleteWithDecision}
+                className="btn btn-primary flex-1"
+              >
+                Ja
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AVD-Eröffnungs-Bestätigungsmodal */}
+      {showAvdNotificationModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              AVD-Eröffnung bestätigen
+            </h3>
+            
+            <p className="text-gray-700 mb-6">
+              Möchten Sie das Ergebnis speichern und den Antrag der Gruppe der AVDs für die persönliche Eröffnung zuweisen?
+            </p>
+            
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowAvdNotificationModal(false)}
+                className="btn btn-secondary flex-1"
+              >
+                Nein
+              </button>
+              <button
+                onClick={confirmAvdNotification}
                 className="btn btn-primary flex-1"
               >
                 Ja
