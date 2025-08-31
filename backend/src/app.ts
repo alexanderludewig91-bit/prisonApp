@@ -12,6 +12,7 @@ import userRoutes from './routes/users';
 import groupRoutes from './routes/groups';
 import adminLogRoutes from './routes/adminLogs';
 import houseRoutes from './routes/houses';
+import inmateRoutes from './routes/inmates';
 
 const app = express();
 const prisma = new PrismaClient();
@@ -59,6 +60,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api/admin-logs', adminLogRoutes);
 app.use('/api/houses', houseRoutes);
+app.use('/api/inmates', inmateRoutes);
 
 // Error handling
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

@@ -11,7 +11,7 @@ const NewService = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    priority: 'MEDIUM'
+    priority: ''
   })
 
   // Prüfe ob Benutzer ein Insasse ist

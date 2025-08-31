@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, User, FileText, MapPin, Clock, Eye } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
 
 interface Inmate {
   id: number;
@@ -19,13 +21,14 @@ interface Inmate {
       };
     };
   };
-  services?: Array<{
-    id: number;
-    title: string;
-    status: string;
-    priority: string;
-    createdAt: string;
-  }>;
+     services?: Array<{
+     id: number;
+     title: string;
+     status: string;
+     priority: string;
+     decision: string | null;
+     createdAt: string;
+   }>;
   assignmentHistory?: Array<{
     id: number;
     action: string;
@@ -53,15 +56,43 @@ interface Inmate {
     when: string;
     who: string;
   }>;
+  behaviorEntries?: Array<{
+    id: number;
+    recordedAt: string;
+    details: string;
+    recordedBy: string;
+  }>;
 }
 
 const InmatesOverview: React.FC = () => {
+  const navigate = useNavigate();
   const [inmates, setInmates] = useState<Inmate[]>([]);
   const [filteredInmates, setFilteredInmates] = useState<Inmate[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedInmate, setSelectedInmate] = useState<Inmate | null>(null);
-  const [activeTab, setActiveTab] = useState<'personal' | 'services' | 'history' | 'constitution'>('personal');
+  const [activeTab, setActiveTab] = useState<'personal' | 'services' | 'history' | 'constitution-personal' | 'constitution-manual'>('personal');
+  const [showBehaviorModal, setShowBehaviorModal] = useState(false);
+  const [behaviorForm, setBehaviorForm] = useState({
+    recordedAt: new Date().toISOString().slice(0, 16), // YYYY-MM-DDTHH:MM
+    details: ''
+  });
+
+  // Funktion zum Zurücksetzen des Formulars mit aktueller Zeit
+  const resetBehaviorForm = () => {
+    const now = new Date();
+    // Lokale Zeit in das richtige Format für datetime-local konvertieren
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    
+    setBehaviorForm({
+      recordedAt: `${year}-${month}-${day}T${hours}:${minutes}`,
+      details: ''
+    });
+  };
 
   // Alle Insassen laden
   useEffect(() => {
@@ -114,6 +145,10 @@ const InmatesOverview: React.FC = () => {
       const personalNotificationsResponse = await fetch(`/api/services/personal-notifications/${inmateId}`);
       const personalNotificationsData = personalNotificationsResponse.ok ? await personalNotificationsResponse.json() : { notifications: [] };
 
+      // Verhaltensdokumentation laden
+      const behaviorResponse = await api.get(`/inmates/${inmateId}/behavior`);
+      const behaviorData = behaviorResponse.data;
+
       const inmate = inmates.find(i => i.id === inmateId);
       if (inmate) {
         setSelectedInmate({
@@ -121,7 +156,8 @@ const InmatesOverview: React.FC = () => {
           currentAssignment: assignmentData?.assignment,
           services: servicesData.services,
           assignmentHistory: historyData.history,
-          personalNotifications: personalNotificationsData.notifications
+          personalNotifications: personalNotificationsData.notifications,
+          behaviorEntries: behaviorData.behaviorEntries
         });
       }
     } catch (error) {
@@ -139,12 +175,62 @@ const InmatesOverview: React.FC = () => {
     }
   };
 
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'PENDING': return 'Ausstehend';
+      case 'IN_PROGRESS': return 'In Bearbeitung';
+      case 'COMPLETED': return 'Abgeschlossen';
+      case 'REJECTED': return 'Abgelehnt';
+      default: return status;
+    }
+  };
+
+  const getDecisionText = (decision: string) => {
+    switch (decision) {
+      case 'APPROVED': return 'Genehmigt';
+      case 'REJECTED': return 'Abgelehnt';
+      case 'RETURNED': return 'Zurückgewiesen';
+      default: return decision;
+    }
+  };
+
+  const getDecisionColor = (decision: string) => {
+    switch (decision) {
+      case 'APPROVED': return 'bg-green-100 text-green-800';
+      case 'REJECTED': return 'bg-red-100 text-red-800';
+      case 'RETURNED': return 'bg-orange-100 text-orange-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
   const getActionColor = (action: string) => {
     switch (action) {
       case 'ASSIGNED': return 'bg-green-100 text-green-800';
       case 'TRANSFERRED': return 'bg-blue-100 text-blue-800';
       case 'REMOVED': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const handleSaveBehavior = async () => {
+    if (!selectedInmate || !behaviorForm.details.trim()) return;
+
+    try {
+      const response = await api.post(`/inmates/${selectedInmate.id}/behavior`, {
+        recordedAt: behaviorForm.recordedAt,
+        details: behaviorForm.details
+      });
+
+      if (response.status === 201) {
+        // Formular zurücksetzen
+        resetBehaviorForm();
+        setShowBehaviorModal(false);
+        
+        // Insassen-Details neu laden
+        await loadInmateDetails(selectedInmate.id);
+      }
+    } catch (error) {
+      console.error('Fehler beim Speichern der Verhaltensdokumentation:', error);
     }
   };
 
@@ -278,17 +364,28 @@ const InmatesOverview: React.FC = () => {
                      <Clock className="h-4 w-4 inline mr-2" />
                      Zuweisungshistorie ({selectedInmate.assignmentHistory?.length || 0})
                    </button>
-                   <button
-                     onClick={() => setActiveTab('constitution')}
-                     className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                       activeTab === 'constitution'
-                         ? 'border-blue-500 text-blue-600'
-                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                     }`}
-                   >
-                     <User className="h-4 w-4 inline mr-2" />
-                     Konstitution
-                   </button>
+                                       <button
+                      onClick={() => setActiveTab('constitution-personal')}
+                      className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                        activeTab === 'constitution-personal'
+                          ? 'border-blue-500 text-blue-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      <User className="h-4 w-4 inline mr-2" />
+                      Persönliche Eröffnungen
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('constitution-manual')}
+                      className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                        activeTab === 'constitution-manual'
+                          ? 'border-blue-500 text-blue-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      <User className="h-4 w-4 inline mr-2" />
+                      Manuelle Erfassungen
+                    </button>
                 </nav>
               </div>
 
@@ -323,34 +420,40 @@ const InmatesOverview: React.FC = () => {
                   </div>
                 )}
 
-                {activeTab === 'services' && (
-                  <div className="space-y-4">
-                    {selectedInmate.services && selectedInmate.services.length > 0 ? (
-                      selectedInmate.services.map((service) => (
-                        <div key={service.id} className="border border-gray-200 rounded-lg p-4">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h3 className="font-medium text-gray-900">{service.title}</h3>
-                              <p className="text-sm text-gray-500">
-                                Erstellt: {new Date(service.createdAt).toLocaleDateString('de-DE')}
-                              </p>
-                            </div>
-                            <div className="flex space-x-2">
-                              <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(service.status)}`}>
-                                {service.status}
-                              </span>
-                              <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
-                                {service.priority}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-gray-500 text-center py-8">Keine Anträge vorhanden</p>
-                    )}
-                  </div>
-                )}
+                                 {activeTab === 'services' && (
+                   <div className="space-y-4">
+                     {selectedInmate.services && selectedInmate.services.length > 0 ? (
+                       selectedInmate.services.map((service) => (
+                         <div 
+                           key={service.id} 
+                           className="border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                                                       onClick={() => navigate(`/services/${service.id}`)}
+                         >
+                           <div className="flex items-center justify-between">
+                             <div>
+                               <h3 className="font-medium text-gray-900">{service.title}</h3>
+                               <p className="text-sm text-gray-500">
+                                 Erstellt: {new Date(service.createdAt).toLocaleDateString('de-DE')}
+                               </p>
+                             </div>
+                                                           <div className="flex space-x-2">
+                                <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(service.status)}`}>
+                                  {getStatusText(service.status)}
+                                </span>
+                                {service.decision && (
+                                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${getDecisionColor(service.decision)}`}>
+                                    {getDecisionText(service.decision)}
+                                  </span>
+                                )}
+                              </div>
+                           </div>
+                         </div>
+                       ))
+                     ) : (
+                       <p className="text-gray-500 text-center py-8">Keine Anträge vorhanden</p>
+                     )}
+                   </div>
+                 )}
 
                 
 
@@ -390,11 +493,12 @@ const InmatesOverview: React.FC = () => {
                   </div>
                                  )}
 
-                                   {activeTab === 'constitution' && (
-                    <div className="space-y-4">
-                      {selectedInmate.personalNotifications && selectedInmate.personalNotifications.length > 0 ? (
-                        <div className="space-y-3">
-                          {selectedInmate.personalNotifications.map((notification) => (
+                                                                                                           {activeTab === 'constitution-personal' && (
+                     <div className="space-y-4">
+                       {/* Persönliche Eröffnungen */}
+                       {selectedInmate.personalNotifications && selectedInmate.personalNotifications.length > 0 ? (
+                         <div className="space-y-3">
+                           {selectedInmate.personalNotifications.map((notification) => (
                             <div key={notification.id} className="border border-gray-200 rounded-lg p-4">
                               <div className="flex items-center justify-between mb-2">
                                 <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
@@ -416,19 +520,64 @@ const InmatesOverview: React.FC = () => {
                               <div className="text-sm text-gray-500 mt-2">
                                 Durchgeführt von: {notification.who}
                               </div>
-                            </div>
-                          ))}
-                        </div>
+                                                         </div>
+                           ))}
+                         </div>
                       ) : (
-                        <div className="text-center py-8">
-                          <p className="text-gray-500">Keine persönlichen Eröffnungen vorhanden</p>
-                          <p className="text-sm text-gray-400 mt-2">
-                            Hier werden persönliche Eröffnungen von Anträgen angezeigt, die zeigen, wie sich der Insasse verhalten hat.
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                                                 <div className="text-center py-8">
+                           <p className="text-gray-500">Keine persönlichen Eröffnungen vorhanden</p>
+                           <p className="text-sm text-gray-400 mt-2">
+                             Hier werden persönliche Eröffnungen von Anträgen angezeigt, die zeigen, wie sich der Insasse verhalten hat.
+                           </p>
+                         </div>
+                       )}
+                     </div>
+                   )}
+
+                   {activeTab === 'constitution-manual' && (
+                     <div className="space-y-4">
+                       {/* Button für neuen Eintrag */}
+                       <div className="flex justify-end">
+                         <button
+                           onClick={() => {
+                             resetBehaviorForm();
+                             setShowBehaviorModal(true);
+                           }}
+                           className="btn btn-primary"
+                         >
+                           Neuer Eintrag
+                         </button>
+                       </div>
+
+                       {/* Manuelle Erfassungen */}
+                       {selectedInmate.behaviorEntries && selectedInmate.behaviorEntries.length > 0 ? (
+                         <div className="space-y-3">
+                           {selectedInmate.behaviorEntries.map((entry) => (
+                                                           <div key={`behavior-${entry.id}`} className="border border-gray-200 rounded-lg p-4">
+                                <div className="flex justify-end mb-2">
+                                  <span className="text-sm text-gray-500">
+                                    {new Date(entry.recordedAt).toLocaleDateString('de-DE')} {new Date(entry.recordedAt).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                                  </span>
+                                </div>
+                                                               <div className="text-sm text-gray-900 mb-2">
+                                  <strong>Verhalten des Insassen, erfasst von {entry.recordedBy}:</strong>
+                                </div>
+                                <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg">
+                                  {entry.details}
+                                </div>
+                             </div>
+                           ))}
+                         </div>
+                       ) : (
+                         <div className="text-center py-8">
+                           <p className="text-gray-500">Keine manuellen Erfassungen vorhanden</p>
+                           <p className="text-sm text-gray-400 mt-2">
+                             Hier werden manuelle Verhaltensdokumentationen angezeigt.
+                           </p>
+                         </div>
+                       )}
+                     </div>
+                   )}
                </div>
              </div>
            ) : (
@@ -440,6 +589,58 @@ const InmatesOverview: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Modal für neue Verhaltensdokumentation */}
+      {showBehaviorModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Neue Verhaltensdokumentation</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Datum und Uhrzeit
+                </label>
+                <input
+                  type="datetime-local"
+                  value={behaviorForm.recordedAt}
+                  onChange={(e) => setBehaviorForm({ ...behaviorForm, recordedAt: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Beschreibung des Verhaltens
+                </label>
+                <textarea
+                  value={behaviorForm.details}
+                  onChange={(e) => setBehaviorForm({ ...behaviorForm, details: e.target.value })}
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Beschreiben Sie das Verhalten des Insassen..."
+                />
+              </div>
+            </div>
+            
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => setShowBehaviorModal(false)}
+                className="btn btn-secondary"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={handleSaveBehavior}
+                disabled={!behaviorForm.details.trim()}
+                className="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Speichern
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

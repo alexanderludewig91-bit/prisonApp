@@ -32,6 +32,7 @@ model User {
   cellAssignmentHistory CellAssignmentHistory[] @relation("CellAssignmentHistory")
   assignmentCreatedBy CellAssignment[] @relation("AssignmentCreatedBy")
   historyCreatedBy CellAssignmentHistory[] @relation("HistoryCreatedBy")
+  behaviorEntries InmateBehavior[] @relation("InmateBehavior")
 
   @@map("users")
 }
@@ -238,4 +239,19 @@ model CellAssignmentHistory {
   assignedByUser User? @relation("HistoryCreatedBy", fields: [assignedBy], references: [id])
 
   @@map("cell_assignment_history")
+}
+
+// Verhaltensdokumentation für Insassen
+model InmateBehavior {
+  id          Int      @id @default(autoincrement())
+  inmateId    Int      // Referenz auf den Insassen
+  recordedAt  DateTime // Datum/Uhrzeit der Erfassung
+  details     String   // Beschreibung des Verhaltens
+  recordedBy  String   // Wer hat es erfasst (Username)
+  createdAt   DateTime @default(now())
+  
+  // Beziehungen
+  inmate      User     @relation("InmateBehavior", fields: [inmateId], references: [id], onDelete: Cascade)
+
+  @@map("inmate_behavior")
 }

@@ -1684,7 +1684,7 @@ router.patch('/:id/priority', [
 router.post('/my/services', checkRole(['INMATE']), [
   body('title').notEmpty().withMessage('Titel ist erforderlich'),
   body('description').notEmpty().withMessage('Beschreibung ist erforderlich'),
-  body('priority').optional().isIn(['HIGH', 'URGENT']).withMessage('Ungültige Priorität. Gültige Werte: HIGH, URGENT')
+  body('priority').optional().isIn(['', 'HIGH', 'URGENT']).withMessage('Ungültige Priorität. Gültige Werte: HIGH, URGENT')
 ], async (req: AuthenticatedRequest, res: Response) => {
   try {
     const errors = validationResult(req);
@@ -1693,7 +1693,10 @@ router.post('/my/services', checkRole(['INMATE']), [
     }
 
     const userId = req.user?.userId;
-    const { title, description, priority } = req.body;
+    const { title, description, priority: rawPriority } = req.body;
+    
+    // Leeren String als null behandeln
+    const priority = rawPriority === '' ? null : rawPriority;
 
     if (!userId) {
       return res.status(401).json({ error: 'Benutzer nicht authentifiziert' });
