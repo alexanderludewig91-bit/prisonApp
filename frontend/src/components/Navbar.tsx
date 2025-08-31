@@ -32,17 +32,15 @@ const Navbar = () => {
         { name: 'Kontoinformationen', href: '/profile' }
       ]
     } else if (isStaff || isAdmin) {
-      const staffNavigation = [
-        { name: 'Antragsbearbeitung', href: '/staff-dashboard' },
-        { name: 'Anträge', href: '/services' },
-        { name: 'Benutzerübersicht', href: '/user-overview' },
-        { name: 'Insassen-Übersicht', href: '/inmates-overview' }
-      ]
+             const staffNavigation = [
+         { name: 'Antragsbearbeitung', href: '/staff-dashboard' },
+         { name: 'Benutzerübersicht', href: '/user-overview' },
+         { name: 'Insassen-Übersicht', href: '/inmates-overview' }
+       ]
       
       // Admin-spezifische Links hinzufügen
       if (isAdmin) {
         staffNavigation.push({ name: 'Admin-Dashboard', href: '/admin-dashboard' })
-        staffNavigation.push({ name: 'Admin-Logs', href: '/admin-logs' })
         staffNavigation.push({ name: 'Hausverwaltung', href: '/house-management' })
       }
       

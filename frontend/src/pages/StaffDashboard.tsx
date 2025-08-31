@@ -64,7 +64,7 @@ const StaffDashboard = () => {
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'all' | 'my-assignments' | 'my-participation'>(defaultTab)
-  const [sortBy, setSortBy] = useState<'date' | 'title' | 'assignee'>('date')
+  const [sortBy, setSortBy] = useState<'date' | 'title' | 'assignee' | 'status' | 'decision'>('date')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [filters, setFilters] = useState<FilterState>({
     status: '',
@@ -151,22 +151,30 @@ const StaffDashboard = () => {
       let aValue: any
       let bValue: any
 
-      switch (sortBy) {
-        case 'date':
-          aValue = new Date(a.createdAt)
-          bValue = new Date(b.createdAt)
-          break
-        case 'title':
-          aValue = a.title.toLowerCase()
-          bValue = b.title.toLowerCase()
-          break
-        case 'assignee':
-          aValue = a.assignedToGroupRef?.description || a.assignedToGroupRef?.name || 'Nicht zugewiesen'
-          bValue = b.assignedToGroupRef?.description || b.assignedToGroupRef?.name || 'Nicht zugewiesen'
-          break
-        default:
-          return 0
-      }
+              switch (sortBy) {
+          case 'date':
+            aValue = new Date(a.createdAt)
+            bValue = new Date(b.createdAt)
+            break
+          case 'title':
+            aValue = a.title.toLowerCase()
+            bValue = b.title.toLowerCase()
+            break
+          case 'assignee':
+            aValue = a.assignedToGroupRef?.description || a.assignedToGroupRef?.name || 'Nicht zugewiesen'
+            bValue = b.assignedToGroupRef?.description || b.assignedToGroupRef?.name || 'Nicht zugewiesen'
+            break
+          case 'status':
+            aValue = a.status || ''
+            bValue = b.status || ''
+            break
+          case 'decision':
+            aValue = a.decision || ''
+            bValue = b.decision || ''
+            break
+          default:
+            return 0
+        }
 
       if (sortDirection === 'asc') {
         return aValue > bValue ? 1 : -1
@@ -176,7 +184,7 @@ const StaffDashboard = () => {
     })
   }
 
-  const handleSort = (field: 'date' | 'title' | 'assignee') => {
+  const handleSort = (field: 'date' | 'title' | 'assignee' | 'status' | 'decision') => {
     if (sortBy === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
     } else {
@@ -185,7 +193,7 @@ const StaffDashboard = () => {
     }
   }
 
-  const getSortIcon = (field: 'date' | 'title' | 'assignee') => {
+  const getSortIcon = (field: 'date' | 'title' | 'assignee' | 'status' | 'decision') => {
     if (sortBy !== field) return null
     return sortDirection === 'asc' ? '↑' : '↓'
   }
@@ -395,7 +403,7 @@ const StaffDashboard = () => {
 
         {/* Tabellenüberschriften */}
         <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b">
-          <div className="grid items-center md:grid-cols-[minmax(0,1fr)_22rem_18rem] gap-x-6 px-6 py-4 text-sm font-medium text-gray-700">
+          <div className="grid items-center md:grid-cols-[minmax(0,1fr)_22rem_12rem_12rem] gap-x-6 px-6 py-4 text-sm font-medium text-gray-700">
             <div className="min-w-0">
               <div className="font-medium">Antrag</div>
               <div className="mt-1 text-sm text-muted-foreground tabular-nums truncate">
@@ -424,8 +432,21 @@ const StaffDashboard = () => {
                 <span>Zuweisung {getSortIcon('assignee')}</span>
               </button>
             </div>
-            <div className="justify-self-end text-right">
-              <span>Status</span>
+            <div className="justify-self-center text-center">
+              <button 
+                onClick={() => handleSort('status')}
+                className="inline-flex items-center gap-1 hover:text-gray-900 transition-colors"
+              >
+                <span>Status {getSortIcon('status')}</span>
+              </button>
+            </div>
+            <div className="justify-self-center text-center">
+              <button 
+                onClick={() => handleSort('decision')}
+                className="inline-flex items-center gap-1 hover:text-gray-900 transition-colors"
+              >
+                <span>Entscheidung {getSortIcon('decision')}</span>
+              </button>
             </div>
           </div>
         </div>
@@ -434,36 +455,41 @@ const StaffDashboard = () => {
           {getSortedServices(filteredServices).map((service) => (
             <div 
               key={service.id} 
-              className="grid items-center md:grid-cols-[minmax(0,1fr)_22rem_18rem] gap-x-6 px-6 odd:bg-muted/30 hover:bg-muted/50 border-t py-3 cursor-pointer transition-colors"
+              className="grid items-center md:grid-cols-[minmax(0,1fr)_22rem_12rem_12rem] gap-x-6 px-6 odd:bg-muted/30 hover:bg-muted/50 border-t py-3 cursor-pointer transition-colors"
               onClick={() => navigate(`/services/${service.id}`)}
             >
               {/* Linke Spalte: Titel + Metadaten */}
               <div className="min-w-0">
                 <div className="font-medium truncate">
+                  {service.priority && service.priority !== '' && (
+                    <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full mr-2 ${getPriorityColor(service.priority)}`}>
+                      {service.priority === 'HIGH' ? 'Hohe Priorität' : 'Höchste Priorität'}
+                    </span>
+                  )}
                   {getServiceTypeText(service.serviceType)}: {service.title}
                 </div>
-                                 <div className="mt-1 text-sm text-muted-foreground tabular-nums truncate">
-                   <span className="inline-flex items-center gap-1 shrink-0">
-                     <Calendar className="h-4 w-4" />
-                     <span className="tabular-nums">{formatDate(service.createdAt)}</span>
-                   </span>
-                   <span className="inline-flex items-center gap-1 min-w-0 ml-2">
-                     <User className="h-4 w-4" />
-                     <span className="truncate">
-                       {service.createdByUser.firstName} {service.createdByUser.lastName}
-                     </span>
-                   </span>
-                 </div>
+                <div className="mt-1 text-sm text-muted-foreground tabular-nums truncate">
+                  <span className="inline-flex items-center gap-1 shrink-0">
+                    <Calendar className="h-4 w-4" />
+                    <span className="tabular-nums">{formatDate(service.createdAt)}</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1 min-w-0 ml-2">
+                    <User className="h-4 w-4" />
+                    <span className="truncate">
+                      {service.createdByUser.firstName} {service.createdByUser.lastName}
+                    </span>
+                  </span>
+                </div>
               </div>
               
               {/* Mittlere Spalte: Zuweisung */}
               <div className="min-w-0">
                 <span className="inline-flex items-center gap-2 truncate">
                   <User className={`h-4 w-4 ${
-                    service.assignedToGroupRef ? 'text-green-500' : 'text-yellow-500'
+                    service.assignedToGroupRef ? 'text-gray-500' : 'text-gray-400'
                   }`} />
                   <span className={
-                    service.assignedToGroupRef ? 'text-green-600' : 'text-yellow-600'
+                    service.assignedToGroupRef ? 'text-gray-900' : 'text-gray-500'
                   }>
                     {service.assignedToGroupRef 
                       ? (service.assignedToGroupRef.description || service.assignedToGroupRef.name)
@@ -473,62 +499,26 @@ const StaffDashboard = () => {
                 </span>
               </div>
               
-              {/* Rechte Spalte: Badges */}
-              <div className="justify-self-end">
-                <div className="flex flex-wrap justify-end items-center gap-2 whitespace-nowrap">
-                  {(() => {
-                    const badges = []
-                    
-                    // Status Badge
-                    if (service.status) {
-                      let statusText = ''
-                      if (service.status === 'PENDING') statusText = 'Ausstehend'
-                      else if (service.status === 'IN_PROGRESS') statusText = 'In Bearbeitung'
-                      else if (service.status === 'COMPLETED') statusText = 'Abgeschlossen'
-                      
-                      if (statusText) {
-                        badges.push(
-                          <span key="status" className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(service.status)}`}>
-                            {statusText}
-                          </span>
-                        )
-                      }
-                    }
-                    
-                    // Decision Badge
-                    if (service.decision && service.decision !== '') {
-                      let decisionText = ''
-                      if (service.decision === 'APPROVED') decisionText = 'Genehmigt'
-                      else if (service.decision === 'REJECTED') decisionText = 'Abgelehnt'
-                      else if (service.decision === 'RETURNED') decisionText = 'Zurückgewiesen'
-                      
-                      if (decisionText) {
-                        badges.push(
-                          <span key="decision" className={`px-2 py-1 text-xs font-medium rounded-full ${getDecisionColor(service.decision)}`}>
-                            {decisionText}
-                          </span>
-                        )
-                      }
-                    }
-                    
-                    // Priority Badge
-                    if (service.priority && service.priority !== '') {
-                      let priorityText = ''
-                      if (service.priority === 'HIGH') priorityText = 'Hohe Priorität'
-                      else if (service.priority === 'URGENT') priorityText = 'Höchste Priorität'
-                      
-                      if (priorityText) {
-                        badges.push(
-                          <span key="priority" className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(service.priority)}`}>
-                            {priorityText}
-                          </span>
-                        )
-                      }
-                    }
-                    
-                    return badges
-                  })()}
-                </div>
+              {/* Status Spalte */}
+              <div className="justify-self-center">
+                {service.status && (
+                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(service.status)}`}>
+                    {service.status === 'PENDING' ? 'Ausstehend' :
+                     service.status === 'IN_PROGRESS' ? 'In Bearbeitung' :
+                     service.status === 'COMPLETED' ? 'Abgeschlossen' : ''}
+                  </span>
+                )}
+              </div>
+              
+              {/* Entscheidung Spalte */}
+              <div className="justify-self-center">
+                {service.decision && service.decision !== '' && (
+                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${getDecisionColor(service.decision)}`}>
+                    {service.decision === 'APPROVED' ? 'Genehmigt' :
+                     service.decision === 'REJECTED' ? 'Abgelehnt' :
+                     service.decision === 'RETURNED' ? 'Zurückgewiesen' : ''}
+                  </span>
+                )}
               </div>
             </div>
           ))}

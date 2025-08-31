@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { 
   Shield, 
@@ -8,7 +8,8 @@ import {
   User,
   Activity,
   Clock,
-  Monitor
+  Monitor,
+  ArrowLeft
 } from 'lucide-react'
 
 interface AdminLog {
@@ -41,6 +42,7 @@ interface AdminLogStatistics {
 
 const AdminLogs: React.FC = () => {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [logs, setLogs] = useState<AdminLog[]>([])
   const [statistics, setStatistics] = useState<AdminLogStatistics | null>(null)
   const [loading, setLoading] = useState(true)
@@ -159,14 +161,23 @@ const AdminLogs: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-            <Shield className="w-8 h-8 mr-3 text-purple-600" />
-            Admin-Logs
-          </h1>
-          <p className="mt-2 text-gray-600">
-            Protokoll aller Admin-Aktionen für Audit und Sicherheit
-          </p>
+        <div className="mb-8 flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+              <Shield className="w-8 h-8 mr-3 text-purple-600" />
+              Admin-Logs
+            </h1>
+            <p className="mt-2 text-gray-600">
+              Protokoll aller Admin-Aktionen für Audit und Sicherheit
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('/admin-dashboard')}
+            className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Zurück
+          </button>
         </div>
 
         {/* Statistiken */}

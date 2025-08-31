@@ -3,7 +3,7 @@ import Navbar from './components/Navbar'
 import Login from './pages/Login'
 import { useAuth } from './contexts/AuthContext'
 
-import Services from './pages/Services'
+
 import ServiceDetail from './pages/ServiceDetail'
 import MyServices from './pages/MyServices'
 import NewService from './pages/NewService'
@@ -50,6 +50,36 @@ const DashboardRedirect = () => {
   }
 }
 
+// Komponente für Routen, die nur für Staff/Admin zugänglich sind
+const StaffOnlyRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useAuth()
+  
+  const userGroups = user?.groups?.map(g => g.name) || []
+  const isInmate = userGroups.some(group => group === 'PS Inmates')
+  const isAdmin = userGroups.some(group => group === 'PS Designers')
+  const isStaff = userGroups.some(group => 
+    group.includes('PS General Enforcement Service') || 
+    group.includes('PS Vollzugsabteilungsleitung') ||
+    group.includes('PS Vollzugsleitung') ||
+    group.includes('PS Anstaltsleitung') ||
+    group.includes('PS Payments Office') ||
+    group.includes('PS Medical Staff')
+  )
+  
+  // Wenn Insasse, zur Insassen-Seite weiterleiten
+  if (isInmate) {
+    return <Navigate to="/my-services" replace />
+  }
+  
+  // Wenn Staff oder Admin, Zugriff erlauben
+  if (isStaff || isAdmin) {
+    return <>{children}</>
+  }
+  
+  // Fallback: Zur Login-Seite weiterleiten
+  return <Navigate to="/login" replace />
+}
+
 function AppContent() {
   const { isAuthenticated, loading } = useAuth()
 
@@ -76,9 +106,7 @@ function AppContent() {
           <Route path="/dashboard" element={
             isAuthenticated ? <DashboardRedirect /> : <Navigate to="/login" replace />
           } />
-          <Route path="/services" element={
-            isAuthenticated ? <Services /> : <Navigate to="/login" replace />
-          } />
+
           <Route path="/services/:id" element={
             isAuthenticated ? <ServiceDetail /> : <Navigate to="/login" replace />
           } />
@@ -89,22 +117,22 @@ function AppContent() {
             isAuthenticated ? <NewService /> : <Navigate to="/login" replace />
           } />
           <Route path="/staff-dashboard" element={
-            isAuthenticated ? <StaffDashboard /> : <Navigate to="/login" replace />
+            isAuthenticated ? <StaffOnlyRoute><StaffDashboard /></StaffOnlyRoute> : <Navigate to="/login" replace />
           } />
           <Route path="/admin-dashboard" element={
-            isAuthenticated ? <AdminDashboard /> : <Navigate to="/login" replace />
+            isAuthenticated ? <StaffOnlyRoute><AdminDashboard /></StaffOnlyRoute> : <Navigate to="/login" replace />
           } />
           <Route path="/admin-logs" element={
-            isAuthenticated ? <AdminLogs /> : <Navigate to="/login" replace />
+            isAuthenticated ? <StaffOnlyRoute><AdminLogs /></StaffOnlyRoute> : <Navigate to="/login" replace />
           } />
           <Route path="/house-management" element={
-            isAuthenticated ? <HouseManagement /> : <Navigate to="/login" replace />
+            isAuthenticated ? <StaffOnlyRoute><HouseManagement /></StaffOnlyRoute> : <Navigate to="/login" replace />
           } />
           <Route path="/inmates-overview" element={
-            isAuthenticated ? <InmatesOverview /> : <Navigate to="/login" replace />
+            isAuthenticated ? <StaffOnlyRoute><InmatesOverview /></StaffOnlyRoute> : <Navigate to="/login" replace />
           } />
           <Route path="/user-overview" element={
-            isAuthenticated ? <UserOverview /> : <Navigate to="/login" replace />
+            isAuthenticated ? <StaffOnlyRoute><UserOverview /></StaffOnlyRoute> : <Navigate to="/login" replace />
           } />
         </Routes>
       </main>
