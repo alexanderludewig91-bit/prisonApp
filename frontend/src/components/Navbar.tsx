@@ -33,7 +33,7 @@ const Navbar = () => {
       ]
     } else if (isStaff || isAdmin) {
       const staffNavigation = [
-        { name: 'Mitarbeiter-Dashboard', href: '/staff-dashboard' },
+        { name: 'Antragsbearbeitung', href: '/staff-dashboard' },
         { name: 'Anträge', href: '/services' },
         { name: 'Benutzerübersicht', href: '/user-overview' },
         { name: 'Insassen-Übersicht', href: '/inmates-overview' }

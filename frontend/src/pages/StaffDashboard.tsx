@@ -1,29 +1,24 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { 
-  FileText, 
-  Clock, 
-  CheckCircle, 
+  CheckCircle,
   XCircle, 
-  AlertCircle,
   Filter,
-  Search,
-  Eye,
   Calendar,
   User,
-  X,
-  ThumbsUp,
-  ThumbsDown
+  X
 } from 'lucide-react'
 import api from '../services/api'
+import { useAuth } from '../contexts/AuthContext'
 
 interface Service {
   id: number
   title: string
   description: string
   status: string
-  decision?: string // Neue Entscheidungs-Spalte
+  decision?: string
   priority: string
+  serviceType: string
   createdAt: string
   createdByUser: {
     id: number
@@ -37,6 +32,11 @@ interface Service {
     firstName: string
     lastName: string
   }
+  assignedToGroupRef?: {
+    id: number
+    name: string
+    description: string
+  }
   activities: Array<{
     id: number
     action: string
@@ -48,7 +48,7 @@ interface Service {
 
 interface FilterState {
   status: string
-  decision: string // Neuer Filter für Entscheidungen
+  decision: string
   priority: string
   search: string
   dateFrom: string
@@ -57,15 +57,18 @@ interface FilterState {
 
 const StaffDashboard = () => {
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const isPSDesigner = user?.groups?.some(group => group.name === 'PS Designers') || false
+  const defaultTab = isPSDesigner ? 'all' : 'my-assignments'
+  
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
-  const [workflowStats, setWorkflowStats] = useState({
-    myAssignedServices: 0,
-    workflowTransitionsToday: 0
-  })
+  const [activeTab, setActiveTab] = useState<'all' | 'my-assignments' | 'my-participation'>(defaultTab)
+  const [sortBy, setSortBy] = useState<'date' | 'title' | 'assignee'>('date')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [filters, setFilters] = useState<FilterState>({
     status: '',
-    decision: '', // Neuer Filter
+    decision: '',
     priority: '',
     search: '',
     dateFrom: '',
@@ -75,14 +78,25 @@ const StaffDashboard = () => {
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
   useEffect(() => {
+    if (!isPSDesigner && activeTab === 'all') {
+      setActiveTab('my-assignments')
+    }
+  }, [isPSDesigner, activeTab])
+
+  useEffect(() => {
     fetchServices()
-    fetchWorkflowStats()
-  }, [])
+  }, [activeTab])
 
   const fetchServices = async () => {
     try {
       setLoading(true)
-      const response = await api.get('/services/staff/all')
+      let endpoint = '/services/staff/all'
+      if (activeTab === 'my-assignments') {
+        endpoint = '/services/staff/my-assignments'
+      } else if (activeTab === 'my-participation') {
+        endpoint = '/services/staff/my-participation'
+      }
+      const response = await api.get(endpoint)
       setServices(response.data.services || [])
     } catch (error) {
       console.error('Fehler beim Laden der Anträge:', error)
@@ -92,141 +106,101 @@ const StaffDashboard = () => {
     }
   }
 
-  const fetchWorkflowStats = async () => {
-    try {
-      const response = await api.get('/services/staff/workflow-stats')
-      setWorkflowStats(response.data.workflowStats || {
-        myAssignedServices: 0,
-        workflowTransitionsToday: 0
-      })
-    } catch (error) {
-      console.error('Fehler beim Laden der Workflow-Statistiken:', error)
-      setWorkflowStats({
-        myAssignedServices: 0,
-        workflowTransitionsToday: 0
-      })
-    }
+  // Helper functions
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('de-DE') + ' ' + new Date(dateString).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
   }
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'PENDING':
-        return <Clock className="w-4 h-4 text-yellow-500" />
-      case 'IN_PROGRESS':
-        return <AlertCircle className="w-4 h-4 text-blue-500" />
-      case 'COMPLETED':
-        return <CheckCircle className="w-4 h-4 text-green-500" />
-      default:
-        return <Clock className="w-4 h-4 text-gray-500" />
+
+
+  const getServiceTypeText = (serviceType: string) => {
+    switch (serviceType) {
+      case 'FREETEXT': return 'Freitextantrag'
+      default: return 'Antrag'
     }
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PENDING':
-        return 'bg-yellow-100 text-yellow-800'
-      case 'IN_PROGRESS':
-        return 'bg-blue-100 text-blue-800'
-      case 'COMPLETED':
-        return 'bg-green-100 text-green-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
+      case 'PENDING': return 'bg-yellow-100 text-yellow-800'
+      case 'IN_PROGRESS': return 'bg-blue-100 text-blue-800'
+      case 'COMPLETED': return 'bg-green-100 text-green-800'
+      default: return 'bg-gray-100 text-gray-800'
     }
   }
 
-  // Neue Funktionen für Entscheidungen
-  const getDecisionIcon = (decision?: string) => {
+  const getDecisionColor = (decision: string) => {
     switch (decision) {
-      case 'APPROVED':
-        return <ThumbsUp className="w-4 h-4 text-green-500" />
-      case 'REJECTED':
-        return <ThumbsDown className="w-4 h-4 text-red-500" />
-      default:
-        return <Clock className="w-4 h-4 text-gray-400" />
-    }
-  }
-
-  const getDecisionColor = (decision?: string) => {
-    switch (decision) {
-      case 'APPROVED':
-        return 'bg-green-100 text-green-800'
-      case 'REJECTED':
-        return 'bg-red-100 text-red-800'
-      default:
-        return 'bg-gray-100 text-gray-600'
+      case 'APPROVED': return 'bg-green-100 text-green-800'
+      case 'REJECTED': return 'bg-red-100 text-red-800'
+      case 'RETURNED': return 'bg-orange-100 text-orange-800'
+      default: return 'bg-gray-100 text-gray-800'
     }
   }
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'HIGH':
-        return 'bg-orange-100 text-orange-800'
-      case 'URGENT':
-        return 'bg-red-100 text-red-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
+      case 'HIGH': return 'bg-orange-100 text-orange-800'
+      case 'URGENT': return 'bg-red-100 text-red-800'
+      default: return 'bg-gray-100 text-gray-800'
     }
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('de-DE', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+  const getSortedServices = (services: Service[]) => {
+    return [...services].sort((a, b) => {
+      let aValue: any
+      let bValue: any
+
+      switch (sortBy) {
+        case 'date':
+          aValue = new Date(a.createdAt)
+          bValue = new Date(b.createdAt)
+          break
+        case 'title':
+          aValue = a.title.toLowerCase()
+          bValue = b.title.toLowerCase()
+          break
+        case 'assignee':
+          aValue = a.assignedToGroupRef?.description || a.assignedToGroupRef?.name || 'Nicht zugewiesen'
+          bValue = b.assignedToGroupRef?.description || b.assignedToGroupRef?.name || 'Nicht zugewiesen'
+          break
+        default:
+          return 0
+      }
+
+      if (sortDirection === 'asc') {
+        return aValue > bValue ? 1 : -1
+      } else {
+        return aValue < bValue ? 1 : -1
+      }
     })
   }
 
-  const handleStatusChange = async (serviceId: number, newStatus: string) => {
-    try {
-      await api.patch(`/services/${serviceId}/status`, { status: newStatus })
-      setMessage({ type: 'success', text: 'Status erfolgreich geändert' })
-      // Service-Liste und Statistiken aktualisieren
-      fetchServices()
-      fetchWorkflowStats()
-    } catch (error) {
-      console.error('Fehler beim Ändern des Status:', error)
-      setMessage({ type: 'error', text: 'Fehler beim Ändern des Status' })
+  const handleSort = (field: 'date' | 'title' | 'assignee') => {
+    if (sortBy === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortBy(field)
+      setSortDirection('desc')
     }
   }
 
-  // Neue Funktion für Entscheidungsänderung
-  const handleDecisionChange = async (serviceId: number, newDecision: string) => {
-    try {
-      await api.patch(`/services/${serviceId}/decision`, { decision: newDecision })
-      setMessage({ type: 'success', text: 'Entscheidung erfolgreich getroffen' })
-      // Service-Liste und Statistiken aktualisieren
-      fetchServices()
-      fetchWorkflowStats()
-    } catch (error) {
-      console.error('Fehler beim Treffen der Entscheidung:', error)
-      setMessage({ type: 'error', text: 'Fehler beim Treffen der Entscheidung' })
-    }
+  const getSortIcon = (field: 'date' | 'title' | 'assignee') => {
+    if (sortBy !== field) return null
+    return sortDirection === 'asc' ? '↑' : '↓'
   }
 
   const filteredServices = services.filter(service => {
     if (filters.status && service.status !== filters.status) return false
-    if (filters.decision && service.decision !== filters.decision) return false // Neuer Filter
+    if (filters.decision && service.decision !== filters.decision) return false
     if (filters.priority && service.priority !== filters.priority) return false
     if (filters.search) {
-      const searchTerm = filters.search.toLowerCase()
-      if (!service.title.toLowerCase().includes(searchTerm) && 
-          !service.description.toLowerCase().includes(searchTerm) &&
-          !service.createdByUser.firstName.toLowerCase().includes(searchTerm) &&
-          !service.createdByUser.lastName.toLowerCase().includes(searchTerm)) {
+      const searchLower = filters.search.toLowerCase()
+      if (!service.title.toLowerCase().includes(searchLower) &&
+          !service.description.toLowerCase().includes(searchLower) &&
+          !`${service.createdByUser.firstName} ${service.createdByUser.lastName}`.toLowerCase().includes(searchLower)) {
         return false
       }
-    }
-    if (filters.dateFrom) {
-      const serviceDate = new Date(service.createdAt)
-      const fromDate = new Date(filters.dateFrom)
-      if (serviceDate < fromDate) return false
-    }
-    if (filters.dateTo) {
-      const serviceDate = new Date(service.createdAt)
-      const toDate = new Date(filters.dateTo)
-      if (serviceDate > toDate) return false
     }
     return true
   })
@@ -244,20 +218,20 @@ const StaffDashboard = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Mitarbeiter-Dashboard</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Antragsbearbeitung</h1>
           <p className="text-gray-600 mt-2">
             Übersicht und Bearbeitung aller Anträge
           </p>
         </div>
-                 <div className="flex space-x-3">
-           <button
-             onClick={() => setShowFilters(!showFilters)}
-             className="btn btn-secondary flex items-center space-x-2"
-           >
-             <Filter className="w-4 h-4" />
-             <span>Filter</span>
-           </button>
-         </div>
+        <div className="flex space-x-3">
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="btn btn-secondary flex items-center space-x-2"
+          >
+            <Filter className="w-4 h-4" />
+            <span>Filter</span>
+          </button>
+        </div>
       </div>
 
       {/* In-App Nachrichten */}
@@ -331,7 +305,6 @@ const StaffDashboard = () => {
                 className="input"
               >
                 <option value="">Alle Prioritäten</option>
-                <option value="">Alle Prioritäten</option>
                 <option value="HIGH">Hohe Priorität</option>
                 <option value="URGENT">Höchste Priorität</option>
               </select>
@@ -340,20 +313,17 @@ const StaffDashboard = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Suche
               </label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Titel, Beschreibung, Name..."
-                  value={filters.search}
-                  onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                  className="input pl-10"
-                />
-              </div>
+              <input
+                type="text"
+                value={filters.search}
+                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                placeholder="Titel, Beschreibung, Antragsteller..."
+                className="input"
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Von Datum
+                Von
               </label>
               <input
                 type="date"
@@ -364,7 +334,7 @@ const StaffDashboard = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Bis Datum
+                Bis
               </label>
               <input
                 type="date"
@@ -377,189 +347,187 @@ const StaffDashboard = () => {
         </div>
       )}
 
-             {/* Kompakte Statistiken */}
-       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-         {/* Status-Übersicht */}
-         <div className="bg-white rounded-lg shadow p-4">
-           <div className="flex items-center justify-between mb-4">
-             <h3 className="text-base font-semibold text-gray-700">Status</h3>
-             <FileText className="w-5 h-5 text-gray-400" />
-           </div>
-           <div className="space-y-3">
-             <div className="flex items-center justify-between">
-               <div className="flex items-center space-x-2">
-                 <FileText className="w-4 h-4 text-gray-500" />
-                 <span className="text-sm text-gray-600">Alle Anträge</span>
-               </div>
-               <span className="text-base font-bold text-gray-900">
-                 {services.length}
-               </span>
-             </div>
-             <div className="flex items-center justify-between">
-               <div className="flex items-center space-x-2">
-                 <Clock className="w-4 h-4 text-yellow-500" />
-                 <span className="text-sm text-gray-600">Ausstehend</span>
-               </div>
-               <span className="text-base font-bold text-gray-900">
-                 {services.filter(s => s.status === 'PENDING').length}
-               </span>
-             </div>
-             <div className="flex items-center justify-between">
-               <div className="flex items-center space-x-2">
-                 <AlertCircle className="w-4 h-4 text-blue-500" />
-                 <span className="text-sm text-gray-600">In Bearbeitung</span>
-               </div>
-               <span className="text-base font-bold text-gray-900">
-                 {services.filter(s => s.status === 'IN_PROGRESS').length}
-               </span>
-             </div>
-             <div className="flex items-center justify-between">
-               <div className="flex items-center space-x-2">
-                 <CheckCircle className="w-4 h-4 text-green-500" />
-                 <span className="text-sm text-gray-600">Abgeschlossen</span>
-               </div>
-               <span className="text-base font-bold text-gray-900">
-                 {services.filter(s => s.status === 'COMPLETED').length}
-               </span>
-             </div>
-           </div>
-         </div>
-
-         {/* Entscheidungs-Übersicht */}
-         <div className="bg-white rounded-lg shadow p-4">
-           <div className="flex items-center justify-between mb-4">
-             <h3 className="text-base font-semibold text-gray-700">Entscheidungen</h3>
-             <ThumbsUp className="w-5 h-5 text-gray-400" />
-           </div>
-           <div className="space-y-3">
-             <div className="flex items-center justify-between">
-               <div className="flex items-center space-x-2">
-                 <ThumbsUp className="w-4 h-4 text-green-500" />
-                 <span className="text-sm text-gray-600">Genehmigt</span>
-               </div>
-               <span className="text-base font-bold text-gray-900">
-                 {services.filter(s => s.decision === 'APPROVED').length}
-               </span>
-             </div>
-             <div className="flex items-center justify-between">
-               <div className="flex items-center space-x-2">
-                 <ThumbsDown className="w-4 h-4 text-red-500" />
-                 <span className="text-sm text-gray-600">Abgelehnt</span>
-               </div>
-               <span className="text-base font-bold text-gray-900">
-                 {services.filter(s => s.decision === 'REJECTED').length}
-               </span>
-             </div>
-           </div>
-         </div>
-
-         {/* Meine Anträge */}
-         <div className="bg-white rounded-lg shadow p-4">
-           <div className="flex items-center justify-between mb-4">
-             <h3 className="text-base font-semibold text-gray-700">Meine Anträge</h3>
-             <User className="w-5 h-5 text-blue-500" />
-           </div>
-           <div className="space-y-3">
-             <div className="flex items-center justify-between">
-               <div className="flex items-center space-x-2">
-                 <User className="w-4 h-4 text-blue-500" />
-                 <span className="text-sm text-gray-600">Zugewiesene Anträge</span>
-               </div>
-               <span className="text-base font-bold text-gray-900">
-                 {workflowStats.myAssignedServices}
-               </span>
-             </div>
-           </div>
-         </div>
-
-         
-       </div>
-
-              {/* Anträge Liste */}
+      {/* Anträge Liste */}
       <div className="bg-white rounded-lg shadow">
+        {/* Tab Navigation */}
+        <nav className="flex space-x-8 px-6">
+          {isPSDesigner && (
+            <button 
+              onClick={() => setActiveTab('all')} 
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'all' 
+                  ? 'border-blue-500 text-blue-600' 
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Alle Anträge
+            </button>
+          )}
+          <button 
+            onClick={() => setActiveTab('my-assignments')} 
+            className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'my-assignments' 
+                ? 'border-blue-500 text-blue-600' 
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Meine Zuweisungen
+          </button>
+          <button 
+            onClick={() => setActiveTab('my-participation')} 
+            className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'my-participation' 
+                ? 'border-blue-500 text-blue-600' 
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Meine Beteiligung
+          </button>
+        </nav>
+
         <div className="px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900">
-            Anträge ({filteredServices.length})
+            {activeTab === 'all' ? 'Alle Anträge' : 
+             activeTab === 'my-assignments' ? 'Meine Zuweisungen' : 
+             'Meine Beteiligung'} ({filteredServices.length})
           </h3>
         </div>
+
+        {/* Tabellenüberschriften */}
+        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b">
+          <div className="grid items-center md:grid-cols-[minmax(0,1fr)_22rem_18rem] gap-x-6 px-6 py-4 text-sm font-medium text-gray-700">
+            <div className="min-w-0">
+              <div className="font-medium">Antrag</div>
+              <div className="mt-1 text-sm text-muted-foreground tabular-nums truncate">
+                <button 
+                  onClick={() => handleSort('date')}
+                  className="inline-flex items-center gap-1 hover:text-gray-900 transition-colors"
+                >
+                  <Calendar className="h-4 w-4" />
+                  <span>Datum {getSortIcon('date')}</span>
+                </button>
+                <button 
+                  onClick={() => handleSort('title')}
+                  className="inline-flex items-center gap-1 hover:text-gray-900 transition-colors"
+                >
+                  <User className="h-4 w-4" />
+                  <span>Antragsteller {getSortIcon('title')}</span>
+                </button>
+              </div>
+            </div>
+            <div className="min-w-0 justify-self-start">
+              <button 
+                onClick={() => handleSort('assignee')}
+                className="inline-flex items-center gap-1 hover:text-gray-900 transition-colors"
+              >
+                <User className="h-4 w-4" />
+                <span>Zuweisung {getSortIcon('assignee')}</span>
+              </button>
+            </div>
+            <div className="justify-self-end text-right">
+              <span>Status</span>
+            </div>
+          </div>
+        </div>
+
         <div className="divide-y divide-gray-200">
-          {filteredServices.map((service) => (
-            <div key={service.id} className="p-6 hover:bg-gray-50">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3 mb-2">
-                    <h4 className="text-lg font-medium text-gray-900">
-                      {service.title}
-                    </h4>
-                    <div className="flex items-center space-x-2">
-                      {getStatusIcon(service.status)}
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(service.status)}`}>
-                        {service.status === 'PENDING' && 'Ausstehend'}
-                        {service.status === 'IN_PROGRESS' && 'In Bearbeitung'}
-                        {service.status === 'COMPLETED' && 'Abgeschlossen'}
-                      </span>
-                      {getDecisionIcon(service.decision)}
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${getDecisionColor(service.decision)}`}>
-                        {!service.decision && 'Keine Entscheidung'}
-                        {service.decision === 'APPROVED' && 'Genehmigt'}
-                        {service.decision === 'REJECTED' && 'Abgelehnt'}
-                      </span>
-                                              {service.priority && (
-                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(service.priority)}`}>
-                            {service.priority === 'HIGH' && 'Hohe Priorität'}
-                            {service.priority === 'URGENT' && 'Höchste Priorität'}
-                          </span>
-                        )}
-                    </div>
-                  </div>
-                  <p className="text-gray-600 mb-3">{service.description}</p>
-                                     <div className="flex items-center space-x-4 text-sm text-gray-500">
-                     <div className="flex items-center space-x-1">
-                       <User className="w-4 h-4" />
-                       <span>
-                         {service.createdByUser.firstName} {service.createdByUser.lastName}
-                       </span>
-                     </div>
-                     <div className="flex items-center space-x-1">
-                       <Calendar className="w-4 h-4" />
-                       <span>{formatDate(service.createdAt)}</span>
-                     </div>
-                     {service.assignedToUser && (
-                       <div className="flex items-center space-x-1">
-                         <User className="w-4 h-4 text-blue-500" />
-                         <span className="text-blue-600">
-                           Zugewiesen: {service.assignedToUser.firstName} {service.assignedToUser.lastName}
-                         </span>
-                       </div>
-                     )}
-                   </div>
+          {getSortedServices(filteredServices).map((service) => (
+            <div 
+              key={service.id} 
+              className="grid items-center md:grid-cols-[minmax(0,1fr)_22rem_18rem] gap-x-6 px-6 odd:bg-muted/30 hover:bg-muted/50 border-t py-3 cursor-pointer transition-colors"
+              onClick={() => navigate(`/services/${service.id}`)}
+            >
+              {/* Linke Spalte: Titel + Metadaten */}
+              <div className="min-w-0">
+                <div className="font-medium truncate">
+                  {getServiceTypeText(service.serviceType)}: {service.title}
                 </div>
-                <div className="flex items-center space-x-2 ml-4">
-                  <button
-                    onClick={() => navigate(`/services/${service.id}`)}
-                    className="btn btn-secondary flex items-center space-x-1"
-                  >
-                    <Eye className="w-4 h-4" />
-                    <span>Anzeigen</span>
-                  </button>
-                  <select
-                    value={service.status}
-                    onChange={(e) => handleStatusChange(service.id, e.target.value)}
-                    className="input text-sm"
-                  >
-                    <option value="PENDING">Ausstehend</option>
-                    <option value="IN_PROGRESS">In Bearbeitung</option>
-                    <option value="COMPLETED">Abgeschlossen</option>
-                  </select>
-                  <select
-                    value={service.decision || ''}
-                    onChange={(e) => handleDecisionChange(service.id, e.target.value)}
-                    className="input text-sm"
-                  >
-                    <option value="">Keine Entscheidung</option>
-                    <option value="APPROVED">Genehmigt</option>
-                    <option value="REJECTED">Abgelehnt</option>
-                  </select>
+                                 <div className="mt-1 text-sm text-muted-foreground tabular-nums truncate">
+                   <span className="inline-flex items-center gap-1 shrink-0">
+                     <Calendar className="h-4 w-4" />
+                     <span className="tabular-nums">{formatDate(service.createdAt)}</span>
+                   </span>
+                   <span className="inline-flex items-center gap-1 min-w-0 ml-2">
+                     <User className="h-4 w-4" />
+                     <span className="truncate">
+                       {service.createdByUser.firstName} {service.createdByUser.lastName}
+                     </span>
+                   </span>
+                 </div>
+              </div>
+              
+              {/* Mittlere Spalte: Zuweisung */}
+              <div className="min-w-0">
+                <span className="inline-flex items-center gap-2 truncate">
+                  <User className={`h-4 w-4 ${
+                    service.assignedToGroupRef ? 'text-green-500' : 'text-yellow-500'
+                  }`} />
+                  <span className={
+                    service.assignedToGroupRef ? 'text-green-600' : 'text-yellow-600'
+                  }>
+                    {service.assignedToGroupRef 
+                      ? (service.assignedToGroupRef.description || service.assignedToGroupRef.name)
+                      : 'Nicht zugewiesen'
+                    }
+                  </span>
+                </span>
+              </div>
+              
+              {/* Rechte Spalte: Badges */}
+              <div className="justify-self-end">
+                <div className="flex flex-wrap justify-end items-center gap-2 whitespace-nowrap">
+                  {(() => {
+                    const badges = []
+                    
+                    // Status Badge
+                    if (service.status) {
+                      let statusText = ''
+                      if (service.status === 'PENDING') statusText = 'Ausstehend'
+                      else if (service.status === 'IN_PROGRESS') statusText = 'In Bearbeitung'
+                      else if (service.status === 'COMPLETED') statusText = 'Abgeschlossen'
+                      
+                      if (statusText) {
+                        badges.push(
+                          <span key="status" className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(service.status)}`}>
+                            {statusText}
+                          </span>
+                        )
+                      }
+                    }
+                    
+                    // Decision Badge
+                    if (service.decision && service.decision !== '') {
+                      let decisionText = ''
+                      if (service.decision === 'APPROVED') decisionText = 'Genehmigt'
+                      else if (service.decision === 'REJECTED') decisionText = 'Abgelehnt'
+                      else if (service.decision === 'RETURNED') decisionText = 'Zurückgewiesen'
+                      
+                      if (decisionText) {
+                        badges.push(
+                          <span key="decision" className={`px-2 py-1 text-xs font-medium rounded-full ${getDecisionColor(service.decision)}`}>
+                            {decisionText}
+                          </span>
+                        )
+                      }
+                    }
+                    
+                    // Priority Badge
+                    if (service.priority && service.priority !== '') {
+                      let priorityText = ''
+                      if (service.priority === 'HIGH') priorityText = 'Hohe Priorität'
+                      else if (service.priority === 'URGENT') priorityText = 'Höchste Priorität'
+                      
+                      if (priorityText) {
+                        badges.push(
+                          <span key="priority" className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(service.priority)}`}>
+                            {priorityText}
+                          </span>
+                        )
+                      }
+                    }
+                    
+                    return badges
+                  })()}
                 </div>
               </div>
             </div>

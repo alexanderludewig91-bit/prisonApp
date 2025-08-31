@@ -1789,11 +1789,18 @@ router.get('/staff/all', checkRole(['STAFF', 'ADMIN']), async (req: Authenticate
             lastName: true
           }
         },
+        assignedToGroupRef: {
+          select: {
+            id: true,
+            name: true,
+            description: true
+          }
+        },
         activities: {
           orderBy: { when: 'desc' },
           take: 5
         }
-      },
+      } as any,
       orderBy: { createdAt: 'desc' },
       skip,
       take: Number(limit)
@@ -1814,6 +1821,257 @@ router.get('/staff/all', checkRole(['STAFF', 'ADMIN']), async (req: Authenticate
   } catch (error: any) {
     console.error('Get staff services error:', error);
     res.status(500).json({ error: 'Fehler beim Abrufen der Services' });
+  }
+});
+
+// Services für die Gruppen des aktuellen Benutzers abrufen
+router.get('/staff/my-assignments', checkRole(['STAFF', 'ADMIN']), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { page = 1, limit = 20, status, priority, search, dateFrom, dateTo } = req.query;
+    const skip = (Number(page) - 1) * Number(limit);
+
+    // Benutzer mit seinen Gruppen abrufen
+    const currentUser = await prisma.user.findUnique({
+      where: { id: req.user!.userId },
+      include: {
+        groups: {
+          include: {
+            group: true
+          }
+        }
+      }
+    });
+
+    if (!currentUser) {
+      return res.status(404).json({ error: 'Benutzer nicht gefunden' });
+    }
+
+    // Gruppen-IDs des Benutzers extrahieren
+    const userGroupIds = currentUser.groups.map(ug => ug.groupId);
+
+    if (userGroupIds.length === 0) {
+      // Benutzer ist in keiner Gruppe - leere Liste zurückgeben
+      return res.json({
+        services: [],
+        pagination: {
+          page: Number(page),
+          limit: Number(limit),
+          total: 0,
+          pages: 0
+        }
+      });
+    }
+
+    const where: any = {
+      assignedToGroup: { in: userGroupIds }
+    };
+    
+    if (status) where.status = status;
+    if (priority) where.priority = priority;
+    if (search) {
+      where.OR = [
+        { title: { contains: String(search) } },
+        { description: { contains: String(search) } },
+        { createdByUser: { 
+          OR: [
+            { firstName: { contains: String(search) } },
+            { lastName: { contains: String(search) } }
+          ]
+        }}
+      ];
+    }
+    if (dateFrom || dateTo) {
+      where.createdAt = {};
+      if (dateFrom) where.createdAt.gte = new Date(String(dateFrom));
+      if (dateTo) where.createdAt.lte = new Date(String(dateTo));
+    }
+
+    const services = await prisma.service.findMany({
+      where,
+      include: {
+        createdByUser: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true
+          }
+        },
+        assignedToUser: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true
+          }
+        },
+        assignedToGroupRef: {
+          select: {
+            id: true,
+            name: true,
+            description: true
+          }
+        },
+        activities: {
+          orderBy: { when: 'desc' },
+          take: 5
+        }
+      } as any,
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: Number(limit)
+    });
+
+    const total = await prisma.service.count({ where });
+
+    res.json({
+      services,
+      pagination: {
+        page: Number(page),
+        limit: Number(limit),
+        total,
+        pages: Math.ceil(total / Number(limit))
+      }
+    });
+
+  } catch (error: any) {
+    console.error('Get my assignments error:', error);
+    res.status(500).json({ error: 'Fehler beim Abrufen der zugewiesenen Services' });
+  }
+});
+
+// Services mit historischer Gruppen-Beteiligung abrufen
+router.get('/staff/my-participation', checkRole(['STAFF', 'ADMIN']), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { page = 1, limit = 20, status, priority, search, dateFrom, dateTo } = req.query;
+    const skip = (Number(page) - 1) * Number(limit);
+
+    // Benutzer mit seinen Gruppen abrufen
+    const currentUser = await prisma.user.findUnique({
+      where: { id: req.user!.userId },
+      include: {
+        groups: {
+          include: {
+            group: true
+          }
+        }
+      }
+    });
+
+    if (!currentUser) {
+      return res.status(404).json({ error: 'Benutzer nicht gefunden' });
+    }
+
+    // Gruppen-IDs des Benutzers extrahieren
+    const userGroupIds = currentUser.groups.map(ug => ug.groupId);
+
+    if (userGroupIds.length === 0) {
+      // Benutzer ist in keiner Gruppe - leere Liste zurückgeben
+      return res.json({
+        services: [],
+        pagination: {
+          page: Number(page),
+          limit: Number(limit),
+          total: 0,
+          pages: 0
+        }
+      });
+    }
+
+    // Services finden, bei denen die Gruppe des Benutzers im Aktivitätsverlauf vorkommt
+    const servicesWithGroupActivity = await prisma.service.findMany({
+      where: {
+        OR: [
+          // Aktuell der Gruppe zugewiesen
+          { assignedToGroup: { in: userGroupIds } } as any,
+          // Oder Gruppe war im Aktivitätsverlauf beteiligt
+          {
+            activities: {
+              some: {
+                groupId: { in: userGroupIds }
+              } as any
+            }
+          } as any
+        ]
+      } as any,
+      include: {
+        createdByUser: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true
+          }
+        },
+        assignedToUser: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true
+          }
+        },
+        assignedToGroupRef: {
+          select: {
+            id: true,
+            name: true,
+            description: true
+          }
+        },
+        activities: {
+          orderBy: { when: 'desc' },
+          take: 5
+        }
+      } as any,
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: Number(limit)
+    });
+
+    // Zusätzliche Filter anwenden (client-seitig, da die komplexe Abfrage bereits gefiltert ist)
+    let filteredServices = servicesWithGroupActivity;
+
+    if (status) {
+      filteredServices = filteredServices.filter(service => service.status === status);
+    }
+    if (priority) {
+      filteredServices = filteredServices.filter(service => service.priority === priority);
+    }
+    if (search) {
+      const searchTerm = String(search).toLowerCase();
+      filteredServices = filteredServices.filter((service: any) => 
+        service.title.toLowerCase().includes(searchTerm) ||
+        (service.description && service.description.toLowerCase().includes(searchTerm)) ||
+        service.createdByUser.firstName.toLowerCase().includes(searchTerm) ||
+        service.createdByUser.lastName.toLowerCase().includes(searchTerm)
+      );
+    }
+    if (dateFrom || dateTo) {
+      filteredServices = filteredServices.filter(service => {
+        const serviceDate = new Date(service.createdAt);
+        if (dateFrom && serviceDate < new Date(String(dateFrom))) return false;
+        if (dateTo && serviceDate > new Date(String(dateTo))) return false;
+        return true;
+      });
+    }
+
+    // Pagination anwenden
+    const total = filteredServices.length;
+    const paginatedServices = filteredServices.slice(skip, skip + Number(limit));
+
+    res.json({
+      services: paginatedServices,
+      pagination: {
+        page: Number(page),
+        limit: Number(limit),
+        total,
+        pages: Math.ceil(total / Number(limit))
+      }
+    });
+
+  } catch (error: any) {
+    console.error('Get my participation error:', error);
+    res.status(500).json({ error: 'Fehler beim Abrufen der Beteiligungen' });
   }
 });
 
