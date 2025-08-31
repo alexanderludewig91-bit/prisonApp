@@ -33,18 +33,18 @@ Dieses Projekt ist eine moderne Webanwendung, die das ursprüngliche Appian-Syst
 - **ApplicationProcessing.tsx:** Ungenutzte Komponente entfernt
 
 ### ✅ **Insassen-Features**
-- ✅ Antragstellung (Neuer Antrag)
-- ✅ Antragsübersicht (Meine Anträge)
-- ✅ Echte API-Verbindung zwischen Frontend und Backend
+  - ✅ Antragstellung (Neuer Antrag)
+  - ✅ Antragsübersicht (Meine Anträge)
+  - ✅ Echte API-Verbindung zwischen Frontend und Backend
 - ✅ **Rückfragen beantworten:** Insassen können auf Staff-Rückfragen antworten
 - ✅ **Informationen erhalten:** Anzeige von Staff-Informationen zu Anträgen
 
 ### ✅ **Mitarbeiter-Features**
-- ✅ Mitarbeiter-Dashboard mit Service-Übersicht
-- ✅ Erweiterte Service-Details mit Kommentaren
-- ✅ Status-Änderungen mit Begründungen
-- ✅ Aktivitätsverlauf für jeden Service
-- ✅ **Insassen-Übersicht** - Zentrale Insassen-Verwaltung mit vollständigen Details
+  - ✅ Mitarbeiter-Dashboard mit Service-Übersicht
+  - ✅ Erweiterte Service-Details mit Kommentaren
+  - ✅ Status-Änderungen mit Begründungen
+  - ✅ Aktivitätsverlauf für jeden Service
+  - ✅ **Insassen-Übersicht** - Zentrale Insassen-Verwaltung mit vollständigen Details
 - ✅ **Neue Bearbeiter-Aktionen:**
   - ✅ **Insassen kontaktieren:** Rückfragen und Informationen an Insassen senden
   - ✅ **Weiterleiten:** Anträge an andere Staff-Gruppen weiterleiten
@@ -61,15 +61,15 @@ Dieses Projekt ist eine moderne Webanwendung, die das ursprüngliche Appian-Syst
   - ✅ **Status zu "In Bearbeitung":** Schnelle Statusänderung für ausstehende Anträge
 
 ### ✅ **Admin-Features**
-- ✅ Admin-Dashboard mit KPIs und System-Status
-- ✅ Gruppen-Management (Benutzer zu Gruppen hinzufügen/entfernen)
-- ✅ Admin-Logs für Audit-Zwecke
-- ✅ Service-Übersicht mit Lösch-Funktion
-- ✅ Benutzerfreundliche Gruppennamen (Beschreibungen statt technische Namen)
-- ✅ Klickbare Gruppenzeilen (Ausklappbare Mitgliederlisten)
-- ✅ Kategoriebasierte Sortierung (ADMIN → STAFF → INMATE → SYSTEM)
-- ✅ In-App Modals statt Browser-Dialoge
-- ✅ **Hausverwaltung** - Vollständiges Zellen-Management-System
+  - ✅ Admin-Dashboard mit KPIs und System-Status
+  - ✅ Gruppen-Management (Benutzer zu Gruppen hinzufügen/entfernen)
+  - ✅ Admin-Logs für Audit-Zwecke
+  - ✅ Service-Übersicht mit Lösch-Funktion
+  - ✅ Benutzerfreundliche Gruppennamen (Beschreibungen statt technische Namen)
+  - ✅ Klickbare Gruppenzeilen (Ausklappbare Mitgliederlisten)
+  - ✅ Kategoriebasierte Sortierung (ADMIN → STAFF → INMATE → SYSTEM)
+  - ✅ In-App Modals statt Browser-Dialoge
+  - ✅ **Hausverwaltung** - Vollständiges Zellen-Management-System
 
 ### ✅ **Workflow-Engine (Vereinfacht)**
 - ✅ **Automatische Gruppenzuweisung:** Freitextanträge werden automatisch "PS General Enforcement Service" zugewiesen
@@ -77,15 +77,15 @@ Dieses Projekt ist eine moderne Webanwendung, die das ursprüngliche Appian-Syst
 - ✅ **Workflow-Statistiken:** Dashboard-Statistiken für Antragsverwaltung
 
 ### ✅ **Backend API**
-- ✅ Insassen-spezifische Endpunkte (`/api/services/my/services`)
-- ✅ Mitarbeiter-spezifische Endpunkte (`/api/services/staff/*`)
-- ✅ Admin-spezifische Endpunkte (`/api/groups`, `/api/admin-logs`)
-- ✅ JWT-Middleware für User-Informationen
-- ✅ Gruppen-basierte Berechtigungsprüfung
-- ✅ Admin-Berechtigungsprüfung (`checkAdmin` Middleware)
-- ✅ Aktivitätsprotokollierung bei Service-Erstellung
-- ✅ Admin-Aktions-Logging für Audit-Zwecke
-- ✅ **Hausverwaltung API** - Vollständige API für Zellen-Management
+  - ✅ Insassen-spezifische Endpunkte (`/api/services/my/services`)
+  - ✅ Mitarbeiter-spezifische Endpunkte (`/api/services/staff/*`)
+  - ✅ Admin-spezifische Endpunkte (`/api/groups`, `/api/admin-logs`)
+  - ✅ JWT-Middleware für User-Informationen
+  - ✅ Gruppen-basierte Berechtigungsprüfung
+  - ✅ Admin-Berechtigungsprüfung (`checkAdmin` Middleware)
+  - ✅ Aktivitätsprotokollierung bei Service-Erstellung
+  - ✅ Admin-Aktions-Logging für Audit-Zwecke
+  - ✅ **Hausverwaltung API** - Vollständige API für Zellen-Management
 - ✅ **Neue Service-Endpunkte:**
   - ✅ `PATCH /services/:id/priority` - Prioritätsänderung
   - ✅ `POST /services/:id/inquiries` - Rückfragen an Insassen

@@ -1465,6 +1465,102 @@ router.get('/my/services', checkRole(['INMATE']), async (req: AuthenticatedReque
   }
 });
 
+// Weiterführende Bearbeitung
+router.post('/:id/further-processing', [
+  authenticateToken,
+  body('decision').notEmpty().withMessage('Entscheidung ist erforderlich'),
+  body('reason').notEmpty().withMessage('Begründung ist erforderlich'),
+  body('groupId').notEmpty().withMessage('Gruppen-ID ist erforderlich'),
+  body('notes').notEmpty().withMessage('Bearbeitungshinweise sind erforderlich')
+], async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { id } = req.params;
+    const { decision, reason, groupId, notes } = req.body;
+    const currentUser = req.user;
+
+    if (!currentUser) {
+      return res.status(401).json({ error: 'Benutzer nicht authentifiziert' });
+    }
+
+    // Benutzerdaten abrufen
+    const user = await prisma.user.findUnique({
+      where: { id: currentUser.userId }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Benutzer nicht gefunden' });
+    }
+
+    const who = `${user.firstName} ${user.lastName} (${user.username})`;
+
+    // Service abrufen
+    const service = await prisma.service.findUnique({
+      where: { id: Number(id) }
+    });
+
+    if (!service) {
+      return res.status(404).json({ error: 'Service nicht gefunden' });
+    }
+
+    // Zielgruppe abrufen
+    const targetGroup = await prisma.group.findUnique({
+      where: { id: Number(groupId) }
+    });
+
+    if (!targetGroup) {
+      return res.status(404).json({ error: 'Zielgruppe nicht gefunden' });
+    }
+
+    // 1. Entscheidung dokumentieren
+    await prisma.service.update({
+      where: { id: Number(id) },
+      data: { decision: decision as any }
+    });
+
+    await prisma.activity.create({
+      data: {
+        recordId: Number(id),
+        who: who,
+        action: 'decision_made',
+        details: reason,
+        userId: currentUser.userId
+      }
+    });
+
+    // 2. Weiterführende Bearbeitung dokumentieren
+    await prisma.service.update({
+      where: { id: Number(id) },
+      data: { assignedToGroup: Number(groupId) as any } as any
+    });
+
+    await prisma.activity.create({
+      data: {
+        recordId: Number(id),
+        who: who,
+        action: 'further_processing',
+        details: `Weiterleitung an ${targetGroup.description || targetGroup.name}. Kommentar: ${notes}`,
+        userId: currentUser.userId,
+        groupId: Number(groupId) as any
+      } as any
+    });
+
+    res.json({ 
+      message: 'Weiterführende Bearbeitung erfolgreich initiiert', 
+      decision: decision,
+      assignedToGroup: Number(groupId)
+    });
+
+  } catch (error: any) {
+    console.error('Further processing error:', error);
+    res.status(500).json({ error: 'Fehler bei der weiterführenden Bearbeitung' });
+  }
+});
+
 // Priorität ändern
 router.patch('/:id/priority', [
   authenticateToken,

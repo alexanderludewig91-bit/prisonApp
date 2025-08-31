@@ -109,6 +109,9 @@ const ServiceDetail = () => {
   const [showStatusToInProgressModal, setShowStatusToInProgressModal] = useState(false)
   const [showPriorityModal, setShowPriorityModal] = useState(false)
   const [newPriority, setNewPriority] = useState('')
+  const [showFurtherProcessing, setShowFurtherProcessing] = useState(false)
+  const [selectedFurtherProcessingGroup, setSelectedFurtherProcessingGroup] = useState('')
+  const [furtherProcessingNotes, setFurtherProcessingNotes] = useState('')
 
   useEffect(() => {
     if (id) {
@@ -116,12 +119,12 @@ const ServiceDetail = () => {
     }
   }, [id])
 
-  // Staff-Gruppen laden wenn Weiterleiten ausgewählt wird
+  // Staff-Gruppen laden wenn Weiterleiten oder weiterführende Bearbeitung ausgewählt wird
   useEffect(() => {
-    if (selectedAction === 'weiterleiten') {
+    if (selectedAction === 'weiterleiten' || showFurtherProcessing) {
       fetchStaffGroups()
     }
-  }, [selectedAction])
+  }, [selectedAction, showFurtherProcessing])
 
   const fetchServiceDetails = async () => {
     try {
@@ -227,6 +230,11 @@ const ServiceDetail = () => {
   const handleDecisionSelect = (decision: 'APPROVED' | 'REJECTED' | 'RETURNED') => {
     setSelectedDecision(decision)
     
+    // Weiterführende Bearbeitung zurücksetzen wenn sich die Entscheidung ändert
+    setShowFurtherProcessing(false)
+    setSelectedFurtherProcessingGroup('')
+    setFurtherProcessingNotes('')
+    
     // Standardbegründungen vorausfüllen
     switch (decision) {
       case 'APPROVED':
@@ -323,6 +331,37 @@ const ServiceDetail = () => {
     } catch (error) {
       console.error('Fehler beim Ändern der Priorität:', error)
       alert('Fehler beim Ändern der Priorität. Bitte versuchen Sie es erneut.')
+    }
+  }
+
+  const handleFurtherProcessing = async () => {
+    if (!selectedFurtherProcessingGroup || !furtherProcessingNotes.trim()) {
+      alert('Bitte wählen Sie eine Gruppe aus und geben Sie Bearbeitungshinweise an.')
+      return
+    }
+
+    try {
+      await api.post(`/services/${id}/further-processing`, {
+        decision: selectedDecision,
+        reason: decisionReason,
+        groupId: selectedFurtherProcessingGroup,
+        notes: furtherProcessingNotes
+      })
+
+      // Erfolgreich weitergeleitet - UI zurücksetzen
+      setShowFurtherProcessing(false)
+      setSelectedFurtherProcessingGroup('')
+      setFurtherProcessingNotes('')
+      setSelectedDecision(null)
+      setDecisionReason('')
+      setSelectedAction(null)
+      
+      // Service-Details neu laden
+      fetchServiceDetails()
+      
+    } catch (error) {
+      console.error('Fehler bei der weiterführenden Bearbeitung:', error)
+      alert('Fehler bei der weiterführenden Bearbeitung. Bitte versuchen Sie es erneut.')
     }
   }
 
@@ -571,6 +610,8 @@ const ServiceDetail = () => {
         return 'Status und Entscheidung aktualisiert'
       case 'priority_changed':
         return 'Priorität geändert'
+      case 'further_processing':
+        return 'Weiterführende Bearbeitung'
       case 'returned':
         return 'Antrag zurückgewiesen'
       default:
@@ -581,6 +622,28 @@ const ServiceDetail = () => {
   // Prüfen ob eine Entscheidung getroffen wurde
   const hasDecisionBeenMade = () => {
     return service?.decision !== null && service?.decision !== undefined
+  }
+
+  // Prüfen ob Benutzer berechtigt ist, diese Seite zu sehen
+  const isUserAuthorized = () => {
+    if (!user) return false
+    
+    // Insassen sind nicht berechtigt
+    const isInmate = user.groups?.some(g => g.name === 'PS Inmates')
+    if (isInmate) return false
+    
+    // Staff und Admins sind berechtigt
+    const isStaff = user.groups?.some(g => 
+      g.name.includes('PS General Enforcement Service') || 
+      g.name.includes('PS Vollzugsabteilungsleitung') ||
+      g.name.includes('PS Vollzugsleitung') ||
+      g.name.includes('PS Anstaltsleitung') ||
+      g.name.includes('PS Payments Office') ||
+      g.name.includes('PS Medical Staff')
+    )
+    const isAdmin = user.groups?.some(g => g.name === 'PS Designers')
+    
+    return isStaff || isAdmin
   }
 
 
@@ -602,6 +665,24 @@ const ServiceDetail = () => {
           className="btn btn-primary"
         >
           Zurück
+        </button>
+      </div>
+    )
+  }
+
+  // Berechtigungsprüfung - Insassen dürfen diese Seite nicht sehen
+  if (!isUserAuthorized()) {
+    return (
+      <div className="text-center py-12">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Zugriff verweigert</h2>
+        <p className="text-gray-600 mb-6">
+          Sie haben keine Berechtigung, diese Seite zu sehen.
+        </p>
+        <button
+          onClick={() => navigate('/dashboard')}
+          className="btn btn-primary"
+        >
+          Zum Dashboard
         </button>
       </div>
     )
@@ -1048,12 +1129,56 @@ const ServiceDetail = () => {
                         </button>
                         {(selectedDecision === 'APPROVED' || selectedDecision === 'REJECTED') && (
                           <button
-                            onClick={() => {/* TODO: Implementierung */}}
+                            onClick={() => setShowFurtherProcessing(true)}
                             className="btn btn-primary flex-1 text-center"
                           >
                             Weiterführende Bearbeitung
                           </button>
                         )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Weiterführende Bearbeitung */}
+                  {showFurtherProcessing && (
+                    <div className="space-y-4 mt-4">
+                      <h4 className="text-sm font-medium text-gray-700">
+                        Weiterführende Bearbeitung
+                      </h4>
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Staff-Gruppe auswählen
+                          </label>
+                          <select
+                            value={selectedFurtherProcessingGroup}
+                            onChange={(e) => setSelectedFurtherProcessingGroup(e.target.value)}
+                            className="input w-full"
+                          >
+                            <option value="">Gruppe auswählen</option>
+                            {staffGroups.map((group) => (
+                              <option key={group.id} value={group.id}>
+                                {group.description || group.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="flex space-x-3">
+                          <textarea
+                            value={furtherProcessingNotes}
+                            onChange={(e) => setFurtherProcessingNotes(e.target.value)}
+                            placeholder="Bearbeitungshinweise für die nächste Staff-Gruppe..."
+                            className="flex-1 input resize-none"
+                            rows={4}
+                          />
+                          <button
+                            onClick={handleFurtherProcessing}
+                            className="btn btn-primary self-end"
+                            disabled={!selectedFurtherProcessingGroup || !furtherProcessingNotes.trim()}
+                          >
+                            Absenden
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}
