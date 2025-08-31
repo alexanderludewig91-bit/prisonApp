@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Building, Users, MapPin, Home, Plus, X, User, ArrowRight, AlertCircle } from 'lucide-react';
+import { Building, Users, MapPin, Home, X, User, AlertCircle } from 'lucide-react';
 import CellAssignmentModal from '../components/CellAssignmentModal';
 import RemoveAssignmentModal from '../components/RemoveAssignmentModal';
 import SearchFilters from '../components/SearchFilters';
 import TransferModal from '../components/TransferModal';
 import CellCard from '../components/CellCard';
-import DraggableInmate from '../components/DraggableInmate';
 import DropZone from '../components/DropZone';
 import UnassignedInmateAssignmentModal from '../components/UnassignedInmateAssignmentModal';
 
@@ -224,7 +223,7 @@ const HouseManagement: React.FC = () => {
   };
 
   // Modal öffnen für Entfernung
-  const openRemoveModal = (assignment: any, cellNumber: string) => {
+  const openRemoveModal = (assignment: any) => {
     setSelectedAssignment(assignment);
     setRemoveModalOpen(true);
   };
@@ -621,8 +620,6 @@ const HouseManagement: React.FC = () => {
           // Belegungs-Filter
           if (occupancyFilter !== 'all') {
             filteredCells = filteredCells.filter(cell => {
-              const occupancyPercentage = cell.capacity > 0 ? (cell.assignments.length / cell.capacity) * 100 : 0;
-              
               switch (occupancyFilter) {
                 case 'empty':
                   return cell.assignments.length === 0;
@@ -966,22 +963,22 @@ const HouseManagement: React.FC = () => {
                          {/* Haus-Details */}
              <div className="space-y-6">
                {filteredHouses.map((house) => (
-                <div key={house.id} className="bg-white shadow rounded-lg overflow-hidden">
+                <div key={house?.id} className="bg-white shadow rounded-lg overflow-hidden">
                   {/* Haus-Header */}
                   <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="text-xl font-semibold text-gray-900">{house.name}</h3>
-                        <p className="text-sm text-gray-600 mt-1">{house.description}</p>
+                        <h3 className="text-xl font-semibold text-gray-900">{house?.name}</h3>
+                        <p className="text-sm text-gray-600 mt-1">{house?.description}</p>
                       </div>
                       <div className="text-right">
                         <div className="text-sm text-gray-500">
                           <div className="flex items-center">
                             <MapPin className="h-4 w-4 mr-1" />
-                            {house._count.stations} Stationen
+                            {house?._count.stations} Stationen
                           </div>
                           <div className="mt-1">
-                            {house.stations.reduce((total, station) => total + station._count.cells, 0)} Zellen
+                            {house?.stations?.reduce((total, station) => total + (station?._count.cells || 0), 0) || 0} Zellen
                           </div>
                         </div>
                       </div>
@@ -990,9 +987,10 @@ const HouseManagement: React.FC = () => {
                   
                                      {/* Stationen */}
                    <div className="divide-y divide-gray-200">
-                     {house.stations.map((station) => {
-                       const totalCapacity = station.cells.reduce((total, cell) => total + cell.capacity, 0);
-                       const totalOccupied = station.cells.reduce((total, cell) => total + cell.assignments.length, 0);
+                     {house?.stations.map((station) => {
+                       if (!station) return null;
+                       const totalCapacity = station.cells?.reduce((total, cell) => total + cell.capacity, 0) || 0;
+                       const totalOccupied = station.cells?.reduce((total, cell) => total + cell.assignments.length, 0) || 0;
                        const availablePlaces = totalCapacity - totalOccupied;
                        
                        return (
@@ -1023,7 +1021,7 @@ const HouseManagement: React.FC = () => {
                            
                                                                                    {/* Zellen-Details */}
                             <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                              {station.cells.map((cell) => (
+                              {station.cells?.map((cell) => (
                                 <DropZone
                                   key={cell.id}
                                   cell={cell}

@@ -15,9 +15,11 @@ interface Cell {
       username: string;
     };
   }[];
-  station: {
+  station?: {
+    id: number;
     name: string;
     house: {
+      id: number;
       name: string;
     };
   };
@@ -78,8 +80,12 @@ const TransferModal: React.FC<TransferModalProps> = ({
             allCells.push({
               ...cell,
               station: {
+                id: station.id,
                 name: station.name,
-                house: { name: house.name }
+                house: { 
+                  id: house.id,
+                  name: house.name 
+                }
               }
             });
           });
@@ -201,7 +207,7 @@ const TransferModal: React.FC<TransferModalProps> = ({
                 <option value="">Ziel-Zelle auswählen...</option>
                 {availableCells.map((cell) => (
                   <option key={cell.id} value={cell.id}>
-                    {cell.number} - {cell.description} ({cell.station.name}, {cell.station.house.name}) - {cell.capacity - cell.assignments.length} Plätze frei
+                    {cell.number} - {cell.description} ({cell.station?.name}, {cell.station?.house.name}) - {cell.capacity - cell.assignments.length} Plätze frei
                   </option>
                 ))}
               </select>
