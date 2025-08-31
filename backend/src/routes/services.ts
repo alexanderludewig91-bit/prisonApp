@@ -629,6 +629,61 @@ router.delete('/all', authenticateToken, checkPermission(['all_permissions']), a
   }
 })
 
+// Persönliche Eröffnungen für einen Insassen abrufen
+router.get('/personal-notifications/:userId', async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+
+    // Erst alle Services des Insassen finden
+    const userServices = await prisma.service.findMany({
+      where: {
+        createdBy: Number(userId)
+      },
+      select: {
+        id: true
+      }
+    });
+
+    const serviceIds = userServices.map(service => service.id);
+
+    // Dann alle personal_notification_completed Aktivitäten für diese Services finden
+    const notifications = await prisma.activity.findMany({
+      where: { 
+        action: 'personal_notification_completed',
+        recordId: {
+          in: serviceIds
+        }
+      },
+      include: {
+        service: {
+          select: {
+            id: true,
+            title: true
+          }
+        }
+      },
+      orderBy: { when: 'desc' }
+    });
+
+    const formattedNotifications = notifications.map((notification: any) => ({
+      id: notification.id,
+      serviceId: notification.service.id,
+      serviceTitle: notification.service.title,
+      details: notification.details,
+      when: notification.when,
+      who: notification.who
+    }));
+
+    console.log(`Found ${formattedNotifications.length} personal notifications for user ${userId}`);
+
+    res.json({ notifications: formattedNotifications });
+
+  } catch (error: any) {
+    console.error('Get personal notifications error:', error);
+    res.status(500).json({ error: 'Fehler beim Abrufen der persönlichen Eröffnungen' });
+  }
+});
+
 // Service nach ID abrufen
 router.get('/:id', async (req: Request, res: Response) => {
   try {

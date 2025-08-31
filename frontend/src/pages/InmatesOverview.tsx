@@ -45,6 +45,14 @@ interface Inmate {
       lastName: string;
     };
   }>;
+  personalNotifications?: Array<{
+    id: number;
+    serviceId: number;
+    serviceTitle: string;
+    details: string;
+    when: string;
+    who: string;
+  }>;
 }
 
 const InmatesOverview: React.FC = () => {
@@ -53,7 +61,7 @@ const InmatesOverview: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedInmate, setSelectedInmate] = useState<Inmate | null>(null);
-  const [activeTab, setActiveTab] = useState<'personal' | 'services' | 'assignment' | 'history'>('personal');
+  const [activeTab, setActiveTab] = useState<'personal' | 'services' | 'history' | 'constitution'>('personal');
 
   // Alle Insassen laden
   useEffect(() => {
@@ -102,13 +110,18 @@ const InmatesOverview: React.FC = () => {
       const historyResponse = await fetch(`/api/houses/assignments/history/${inmateId}`);
       const historyData = historyResponse.ok ? await historyResponse.json() : { history: [] };
 
+      // Persönliche Eröffnungen laden
+      const personalNotificationsResponse = await fetch(`/api/services/personal-notifications/${inmateId}`);
+      const personalNotificationsData = personalNotificationsResponse.ok ? await personalNotificationsResponse.json() : { notifications: [] };
+
       const inmate = inmates.find(i => i.id === inmateId);
       if (inmate) {
         setSelectedInmate({
           ...inmate,
           currentAssignment: assignmentData?.assignment,
           services: servicesData.services,
-          assignmentHistory: historyData.history
+          assignmentHistory: historyData.history,
+          personalNotifications: personalNotificationsData.notifications
         });
       }
     } catch (error) {
@@ -147,7 +160,7 @@ const InmatesOverview: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Insassen-Übersicht</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Insassenübersicht</h1>
         <div className="text-sm text-gray-500">
           {filteredInmates.length} von {inmates.length} Insassen
         </div>
@@ -253,28 +266,29 @@ const InmatesOverview: React.FC = () => {
                     <FileText className="h-4 w-4 inline mr-2" />
                     Anträge ({selectedInmate.services?.length || 0})
                   </button>
-                  <button
-                    onClick={() => setActiveTab('assignment')}
-                    className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                      activeTab === 'assignment'
-                        ? 'border-blue-500 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    <MapPin className="h-4 w-4 inline mr-2" />
-                    Aktuelle Zuweisung
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('history')}
-                    className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                      activeTab === 'history'
-                        ? 'border-blue-500 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    <Clock className="h-4 w-4 inline mr-2" />
-                    Zuweisungshistorie ({selectedInmate.assignmentHistory?.length || 0})
-                  </button>
+                  
+                                     <button
+                     onClick={() => setActiveTab('history')}
+                     className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                       activeTab === 'history'
+                         ? 'border-blue-500 text-blue-600'
+                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                     }`}
+                   >
+                     <Clock className="h-4 w-4 inline mr-2" />
+                     Zuweisungshistorie ({selectedInmate.assignmentHistory?.length || 0})
+                   </button>
+                   <button
+                     onClick={() => setActiveTab('constitution')}
+                     className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                       activeTab === 'constitution'
+                         ? 'border-blue-500 text-blue-600'
+                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                     }`}
+                   >
+                     <User className="h-4 w-4 inline mr-2" />
+                     Konstitution
+                   </button>
                 </nav>
               </div>
 
@@ -338,31 +352,7 @@ const InmatesOverview: React.FC = () => {
                   </div>
                 )}
 
-                {activeTab === 'assignment' && (
-                  <div className="space-y-4">
-                    {selectedInmate.currentAssignment ? (
-                      <div className="border border-gray-200 rounded-lg p-4">
-                        <h3 className="font-medium text-gray-900 mb-4">Aktuelle Zuweisung</h3>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700">Zelle</label>
-                            <p className="mt-1 text-sm text-gray-900">{selectedInmate.currentAssignment.cell.number}</p>
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700">Station</label>
-                            <p className="mt-1 text-sm text-gray-900">{selectedInmate.currentAssignment.cell.station.name}</p>
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700">Haus</label>
-                            <p className="mt-1 text-sm text-gray-900">{selectedInmate.currentAssignment.cell.station.house.name}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-gray-500 text-center py-8">Keine aktuelle Zuweisung</p>
-                    )}
-                  </div>
-                )}
+                
 
                 {activeTab === 'history' && (
                   <div className="space-y-4">
@@ -398,10 +388,50 @@ const InmatesOverview: React.FC = () => {
                       <p className="text-gray-500 text-center py-8">Keine Zuweisungshistorie vorhanden</p>
                     )}
                   </div>
-                )}
-              </div>
-            </div>
-          ) : (
+                                 )}
+
+                                   {activeTab === 'constitution' && (
+                    <div className="space-y-4">
+                      {selectedInmate.personalNotifications && selectedInmate.personalNotifications.length > 0 ? (
+                        <div className="space-y-3">
+                          {selectedInmate.personalNotifications.map((notification) => (
+                            <div key={notification.id} className="border border-gray-200 rounded-lg p-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                                  Persönliche Eröffnung
+                                </span>
+                                <span className="text-sm text-gray-500">
+                                  {new Date(notification.when).toLocaleDateString('de-DE')} {new Date(notification.when).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                              </div>
+                              <div className="text-sm text-gray-900 mb-2">
+                                <strong>Antrag:</strong> {notification.serviceTitle}
+                              </div>
+                              <div className="text-sm text-gray-900 mb-2">
+                                <strong>Verhalten des Insassen:</strong>
+                              </div>
+                              <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg">
+                                {notification.details}
+                              </div>
+                              <div className="text-sm text-gray-500 mt-2">
+                                Durchgeführt von: {notification.who}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <p className="text-gray-500">Keine persönlichen Eröffnungen vorhanden</p>
+                          <p className="text-sm text-gray-400 mt-2">
+                            Hier werden persönliche Eröffnungen von Anträgen angezeigt, die zeigen, wie sich der Insasse verhalten hat.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+               </div>
+             </div>
+           ) : (
             <div className="bg-white rounded-lg shadow p-8 text-center">
               <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">Insasse auswählen</h3>

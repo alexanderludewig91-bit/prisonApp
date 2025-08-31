@@ -1,16 +1,15 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { 
-  ArrowLeft,
   Clock, 
   CheckCircle, 
   XCircle, 
   AlertCircle,
-  Edit,
   FileText
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import api from '../services/api'
+import jsPDF from 'jspdf'
 
 interface Service {
   id: number
@@ -582,6 +581,161 @@ const ServiceDetail = () => {
     })
   }
 
+  const truncateTitle = (title: string, maxLength: number = 55) => {
+    if (title.length <= maxLength) {
+      return title
+    }
+    return title.substring(0, maxLength) + '...'
+  }
+
+  const generatePDF = () => {
+    if (!service) return
+
+    const doc = new jsPDF()
+    
+    // Titel
+    doc.setFontSize(20)
+    doc.setFont('helvetica', 'bold')
+    doc.text('Antragsdetails', 20, 30)
+    
+    // Antragsinformationen
+    doc.setFontSize(12)
+    doc.setFont('helvetica', 'normal')
+    
+    let yPosition = 50
+    
+    // Antragstitel
+    doc.setFont('helvetica', 'bold')
+    doc.text('Antragstitel:', 20, yPosition)
+    doc.setFont('helvetica', 'normal')
+    doc.text(service.title, 60, yPosition)
+    yPosition += 10
+    
+    // Antrags-ID
+    doc.setFont('helvetica', 'bold')
+    doc.text('Antrags-ID:', 20, yPosition)
+    doc.setFont('helvetica', 'normal')
+    doc.text(`#${service.id}`, 60, yPosition)
+    yPosition += 10
+    
+    // Erstellt am
+    doc.setFont('helvetica', 'bold')
+    doc.text('Erstellt am:', 20, yPosition)
+    doc.setFont('helvetica', 'normal')
+    doc.text(formatDate(service.createdAt), 60, yPosition)
+    yPosition += 10
+    
+    // Status
+    doc.setFont('helvetica', 'bold')
+    doc.text('Status:', 20, yPosition)
+    doc.setFont('helvetica', 'normal')
+    doc.text(getStatusText(service.status), 60, yPosition)
+    yPosition += 10
+    
+    // Entscheidung (falls vorhanden)
+    if (service.decision) {
+      doc.setFont('helvetica', 'bold')
+      doc.text('Entscheidung:', 20, yPosition)
+      doc.setFont('helvetica', 'normal')
+      doc.text(getDecisionText(service.decision), 60, yPosition)
+      yPosition += 10
+    }
+    
+    // Priorität (falls vorhanden)
+    if (service.priority) {
+      doc.setFont('helvetica', 'bold')
+      doc.text('Priorität:', 20, yPosition)
+      doc.setFont('helvetica', 'normal')
+      const priorityText = service.priority === 'HIGH' ? 'Hohe Priorität' : 'Höchste Priorität'
+      doc.text(priorityText, 60, yPosition)
+      yPosition += 10
+    }
+    
+    // Zuweisung
+    doc.setFont('helvetica', 'bold')
+    doc.text('Zugewiesen an:', 20, yPosition)
+    doc.setFont('helvetica', 'normal')
+    const assignmentText = service.assignedToGroupRef 
+      ? (service.assignedToGroupRef.description || service.assignedToGroupRef.name)
+      : 'Nicht zugewiesen'
+    doc.text(assignmentText, 60, yPosition)
+    yPosition += 15
+    
+    // Antragsteller
+    doc.setFont('helvetica', 'bold')
+    doc.text('Antragsteller:', 20, yPosition)
+    yPosition += 10
+    
+    doc.setFont('helvetica', 'normal')
+    doc.text(`Name: ${service.createdByUser.firstName} ${service.createdByUser.lastName}`, 30, yPosition)
+    yPosition += 7
+    doc.text(`Buchnummer: ${service.createdByUser.username}`, 30, yPosition)
+    yPosition += 7
+    doc.text(`E-Mail: ${service.createdByUser.email}`, 30, yPosition)
+    yPosition += 7
+    doc.text(`Registriert am: ${new Date(service.createdByUser.createdAt).toLocaleDateString('de-DE')}`, 30, yPosition)
+    yPosition += 7
+    
+    // Zellzuweisung (falls vorhanden)
+    if (service.createdByUserAssignment) {
+      const cellInfo = `${service.createdByUserAssignment.cell.number} - ${service.createdByUserAssignment.cell.station.name} ${service.createdByUserAssignment.cell.station.house.name}`
+      doc.text(`Aktuelle Zuweisung: ${cellInfo}`, 30, yPosition)
+      yPosition += 10
+    } else {
+      yPosition += 10
+    }
+    
+    // Beschreibung
+    doc.setFont('helvetica', 'bold')
+    doc.text('Beschreibung:', 20, yPosition)
+    yPosition += 10
+    
+    doc.setFont('helvetica', 'normal')
+    // Beschreibung in mehrere Zeilen aufteilen
+    const descriptionLines = doc.splitTextToSize(service.description, 170)
+    doc.text(descriptionLines, 20, yPosition)
+    yPosition += descriptionLines.length * 7 + 10
+    
+    // Entscheidungsdetails (falls vorhanden)
+    if (service.decisionDetails) {
+      doc.setFont('helvetica', 'bold')
+      doc.text('Entscheidungsdetails:', 20, yPosition)
+      yPosition += 10
+      
+      doc.setFont('helvetica', 'normal')
+      doc.text(`Entscheidung: ${getDecisionText(service.decisionDetails.decision)}`, 30, yPosition)
+      yPosition += 7
+      doc.text(`Begründung: ${service.decisionDetails.reason}`, 30, yPosition)
+      yPosition += 7
+      doc.text(`Entschieden von: ${service.decisionDetails.who}`, 30, yPosition)
+      yPosition += 7
+      doc.text(`Entschieden am: ${service.decisionDetails.when}`, 30, yPosition)
+      yPosition += 10
+    }
+    
+    // Aktivitätsverlauf
+    doc.setFont('helvetica', 'bold')
+    doc.text('Aktivitätsverlauf:', 20, yPosition)
+    yPosition += 10
+    
+    doc.setFont('helvetica', 'normal')
+    service.activities.forEach((activity) => {
+      if (yPosition > 270) {
+        doc.addPage()
+        yPosition = 20
+      }
+      
+      const activityText = `${formatDate(activity.when)} - ${getActionText(activity.action)}: ${activity.details}`
+      const activityLines = doc.splitTextToSize(activityText, 170)
+      doc.text(activityLines, 20, yPosition)
+      yPosition += activityLines.length * 7 + 5
+    })
+    
+    // PDF speichern
+    const fileName = `Antrag_${service.id}_${new Date().toISOString().split('T')[0]}.pdf`
+    doc.save(fileName)
+  }
+
   const getActionText = (action: string) => {
     switch (action) {
       case 'created':
@@ -692,41 +846,42 @@ const ServiceDetail = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="btn btn-secondary flex items-center space-x-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Zurück</span>
-          </button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">{service.title}</h1>
-            <p className="text-gray-600 mt-1">Freitextantrag #{service.id} vom {formatDate(service.createdAt)}</p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">{truncateTitle(service.title)}</h1>
+          <p className="text-gray-600 mt-1">Freitextantrag #{service.id} vom {formatDate(service.createdAt)}</p>
         </div>
         <div className="flex space-x-3">
+          <button
+            onClick={() => generatePDF()}
+            className="btn btn-primary text-sm px-3 py-1.5"
+          >
+            PDF generieren
+          </button>
           {(user?.groups?.some(g => g.name.includes('PS General Enforcement Service') || g.name.includes('PS Vollzugsabteilungsleitung') || g.name.includes('PS Vollzugsleitung') || g.name.includes('PS Anstaltsleitung') || g.name.includes('PS Payments Office') || g.name.includes('PS Medical Staff') || g.name === 'PS Designers')) && (
             <>
               <button
                 onClick={() => setShowStatusModal(true)}
-                className="btn btn-primary flex items-center space-x-2"
+                className="btn btn-primary text-sm px-3 py-1.5"
               >
-                <Edit className="w-4 h-4" />
-                <span>Status oder Entscheidung ändern</span>
+                Status ändern
               </button>
               <button
                 onClick={() => {
                   setNewPriority(service.priority || '')
                   setShowPriorityModal(true)
                 }}
-                className="btn btn-primary flex items-center space-x-2"
+                className="btn btn-primary text-sm px-3 py-1.5"
               >
-                <Edit className="w-4 h-4" />
-                <span>Antrag priorisieren</span>
+                Antrag priorisieren
               </button>
             </>
           )}
+          <button
+            onClick={() => navigate(-1)}
+            className="btn btn-primary text-sm px-3 py-1.5"
+          >
+            Zurück
+          </button>
         </div>
       </div>
 
@@ -846,20 +1001,20 @@ const ServiceDetail = () => {
           {/* Bearbeiter-Aktionen */}
           {(user?.groups?.some(g => g.name.includes('PS General Enforcement Service') || g.name.includes('PS Vollzugsabteilungsleitung') || g.name.includes('PS Vollzugsleitung') || g.name.includes('PS Anstaltsleitung') || g.name.includes('PS Payments Office') || g.name.includes('PS Medical Staff') || g.name === 'PS Designers')) && service.status !== 'COMPLETED' && (
                          <div className="bg-white rounded-lg shadow p-6">
-               <div className="flex items-center justify-between mb-4">
+               <div className="mb-4">
                  <h2 className="text-xl font-semibold text-gray-900">Sie haben folgende Auswahlmöglichkeiten:</h2>
-                 {service.status === 'PENDING' && (
-                   <button
-                     onClick={handleStatusToInProgress}
-                     className="btn btn-primary text-sm"
-                   >
-                     Status ändern: In Bearbeitung
-                   </button>
-                 )}
                </div>
               
                              {/* Aktions-Buttons */}
                <div className="flex space-x-4 mb-6">
+                 {service.status === 'PENDING' && (
+                   <button
+                     onClick={handleStatusToInProgress}
+                     className="px-4 py-2 rounded-lg border-2 border-gray-300 hover:border-gray-400 transition-colors"
+                   >
+                     In Bearbeitung setzen
+                   </button>
+                 )}
                  <button
                    onClick={() => setSelectedAction('insassen-kontaktieren')}
                    className={`px-4 py-2 rounded-lg border-2 transition-colors ${

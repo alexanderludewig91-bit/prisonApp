@@ -35,7 +35,7 @@ const Navbar = () => {
              const staffNavigation = [
          { name: 'Antragsbearbeitung', href: '/staff-dashboard' },
          { name: 'Benutzerübersicht', href: '/user-overview' },
-         { name: 'Insassen-Übersicht', href: '/inmates-overview' }
+         { name: 'Insassenübersicht', href: '/inmates-overview' }
        ]
       
       // Admin-spezifische Links hinzufügen
