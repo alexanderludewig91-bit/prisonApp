@@ -17,13 +17,14 @@ async function main() {
       name: 'PS All Users',
       description: 'Alle Benutzer',
       category: 'SYSTEM',
-      permissions: JSON.stringify(['read'])
+      permissions: JSON.stringify(['read']) // ✅ VERWENDET: checkPermission(['read'])
     },
     {
       name: 'PS Inmates',
       description: 'Insassen',
       category: 'INMATE',
-      permissions: JSON.stringify(['create_service', 'read_own_services', 'update_own_services'])
+      // permissions: JSON.stringify(['create_service', 'read_own_services', 'update_own_services']) // ❌ NICHT VERWENDET
+      permissions: null
     },
     
     // Verwaltungsabteilungen
@@ -31,25 +32,29 @@ async function main() {
       name: 'PS General Enforcement Service',
       description: 'Allgemeiner Vollzugsdienst (AVD)',
       category: 'STAFF',
-      permissions: JSON.stringify(['read_all_services', 'update_services', 'assign_services', 'workflow_approval'])
+      // permissions: JSON.stringify(['read_all_services', 'update_services', 'assign_services', 'workflow_approval']) // ❌ NICHT VERWENDET
+      permissions: null
     },
     {
       name: 'PS Vollzugsabteilungsleitung',
       description: 'Vollzugsabteilungsleitung (VAL)',
       category: 'STAFF',
-      permissions: JSON.stringify(['read_all_services', 'update_services', 'assign_services', 'workflow_approval', 'department_approval'])
+      // permissions: JSON.stringify(['read_all_services', 'update_services', 'assign_services', 'workflow_approval', 'department_approval']) // ❌ NICHT VERWENDET
+      permissions: null
     },
     {
       name: 'PS Vollzugsleitung',
       description: 'Vollzugsleitung (VL)',
       category: 'STAFF',
-      permissions: JSON.stringify(['read_all_services', 'update_services', 'assign_services', 'workflow_approval', 'department_approval', 'management_approval'])
+      // permissions: JSON.stringify(['read_all_services', 'update_services', 'assign_services', 'workflow_approval', 'department_approval', 'management_approval']) // ❌ NICHT VERWENDET
+      permissions: null
     },
     {
       name: 'PS Anstaltsleitung',
       description: 'Anstaltsleitung (AL)',
       category: 'STAFF',
-      permissions: JSON.stringify(['read_all_services', 'update_services', 'assign_services', 'workflow_approval', 'department_approval', 'management_approval', 'final_approval'])
+      // permissions: JSON.stringify(['read_all_services', 'update_services', 'assign_services', 'workflow_approval', 'department_approval', 'management_approval', 'final_approval']) // ❌ NICHT VERWENDET
+      permissions: null
     },
     
     // Spezialabteilungen
@@ -57,13 +62,15 @@ async function main() {
       name: 'PS Payments Office',
       description: 'Zahlstelle',
       category: 'STAFF',
-      permissions: JSON.stringify(['read_payment_services', 'update_payment_services', 'payment_processing'])
+      // permissions: JSON.stringify(['read_payment_services', 'update_payment_services', 'payment_processing']) // ❌ NICHT VERWENDET
+      permissions: null
     },
     {
       name: 'PS Medical Staff',
       description: 'Ärztliches Personal',
       category: 'STAFF',
-      permissions: JSON.stringify(['read_medical_services', 'update_medical_services', 'medical_approval'])
+      // permissions: JSON.stringify(['read_medical_services', 'update_medical_services', 'medical_approval']) // ❌ NICHT VERWENDET
+      permissions: null
     },
     
     // System-Gruppen
@@ -71,7 +78,7 @@ async function main() {
       name: 'PS Designers',
       description: 'Administratoren',
       category: 'ADMIN',
-      permissions: JSON.stringify(['all_permissions'])
+      permissions: JSON.stringify(['all_permissions']) // ✅ VERWENDET: checkPermission(['all_permissions'])
     }
   ]
 
