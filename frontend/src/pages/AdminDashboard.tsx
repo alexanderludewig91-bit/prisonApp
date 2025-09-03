@@ -124,6 +124,16 @@ const AdminDashboard: React.FC = () => {
     confirmPassword: ''
   })
   
+  // Neue Staff-Gruppe hinzufügen Modal State
+  const [showAddGroupModal, setShowAddGroupModal] = useState(false)
+  const [newGroupData, setNewGroupData] = useState({
+    name: '',
+    description: '',
+    category: 'STAFF'
+  })
+  const [groupValidationErrors, setGroupValidationErrors] = useState<{[key: string]: string}>({})
+  const [addingGroup, setAddingGroup] = useState(false)
+  
   // Validierungsfehler State
   const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({})
   const [staffValidationErrors, setStaffValidationErrors] = useState<{[key: string]: string}>({})
@@ -290,6 +300,37 @@ const AdminDashboard: React.FC = () => {
     setStaffValidationErrors(errors)
     return Object.keys(errors).length === 0
   }
+
+  // Validierungsfunktion für neue Staff-Gruppen
+  const validateGroupData = () => {
+    const errors: {[key: string]: string} = {}
+
+    // Technischer Name validieren
+    if (!newGroupData.name.trim()) {
+      errors.name = 'Technischer Name ist erforderlich'
+    } else if (newGroupData.name.trim().length < 3) {
+      errors.name = 'Technischer Name muss mindestens 3 Zeichen lang sein'
+    } else if (!/^[A-Za-z0-9_-]+$/.test(newGroupData.name.trim())) {
+      errors.name = 'Technischer Name darf nur Buchstaben, Zahlen, Unterstriche und Bindestriche enthalten'
+    }
+
+    // Beschreibung validieren
+    if (!newGroupData.description.trim()) {
+      errors.description = 'Beschreibung ist erforderlich'
+    } else if (newGroupData.description.trim().length < 3) {
+      errors.description = 'Beschreibung muss mindestens 3 Zeichen lang sein'
+    } else if (newGroupData.description.trim().length > 100) {
+      errors.description = 'Beschreibung darf maximal 100 Zeichen lang sein'
+    }
+
+    // Kategorie validieren (sollte immer 'STAFF' sein)
+    if (newGroupData.category !== 'STAFF') {
+      errors.category = 'Kategorie muss STAFF sein'
+    }
+
+    setGroupValidationErrors(errors)
+    return Object.keys(errors).length === 0
+  }
   
   // Validierungsfunktion für Benutzer-Bearbeitung
   const validateEditUserData = () => {
@@ -449,6 +490,61 @@ const AdminDashboard: React.FC = () => {
       groupName: group.name
     })
     setShowRemoveConfirm(true)
+  }
+
+  const handleAddGroup = async () => {
+    try {
+      // Client-seitige Validierung
+      if (!validateGroupData()) {
+        setMessage({ type: 'error', text: 'Bitte korrigieren Sie die Validierungsfehler' })
+        return
+      }
+
+      setAddingGroup(true)
+
+      // API-Aufruf
+      await api.post('/groups', {
+        name: newGroupData.name.trim(),
+        description: newGroupData.description.trim(),
+        category: newGroupData.category,
+        permissions: null
+      })
+      
+      // Erfolg
+      setMessage({ type: 'success', text: `Gruppe "${newGroupData.description}" wurde erfolgreich erstellt!` })
+      setShowAddGroupModal(false)
+      
+      // Formular zurücksetzen
+      setNewGroupData({
+        name: '',
+        description: '',
+        category: 'STAFF'
+      })
+      setGroupValidationErrors({})
+      
+      // Gruppenliste aktualisieren
+      fetchGroups()
+      
+    } catch (error: any) {
+      console.error('Fehler beim Erstellen der Gruppe:', error)
+      console.error('Response data:', error.response?.data)
+      console.error('Request data:', newGroupData)
+      
+      if (error.response?.data?.details) {
+        // Validierungsfehler vom Backend
+        console.error('Validation details:', error.response.data.details)
+        const validationErrors = error.response.data.details
+          .map((err: any) => err.msg)
+          .join(', ')
+        setMessage({ type: 'error', text: `Validierungsfehler: ${validationErrors}` })
+      } else if (error.response?.data?.error) {
+        setMessage({ type: 'error', text: error.response.data.error })
+      } else {
+        setMessage({ type: 'error', text: 'Fehler beim Erstellen der Gruppe' })
+      }
+    } finally {
+      setAddingGroup(false)
+    }
   }
 
   const confirmRemoveUserFromGroup = async () => {
@@ -981,7 +1077,7 @@ const AdminDashboard: React.FC = () => {
           </div>
           <button
             onClick={() => navigate('/admin-logs')}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                              className="flex items-center px-4 py-2 bg-[#060E5D] text-white rounded-lg hover:bg-[#050B4A] transition-colors"
           >
             <FileTextIcon className="w-4 h-4 mr-2" />
             Admin-Logs
@@ -1110,8 +1206,19 @@ const AdminDashboard: React.FC = () => {
                  {/* Gruppen-Liste */}
          <div className="bg-white rounded-lg shadow">
            <div className="px-6 py-4 border-b border-gray-200">
-             <h2 className="text-xl font-semibold text-gray-900">Gruppenverwaltung</h2>
-             <p className="text-sm text-gray-600 mt-1">Verwalten Sie Gruppen und deren Mitglieder</p>
+             <div className="flex justify-between items-center">
+               <div>
+                 <h2 className="text-xl font-semibold text-gray-900">Gruppenverwaltung</h2>
+                 <p className="text-sm text-gray-600 mt-1">Verwalten Sie Gruppen und deren Mitglieder</p>
+               </div>
+               <button
+                 onClick={() => setShowAddGroupModal(true)}
+                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[#060E5D] rounded-md hover:bg-[#050B4A] transition-colors"
+               >
+                 <UserPlus className="w-4 h-4" />
+                 Neue Staff-Gruppe
+               </button>
+             </div>
            </div>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -1593,7 +1700,7 @@ const AdminDashboard: React.FC = () => {
                  {activeUserTab === 'inmates' && (
                    <button
                      onClick={() => setShowAddInmateModal(true)}
-                     className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+                     className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[#060E5D] rounded-md hover:bg-[#050B4A] transition-colors"
                    >
                      <UserPlus className="w-4 h-4" />
                      Insassen hinzufügen
@@ -1602,7 +1709,7 @@ const AdminDashboard: React.FC = () => {
                  {activeUserTab === 'allUsers' && (
                    <button
                      onClick={() => setShowAddStaffModal(true)}
-                     className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+                     className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[#060E5D] rounded-md hover:bg-[#050B4A] transition-colors"
                    >
                      <UserPlus className="w-4 h-4" />
                      Verwaltungsbenutzer hinzufügen
@@ -1611,7 +1718,7 @@ const AdminDashboard: React.FC = () => {
                  {activeUserTab === 'admins' && (
                    <button
                      onClick={() => setShowAddAdminModal(true)}
-                     className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+                     className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[#060E5D] rounded-md hover:bg-[#050B4A] transition-colors"
                    >
                      <UserPlus className="w-4 h-4" />
                      Admin hinzufügen
@@ -1990,7 +2097,7 @@ const AdminDashboard: React.FC = () => {
                           <button
                             onClick={handleSavePassword}
                             disabled={!passwordData.newPassword || !passwordData.confirmPassword}
-                            className="px-3 py-1 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-3 py-1 text-sm font-medium text-white bg-[#060E5D] rounded-md hover:bg-[#050B4A] disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             Passwort ändern
                           </button>
@@ -2012,7 +2119,7 @@ const AdminDashboard: React.FC = () => {
                      </button>
                                            <button
                         onClick={handleSaveUser}
-                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                        className="px-4 py-2 text-sm font-medium text-white bg-[#060E5D] rounded-md hover:bg-[#050B4A]"
                       >
                         Speichern
                       </button>
@@ -2062,7 +2169,7 @@ const AdminDashboard: React.FC = () => {
                     <button
                       onClick={() => selectedUser && handleAddUserToGroup(selectedGroup.id, selectedUser)}
                       disabled={!selectedUser}
-                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
+                      className="px-4 py-2 text-sm font-medium text-white bg-[#060E5D] rounded-md hover:bg-[#050B4A] disabled:opacity-50"
                     >
                       Hinzufügen
                     </button>
@@ -2072,6 +2179,105 @@ const AdminDashboard: React.FC = () => {
             </div>
                      </div>
          )}
+
+                 {/* Modal für neue Staff-Gruppe hinzufügen */}
+                 {showAddGroupModal && (
+                   <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+                     <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                       <div className="mt-3">
+                         <h3 className="text-lg font-medium text-gray-900 mb-4">
+                           Neue Staff-Gruppe hinzufügen
+                         </h3>
+                         <div className="space-y-4">
+                           <div>
+                             <label className="block text-sm font-medium text-gray-700 mb-1">
+                               Technischer Name
+                             </label>
+                             <input
+                               type="text"
+                               value={newGroupData.name}
+                               onChange={(e) => {
+                                 setNewGroupData({...newGroupData, name: e.target.value})
+                                 if (groupValidationErrors.name) {
+                                   setGroupValidationErrors({...groupValidationErrors, name: ''})
+                                 }
+                               }}
+                                                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#060E5D] ${
+                               groupValidationErrors.name ? 'border-red-500' : 'border-gray-300'
+                             }`}
+                               placeholder="z.B. PS_New_Staff"
+                             />
+                             {groupValidationErrors.name && (
+                               <p className="mt-1 text-sm text-red-600">{groupValidationErrors.name}</p>
+                             )}
+                             <p className="mt-1 text-xs text-gray-500">
+                               Technischer Name für die Gruppe (wird intern verwendet)
+                             </p>
+                           </div>
+                           <div>
+                             <label className="block text-sm font-medium text-gray-700 mb-1">
+                               Beschreibung
+                             </label>
+                             <input
+                               type="text"
+                               value={newGroupData.description}
+                               onChange={(e) => {
+                                 setNewGroupData({...newGroupData, description: e.target.value})
+                                 if (groupValidationErrors.description) {
+                                   setGroupValidationErrors({...groupValidationErrors, description: ''})
+                                 }
+                               }}
+                                                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#060E5D] ${
+                               groupValidationErrors.description ? 'border-red-500' : 'border-gray-300'
+                             }`}
+                               placeholder="z.B. Neue Staff-Gruppe"
+                             />
+                             {groupValidationErrors.description && (
+                               <p className="mt-1 text-sm text-red-600">{groupValidationErrors.description}</p>
+                             )}
+                             <p className="mt-1 text-xs text-gray-500">
+                               Anzeigename der Gruppe (wird den Benutzern angezeigt)
+                             </p>
+                           </div>
+                           <div>
+                             <label className="block text-sm font-medium text-gray-700 mb-1">
+                               Kategorie
+                             </label>
+                             <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded border">
+                               STAFF (fest vorgegeben)
+                             </div>
+                             <p className="mt-1 text-xs text-gray-500">
+                               Neue Gruppen sind immer vom Typ STAFF
+                             </p>
+                           </div>
+                           <div className="flex justify-end space-x-3">
+                             <button
+                               onClick={() => {
+                                 setShowAddGroupModal(false)
+                                 setNewGroupData({
+                                   name: '',
+                                   description: '',
+                                   category: 'STAFF'
+                                 })
+                                 setGroupValidationErrors({})
+                               }}
+                               className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                             >
+                               Abbrechen
+                             </button>
+                             <button
+                               onClick={handleAddGroup}
+                               disabled={addingGroup}
+                               className="px-4 py-2 text-sm font-medium text-white bg-[#060E5D] rounded-md hover:bg-[#050B4A] disabled:opacity-50 disabled:cursor-not-allowed"
+                             >
+                               {addingGroup ? 'Wird erstellt...' : 'Gruppe hinzufügen'}
+                             </button>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                 )}
 
                  {/* System-Status */}
          <div className="bg-white rounded-lg shadow p-6 mt-8">
@@ -2373,7 +2579,7 @@ const AdminDashboard: React.FC = () => {
                        </button>
                                                <button
                           onClick={handleAddInmate}
-                          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                          className="px-4 py-2 text-sm font-medium text-white bg-[#060E5D] rounded-md hover:bg-[#050B4A]"
                         >
                           Insassen hinzufügen
                         </button>
@@ -2406,7 +2612,7 @@ const AdminDashboard: React.FC = () => {
                              setStaffValidationErrors({...staffValidationErrors, firstName: ''})
                            }
                          }}
-                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#060E5D] ${
                            staffValidationErrors.firstName ? 'border-red-500' : 'border-gray-300'
                          }`}
                        />
@@ -2427,7 +2633,7 @@ const AdminDashboard: React.FC = () => {
                              setStaffValidationErrors({...staffValidationErrors, lastName: ''})
                            }
                          }}
-                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#060E5D] ${
                            staffValidationErrors.lastName ? 'border-red-500' : 'border-gray-300'
                          }`}
                        />
@@ -2448,7 +2654,7 @@ const AdminDashboard: React.FC = () => {
                              setStaffValidationErrors({...staffValidationErrors, username: ''})
                            }
                          }}
-                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#060E5D] ${
                            staffValidationErrors.username ? 'border-red-500' : 'border-gray-300'
                          }`}
                        />
@@ -2469,7 +2675,7 @@ const AdminDashboard: React.FC = () => {
                              setStaffValidationErrors({...staffValidationErrors, email: ''})
                            }
                          }}
-                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#060E5D] ${
                            staffValidationErrors.email ? 'border-red-500' : 'border-gray-300'
                          }`}
                        />
@@ -2496,7 +2702,7 @@ const AdminDashboard: React.FC = () => {
                              setStaffValidationErrors({...staffValidationErrors, confirmPassword: ''})
                            }
                          }}
-                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#060E5D] ${
                            staffValidationErrors.password ? 'border-red-500' : 'border-gray-300'
                          }`}
                          placeholder="Mindestens 6 Zeichen"
@@ -2522,7 +2728,7 @@ const AdminDashboard: React.FC = () => {
                              setStaffValidationErrors({...staffValidationErrors, confirmPassword: ''})
                            }
                          }}
-                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#060E5D] ${
                            staffValidationErrors.confirmPassword ? 'border-red-500' : 'border-gray-300'
                          }`}
                          placeholder="Passwort wiederholen"
@@ -2543,7 +2749,7 @@ const AdminDashboard: React.FC = () => {
                              setStaffValidationErrors({...staffValidationErrors, selectedGroup: ''})
                            }
                          }}
-                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                         className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#060E5D] ${
                            staffValidationErrors.selectedGroup ? 'border-red-500' : 'border-gray-300'
                          }`}
                        >
@@ -2582,7 +2788,7 @@ const AdminDashboard: React.FC = () => {
                        </button>
                        <button
                          onClick={handleAddStaff}
-                         className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                         className="px-4 py-2 text-sm font-medium text-white bg-[#060E5D] rounded-md hover:bg-[#050B4A]"
                        >
                          Verwaltungsbenutzer hinzufügen
                        </button>
@@ -2615,7 +2821,7 @@ const AdminDashboard: React.FC = () => {
                              setAdminValidationErrors({...adminValidationErrors, firstName: ''})
                            }
                          }}
-                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#060E5D] ${
                            adminValidationErrors.firstName ? 'border-red-500' : 'border-gray-300'
                          }`}
                        />
@@ -2636,7 +2842,7 @@ const AdminDashboard: React.FC = () => {
                              setAdminValidationErrors({...adminValidationErrors, lastName: ''})
                            }
                          }}
-                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#060E5D] ${
                            adminValidationErrors.lastName ? 'border-red-500' : 'border-gray-300'
                          }`}
                        />
@@ -2657,7 +2863,7 @@ const AdminDashboard: React.FC = () => {
                              setAdminValidationErrors({...adminValidationErrors, username: ''})
                            }
                          }}
-                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#060E5D] ${
                            adminValidationErrors.username ? 'border-red-500' : 'border-gray-300'
                          }`}
                        />
@@ -2678,7 +2884,7 @@ const AdminDashboard: React.FC = () => {
                              setAdminValidationErrors({...adminValidationErrors, email: ''})
                            }
                          }}
-                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#060E5D] ${
                            adminValidationErrors.email ? 'border-red-500' : 'border-gray-300'
                          }`}
                        />
@@ -2705,7 +2911,7 @@ const AdminDashboard: React.FC = () => {
                              setAdminValidationErrors({...adminValidationErrors, confirmPassword: ''})
                            }
                          }}
-                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#060E5D] ${
                            adminValidationErrors.password ? 'border-red-500' : 'border-gray-300'
                          }`}
                          placeholder="Mindestens 6 Zeichen"
@@ -2731,7 +2937,7 @@ const AdminDashboard: React.FC = () => {
                              setAdminValidationErrors({...adminValidationErrors, confirmPassword: ''})
                            }
                          }}
-                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#060E5D] ${
                            adminValidationErrors.confirmPassword ? 'border-red-500' : 'border-gray-300'
                          }`}
                          placeholder="Passwort wiederholen"
@@ -2760,7 +2966,7 @@ const AdminDashboard: React.FC = () => {
                        </button>
                        <button
                          onClick={handleAddAdmin}
-                         className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                         className="px-4 py-2 text-sm font-medium text-white bg-[#060E5D] rounded-md hover:bg-[#050B4A]"
                        >
                          Admin hinzufügen
                        </button>

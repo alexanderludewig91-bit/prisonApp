@@ -173,7 +173,7 @@ const AdminLogs: React.FC = () => {
           </div>
           <button
             onClick={() => navigate('/admin-dashboard')}
-            className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            className="flex items-center px-4 py-2 bg-[#060E5D] text-white rounded-lg hover:bg-[#050B4A] transition-colors"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Zurück
@@ -253,7 +253,7 @@ const AdminLogs: React.FC = () => {
                 value={filters.action}
                 onChange={(e) => handleFilterChange('action', e.target.value)}
                 placeholder="z.B. DELETE_ALL_SERVICES"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#060E5D]"
               />
             </div>
             
@@ -266,7 +266,7 @@ const AdminLogs: React.FC = () => {
                 value={filters.adminUsername}
                 onChange={(e) => handleFilterChange('adminUsername', e.target.value)}
                 placeholder="Benutzername"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#060E5D]"
               />
             </div>
             
@@ -278,7 +278,7 @@ const AdminLogs: React.FC = () => {
                 type="date"
                 value={filters.startDate}
                 onChange={(e) => handleFilterChange('startDate', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#060E5D]"
               />
             </div>
             
@@ -290,7 +290,7 @@ const AdminLogs: React.FC = () => {
                 type="date"
                 value={filters.endDate}
                 onChange={(e) => handleFilterChange('endDate', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#060E5D]"
               />
             </div>
           </div>
