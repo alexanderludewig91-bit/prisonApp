@@ -6,6 +6,13 @@
   html {
     font-family: system-ui, sans-serif;
   }
+  
+  :root {
+    --nav-bg: #060E5D;
+    --nav-fg: #ffffff;
+    --nav-fg-muted: rgba(255,255,255,.85);
+    --nav-ring: rgba(255,255,255,.25);
+  }
 }
 
 @layer components {
@@ -14,15 +21,15 @@
   }
   
   .btn-primary {
-    @apply bg-primary-600 text-white hover:bg-primary-700;
+    @apply bg-[#060E5D] text-white hover:bg-[#050B4A] focus:outline-none focus:ring-2 focus:ring-[#060E5D]/40;
   }
   
   .btn-secondary {
-    @apply bg-gray-200 text-gray-800 hover:bg-gray-300;
+    @apply bg-[#060E5D] text-white hover:bg-[#050B4A] focus:outline-none focus:ring-2 focus:ring-[#060E5D]/40;
   }
   
   .btn-danger {
-    @apply bg-red-600 text-white hover:bg-red-700;
+    @apply bg-red-600 text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500/40;
   }
   
   .input {
@@ -31,5 +38,13 @@
   
   .card {
     @apply bg-white rounded-lg shadow-md p-6;
+  }
+  
+  .btn-navy {
+    @apply bg-[#060E5D] text-white hover:bg-[#050B4A] focus:outline-none focus:ring-2 focus:ring-[#060E5D]/40 transition-colors duration-200;
+  }
+  
+  .btn-navy-outline {
+    @apply bg-[#060E5D] text-white hover:bg-[#050B4A] focus:outline-none focus:ring-2 focus:ring-[#060E5D]/40 transition-colors duration-200;
   }
 }

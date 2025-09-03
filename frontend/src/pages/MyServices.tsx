@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { FileText, Clock, CheckCircle, XCircle, MessageSquare } from 'lucide-react'
+import { FileText, Clock, CheckCircle, XCircle, MessageSquare, Plus } from 'lucide-react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import api from '../services/api'
@@ -12,6 +12,21 @@ interface Service {
   priority: string
   createdAt: string
   updatedAt: string
+  decision?: string
+  decisionReason?: string
+  serviceType?: string
+  createdByUser?: {
+    firstName: string
+    lastName: string
+    username: string
+  }
+  activities?: Array<{
+    id: number
+    action: string
+    details: string
+    when: string
+    who: string
+  }>
 }
 
 interface ServiceWithInquiries {
@@ -51,6 +66,7 @@ interface ServiceWithInformation {
 const MyServices = () => {
   const { user } = useAuth()
   const [services, setServices] = useState<Service[]>([])
+  const [completedServices, setCompletedServices] = useState<Service[]>([])
   const [servicesWithInquiries, setServicesWithInquiries] = useState<ServiceWithInquiries[]>([])
   const [servicesWithInformation, setServicesWithInformation] = useState<ServiceWithInformation[]>([])
   const [loading, setLoading] = useState(true)
@@ -58,6 +74,14 @@ const MyServices = () => {
   const [inquiryResponse, setInquiryResponse] = useState('')
   const [showInquiryModal, setShowInquiryModal] = useState(false)
   const [sendingResponse, setSendingResponse] = useState(false)
+  const [selectedService, setSelectedService] = useState<Service | null>(null)
+  const [showServiceModal, setShowServiceModal] = useState(false)
+  const [showNewServiceModal, setShowNewServiceModal] = useState(false)
+  const [newServiceTitle, setNewServiceTitle] = useState('')
+  const [newServiceDescription, setNewServiceDescription] = useState('')
+  const [newServiceType, setNewServiceType] = useState('FREETEXT')
+  const [submittingNewService, setSubmittingNewService] = useState(false)
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false)
 
   // Prüfe ob Benutzer ein Insasse ist
   const userGroups = user?.groups?.map(g => g.name) || []
@@ -76,7 +100,21 @@ const MyServices = () => {
         // Anträge laden
         const servicesResponse = await api.get('/services/my/services')
         console.log('Anträge geladen:', servicesResponse.data)
-        setServices(servicesResponse.data.services || [])
+        
+        // Anträge nach Status filtern
+        const allServices = servicesResponse.data.services || []
+        
+        // Offene Anträge (Ausstehend und In Bearbeitung)
+        const filteredServices = allServices.filter((service: Service) => 
+          service.status === 'PENDING' || service.status === 'IN_PROGRESS'
+        )
+        setServices(filteredServices)
+        
+        // Abgeschlossene Anträge (Abgeschlossen und Abgelehnt)
+        const filteredCompletedServices = allServices.filter((service: Service) => 
+          service.status === 'COMPLETED' || service.status === 'REJECTED'
+        )
+        setCompletedServices(filteredCompletedServices)
 
         // Rückfragen laden
         if (user?.id) {
@@ -135,6 +173,68 @@ const MyServices = () => {
     }
   }
 
+  const handleServiceClick = (service: Service) => {
+    setSelectedService(service)
+    setShowServiceModal(true)
+  }
+
+
+
+  const handleNewServiceClick = () => {
+    setShowNewServiceModal(true)
+    setNewServiceTitle('')
+    setNewServiceDescription('')
+    setNewServiceType('FREETEXT')
+  }
+
+  const handleSubmitNewService = async () => {
+    if (!newServiceTitle.trim() || !newServiceDescription.trim()) {
+      alert('Bitte füllen Sie alle Pflichtfelder aus.')
+      return
+    }
+
+    setSubmittingNewService(true)
+    try {
+      const serviceData = {
+        title: newServiceTitle.trim(),
+        description: newServiceDescription.trim(),
+        serviceType: newServiceType
+      }
+
+      console.log('Sende neuen Antrag:', serviceData)
+      const response = await api.post('/services/my/services', serviceData)
+      console.log('Antrag erfolgreich erstellt:', response.data)
+
+      // Modal schließen und Daten zurücksetzen
+      setShowNewServiceModal(false)
+      setNewServiceTitle('')
+      setNewServiceDescription('')
+      setNewServiceType('FREETEXT')
+
+      // Anträge neu laden
+      const servicesResponse = await api.get('/services/my/services')
+      const allServices = servicesResponse.data.services || []
+      
+      const openServices = allServices.filter((service: Service) => 
+        service.status === 'PENDING' || service.status === 'IN_PROGRESS'
+      )
+      const completedServices = allServices.filter((service: Service) => 
+        service.status === 'COMPLETED'
+      )
+      
+      setServices(openServices)
+      setCompletedServices(completedServices)
+
+      setShowSuccessMessage(true)
+      setTimeout(() => setShowSuccessMessage(false), 5000) // Nach 5 Sekunden ausblenden
+    } catch (error) {
+      console.error('Fehler beim Erstellen des Antrags:', error)
+      // Fehlermeldung wird über den Button-Status angezeigt (disabled state)
+    } finally {
+      setSubmittingNewService(false)
+    }
+  }
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'PENDING':
@@ -165,14 +265,20 @@ const MyServices = () => {
     }
   }
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'HIGH':
-        return 'bg-orange-100 text-orange-800'
-      case 'URGENT':
-        return 'bg-red-100 text-red-800'
+
+
+  const getDecisionText = (decision: string) => {
+    switch (decision) {
+      case 'APPROVED':
+        return 'Genehmigt'
+      case 'REJECTED':
+        return 'Abgelehnt'
+      case 'RETURNED':
+        return 'Zurückgewiesen'
+      case 'PENDING':
+        return 'Ausstehend'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return decision
     }
   }
 
@@ -185,150 +291,362 @@ const MyServices = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">
-          Meine Anträge
-        </h1>
-        <p className="text-gray-600">
-          Hier sehen Sie alle Ihre eingereichten Anträge und deren Status.
-        </p>
+    <div className="space-y-6 p-6">
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Willkommen {user?.firstName} {user?.lastName}
+          </h1>
+        </div>
+        <div className="flex space-x-3">
+          <button
+            onClick={handleNewServiceClick}
+            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-[#060E5D] hover:bg-[#050B4A] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#060E5D]/40 shadow-sm"
+          >
+            <Plus className="h-5 w-5 mr-2" />
+            Neuen Antrag stellen
+          </button>
+          <button
+            onClick={() => window.location.href = '/all-my-services'}
+            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-[#060E5D] hover:bg-[#050B4A] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#060E5D]/40 shadow-sm"
+          >
+            <Clock className="h-5 w-5 mr-2" />
+            Alle meine Anträge
+          </button>
+        </div>
       </div>
 
-      {/* Informationen zu Anträgen */}
-      {servicesWithInformation.length > 0 && (
+      {/* Informationen und Rückfragen in zwei Spalten */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Informationen zu Anträgen */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
+                    <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
               <FileText className="h-5 w-5 text-green-500" />
-              <span>Informationen zu Anträgen ({servicesWithInformation.length})</span>
+              <span>
+                {servicesWithInformation.length > 0 
+                  ? `Es gibt neue Informationen für Sie (${servicesWithInformation.length})`
+                  : 'Aktuell gibt es keine neuen Informationen'
+                }
+              </span>
             </h2>
           </div>
-          <div className="divide-y divide-gray-200">
-            {servicesWithInformation.map((service) => (
-              <div 
-                key={service.id} 
-                className="px-6 py-4 hover:bg-gray-50"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <FileText className="h-5 w-5 text-green-500" />
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-900">
-                        Information zum Antrag "{service.title}"
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        {service.activities[0]?.details}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Information erhalten am {new Date(service.activities[0]?.when || '').toLocaleDateString('de-DE')}
-                      </p>
+          {servicesWithInformation.length > 0 && (
+            <div className="divide-y divide-gray-200">
+              {servicesWithInformation.map((service) => (
+                <div 
+                  key={service.id} 
+                  className="px-6 py-4 bg-white border-t border-gray-100 rounded-md transition-all duration-150 hover:bg-white hover:shadow-sm hover:ring-1 hover:ring-blue-500/10 motion-safe:hover:-translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <FileText className="h-5 w-5 text-green-500" />
+                      <div>
+                        <h3 className="text-lg font-medium text-gray-900">
+                          Information zum Antrag "{service.title}"
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          {service.activities[0]?.details}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Information erhalten am {new Date(service.activities[0]?.when || '').toLocaleDateString('de-DE')}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
-      )}
 
-      {/* Rückfragen zu Anträgen */}
-      {servicesWithInquiries.length > 0 && (
+        {/* Rückfragen zu Anträgen */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
               <MessageSquare className="h-5 w-5 text-blue-500" />
-              <span>Rückfragen zu Anträgen ({servicesWithInquiries.length})</span>
+              <span>
+                {servicesWithInquiries.length > 0 
+                  ? `Es gibt neue Rückfragen für Sie (${servicesWithInquiries.length})`
+                  : 'Aktuell gibt es keine neuen Rückfragen'
+                }
+              </span>
             </h2>
           </div>
-          <div className="divide-y divide-gray-200">
-            {servicesWithInquiries.map((service) => (
-              <div 
-                key={service.id} 
-                className="px-6 py-4 hover:bg-gray-50 cursor-pointer"
-                onClick={() => handleInquiryClick(service)}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <MessageSquare className="h-5 w-5 text-blue-500" />
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-900">
-                        Rückfrage zum Antrag "{service.title}"
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        {service.activities[0]?.details}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Rückfrage gestellt am {new Date(service.activities[0]?.when || '').toLocaleDateString('de-DE')}
-                      </p>
+          {servicesWithInquiries.length > 0 && (
+            <div className="divide-y divide-gray-200">
+              {servicesWithInquiries.map((service) => (
+                <div 
+                  key={service.id} 
+                  className="px-6 py-4 bg-white border-t border-gray-100 rounded-md transition-all duration-150 hover:bg-white hover:shadow-sm hover:ring-1 hover:ring-blue-500/10 motion-safe:hover:-translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 cursor-pointer"
+                  onClick={() => handleInquiryClick(service)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <MessageSquare className="h-5 w-5 text-blue-500" />
+                      <div>
+                        <h3 className="text-lg font-medium text-gray-900">
+                          Rückfrage zum Antrag "{service.title}"
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          {service.activities[0]?.details}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Rückfrage gestellt am {new Date(service.activities[0]?.when || '').toLocaleDateString('de-DE')}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-blue-600">
+                      <span className="text-sm">Antworten</span>
                     </div>
                   </div>
-                  <div className="text-blue-600">
-                    <span className="text-sm">Antworten</span>
-                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
-      {/* Meine Anträge */}
-      {services.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-8 text-center">
-          <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Keine Anträge vorhanden
-          </h3>
-          <p className="text-gray-600 mb-4">
-            Sie haben noch keine Anträge eingereicht.
-          </p>
-          <a
-            href="/new-service"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            Neuen Antrag erstellen
-          </a>
-        </div>
-      ) : (
+      {/* Anträge in zwei Spalten */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Offene Anträge */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">
-              Ihre Anträge ({services.length})
+              Ihre zuletzt gestellten Anträge
             </h2>
           </div>
-          <div className="divide-y divide-gray-200">
-            {services.map((service) => (
-              <div key={service.id} className="px-6 py-4 hover:bg-gray-50">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    {getStatusIcon(service.status)}
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-900">
-                        {service.title}
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        {service.description}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Eingereicht am {new Date(service.createdAt).toLocaleDateString('de-DE')}
-                      </p>
+          {services.length === 0 ? (
+            <div className="p-8 text-center">
+              <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Keine offenen Anträge
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Sie haben derzeit keine offenen Anträge.
+              </p>
+              <button
+                onClick={handleNewServiceClick}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#060E5D] hover:bg-[#050B4A] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#060E5D]/40"
+              >
+                Neuen Antrag stellen
+              </button>
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-200">
+              {services.slice(0, 5).map((service) => (
+                <div 
+                  key={service.id} 
+                  className="px-6 py-4 bg-white border-t border-gray-100 rounded-md transition-all duration-150 hover:bg-white hover:shadow-sm hover:ring-1 hover:ring-blue-500/10 motion-safe:hover:-translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 cursor-pointer"
+                  onClick={() => handleServiceClick(service)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      {getStatusIcon(service.status)}
+                      <div>
+                        <h3 className="text-lg font-medium text-gray-900">
+                          {service.title}
+                        </h3>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Eingereicht am {new Date(service.createdAt).toLocaleDateString('de-DE')}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        {getStatusText(service.status)}
+                      </span>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    {service.priority && (
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(service.priority)}`}>
-                        {service.priority === 'HIGH' && 'Hohe Priorität'}
-                        {service.priority === 'URGENT' && 'Höchste Priorität'}
+                </div>
+              ))}
+
+            </div>
+          )}
+        </div>
+
+        {/* Abgeschlossene Anträge */}
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-900">
+              Ihre zuletzt abgeschlossenen Anträge
+            </h2>
+          </div>
+          {completedServices.length === 0 ? (
+            <div className="p-8 text-center">
+              <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Keine abgeschlossenen Anträge
+              </h3>
+              <p className="text-gray-600">
+                Sie haben noch keine Anträge abgeschlossen.
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-200">
+              {completedServices.slice(0, 5).map((service) => (
+                <div 
+                  key={service.id} 
+                  className="px-6 py-4 bg-white border-t border-gray-100 rounded-md transition-all duration-150 hover:bg-white hover:shadow-sm hover:ring-1 hover:ring-blue-500/10 motion-safe:hover:-translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 cursor-pointer"
+                  onClick={() => handleServiceClick(service)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      {getStatusIcon(service.status)}
+                      <div className="flex-1">
+                        <h3 className="text-lg font-medium text-gray-900">
+                          {service.title}
+                        </h3>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Eingereicht am {new Date(service.createdAt).toLocaleDateString('de-DE')}
+                        </p>
+                        {service.decision && (
+                          <p className="text-sm text-gray-700 mt-1">
+                            <span className="font-medium">Entscheidung:</span> {getDecisionText(service.decision)}
+                          </p>
+                        )}
+
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        {getStatusText(service.status)}
                       </span>
-                    )}
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                      {getStatusText(service.status)}
-                    </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Antragsdetails-Modal */}
+      {showServiceModal && selectedService && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              {selectedService.serviceType === 'FREETEXT' ? 'Sonstiges Anliegen' : 'Antragsdetails'}
+            </h3>
+            
+            <div className="space-y-6">
+              {/* Antragsteller-Informationen */}
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900 mb-3 border-b border-gray-200 pb-2">
+                  Antragsteller-Informationen
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-sm font-medium text-gray-600">Name:</span>
+                    <p className="text-gray-900 mt-1">
+                      {selectedService.createdByUser?.firstName} {selectedService.createdByUser?.lastName}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-600">Buchnummer:</span>
+                    <p className="text-gray-900 mt-1">{selectedService.createdByUser?.username}</p>
                   </div>
                 </div>
               </div>
-            ))}
+
+              {/* Antragsdetails */}
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900 mb-3 border-b border-gray-200 pb-2">
+                  Antragsdetails
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-sm font-medium text-gray-600">Antragsdatum:</span>
+                    <p className="text-gray-900 mt-1">
+                      {new Date(selectedService.createdAt).toLocaleDateString('de-DE')} um {new Date(selectedService.createdAt).toLocaleTimeString('de-DE')}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-600">Status:</span>
+                    <p className="text-gray-900 mt-1">{getStatusText(selectedService.status)}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-600">Titel:</span>
+                    <p className="text-gray-900 mt-1">{selectedService.title}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-600">Beschreibung:</span>
+                    <p className="text-gray-900 mt-1 leading-relaxed">{selectedService.description}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Rückfragen und Antworten (falls vorhanden) */}
+              {(() => {
+                if (selectedService.activities && selectedService.activities.length > 0) {
+                  // Alle Rückfrage-bezogenen Activities finden und chronologisch sortieren (älteste zuerst)
+                  const inquiryActivities = selectedService.activities
+                    .filter(activity => 
+                      activity.action === 'inquiry' || 
+                      activity.action === 'answer' ||
+                      activity.action === 'information'
+                    )
+                    .sort((a, b) => new Date(a.when).getTime() - new Date(b.when).getTime());
+
+                  if (inquiryActivities.length > 0) {
+                    return (
+                      <div>
+                        <h4 className="text-lg font-semibold text-gray-900 mb-3 border-b border-gray-200 pb-2">
+                          Zusätzliche Informationen
+                        </h4>
+                        <div className="space-y-2">
+                          {inquiryActivities.map((activity, index) => (
+                            <div key={index} className="py-1">
+                              <h5 className="text-sm font-medium text-gray-600 mb-2">
+                                {activity.action === 'inquiry' ? 'Rückfrage' :
+                                 activity.action === 'answer' ? 'Antwort' :
+                                 activity.action === 'information' ? 'Information' : 'Nachricht'} von {activity.who.split(' (')[0]} vom {new Date(activity.when).toLocaleDateString('de-DE')} um {new Date(activity.when).toLocaleTimeString('de-DE')}
+                              </h5>
+                              <p className="text-gray-900 leading-relaxed">{activity.details}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  }
+                }
+                return null;
+              })()}
+
+              {/* Entscheidung und Begründung (nur bei abgeschlossenen Anträgen) */}
+              {selectedService.decision && selectedService.status === 'COMPLETED' && (
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3 border-b border-gray-200 pb-2">
+                    Entscheidung
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-gray-600">Entscheidung:</span>
+                      <p className="text-gray-900 mt-1">{getDecisionText(selectedService.decision)}</p>
+                    </div>
+                    {selectedService.decisionReason && (
+                      <div>
+                        <span className="text-sm font-medium text-gray-600">Begründung:</span>
+                        <p className="text-gray-900 mt-1">{selectedService.decisionReason}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={() => {
+                  setShowServiceModal(false)
+                  setSelectedService(null)
+                }}
+                className="btn btn-secondary"
+              >
+                Schließen
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -389,6 +707,107 @@ const MyServices = () => {
                 className="btn btn-primary flex-1"
               >
                 {sendingResponse ? 'Senden...' : 'Antwort senden'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Erfolgsmeldung */}
+      {showSuccessMessage && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="bg-green-500 text-white px-8 py-4 rounded-lg shadow-lg">
+            <div className="flex items-center space-x-3">
+              <CheckCircle className="h-6 w-6" />
+              <span className="text-lg font-medium">Ihr Antrag wurde erfolgreich eingereicht!</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Neuer Antrag Modal */}
+      {showNewServiceModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Neuen Antrag stellen
+            </h3>
+            
+            <div className="space-y-4">
+              {/* Antragstyp */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Antragstyp:
+                </label>
+                <div className="grid grid-cols-1 gap-3">
+                  <label className="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                    <input
+                      type="radio"
+                      name="serviceType"
+                      value="FREETEXT"
+                      checked={newServiceType === 'FREETEXT'}
+                      onChange={(e) => setNewServiceType(e.target.value)}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                    />
+                    <div className="ml-3">
+                      <div className="text-sm font-medium text-gray-900">Sonstiges Anliegen</div>
+                      <div className="text-sm text-gray-500">Für allgemeine Anfragen und Anliegen</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Titel */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Titel des Antrags: *
+                </label>
+                <input
+                  type="text"
+                  value={newServiceTitle}
+                  onChange={(e) => setNewServiceTitle(e.target.value)}
+                  placeholder="Kurze Beschreibung Ihres Anliegens..."
+                  className="w-full input"
+                  maxLength={100}
+                />
+              </div>
+
+              {/* Beschreibung */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Beschreibung: *
+                </label>
+                <textarea
+                  value={newServiceDescription}
+                  onChange={(e) => setNewServiceDescription(e.target.value)}
+                  placeholder="Detaillierte Beschreibung Ihres Anliegens..."
+                  className="w-full input resize-none"
+                  rows={4}
+                  maxLength={500}
+                />
+              </div>
+
+
+            </div>
+            
+            <div className="flex space-x-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowNewServiceModal(false)
+                  setNewServiceTitle('')
+                  setNewServiceDescription('')
+                  setNewServiceType('FREETEXT')
+                }}
+                className="btn btn-secondary flex-1"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={handleSubmitNewService}
+                disabled={!newServiceTitle.trim() || !newServiceDescription.trim() || submittingNewService}
+                className="btn btn-primary flex-1"
+              >
+                {submittingNewService ? 'Wird eingereicht...' : 'Antrag einreichen'}
               </button>
             </div>
           </div>

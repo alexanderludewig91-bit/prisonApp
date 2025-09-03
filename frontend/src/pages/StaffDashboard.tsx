@@ -64,7 +64,7 @@ const StaffDashboard = () => {
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'all' | 'my-assignments' | 'my-participation'>(defaultTab)
-  const [sortBy, setSortBy] = useState<'date' | 'title' | 'assignee' | 'status' | 'decision'>('date')
+  const [sortBy, setSortBy] = useState<'date' | 'title' | 'assignee' | 'lastAction' | 'status' | 'decision'>('date')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [filters, setFilters] = useState<FilterState>({
     status: '',
@@ -133,7 +133,7 @@ const StaffDashboard = () => {
     switch (decision) {
       case 'APPROVED': return 'bg-green-100 text-green-800'
       case 'REJECTED': return 'bg-red-100 text-red-800'
-      case 'RETURNED': return 'bg-orange-100 text-orange-800'
+      case 'RETURNED': return 'bg-yellow-100 text-yellow-800'
       default: return 'bg-gray-100 text-gray-800'
     }
   }
@@ -143,6 +143,43 @@ const StaffDashboard = () => {
       case 'HIGH': return 'bg-orange-100 text-orange-800'
       case 'URGENT': return 'bg-red-100 text-red-800'
       default: return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  const getActionText = (action: string) => {
+    switch (action) {
+      case 'created':
+        return 'Antrag gestellt'
+      case 'comment':
+        return 'Kommentar'
+      case 'inquiry':
+        return 'Rückfrage an Insassen'
+      case 'answer':
+        return 'Antwort des Insassen'
+      case 'information':
+        return 'Information an Insassen gesendet'
+      case 'forward':
+        return 'Weiterleitung'
+      case 'workflow_transition':
+        return 'Status-Änderung'
+      case 'status_changed':
+        return 'Statusänderung'
+      case 'decision_made':
+        return 'Entscheidung'
+      case 'personal_notification':
+        return 'Persönliche Eröffnung'
+      case 'personal_notification_completed':
+        return 'Persönliche Eröffnung durchgeführt'
+      case 'status_and_decision_updated':
+        return 'Status und Entscheidung aktualisiert'
+      case 'priority_changed':
+        return 'Priorität geändert'
+      case 'further_processing':
+        return 'Weiterführende Bearbeitung'
+      case 'returned':
+        return 'Antrag zurückgewiesen'
+      default:
+        return action
     }
   }
 
@@ -164,6 +201,12 @@ const StaffDashboard = () => {
             aValue = a.assignedToGroupRef?.description || a.assignedToGroupRef?.name || 'Nicht zugewiesen'
             bValue = b.assignedToGroupRef?.description || b.assignedToGroupRef?.name || 'Nicht zugewiesen'
             break
+          case 'lastAction':
+            const aLastAction = a.activities && a.activities.length > 0 ? a.activities[0]?.action || '' : ''
+            const bLastAction = b.activities && b.activities.length > 0 ? b.activities[0]?.action || '' : ''
+            aValue = getActionText(aLastAction).toLowerCase()
+            bValue = getActionText(bLastAction).toLowerCase()
+            break
           case 'status':
             aValue = a.status || ''
             bValue = b.status || ''
@@ -184,7 +227,7 @@ const StaffDashboard = () => {
     })
   }
 
-  const handleSort = (field: 'date' | 'title' | 'assignee' | 'status' | 'decision') => {
+  const handleSort = (field: 'date' | 'title' | 'assignee' | 'lastAction' | 'status' | 'decision') => {
     if (sortBy === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
     } else {
@@ -193,7 +236,7 @@ const StaffDashboard = () => {
     }
   }
 
-  const getSortIcon = (field: 'date' | 'title' | 'assignee' | 'status' | 'decision') => {
+  const getSortIcon = (field: 'date' | 'title' | 'assignee' | 'lastAction' | 'status' | 'decision') => {
     if (sortBy !== field) return null
     return sortDirection === 'asc' ? '↑' : '↓'
   }
@@ -403,7 +446,7 @@ const StaffDashboard = () => {
 
         {/* Tabellenüberschriften */}
         <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b">
-          <div className="grid items-center md:grid-cols-[minmax(0,1fr)_22rem_12rem_12rem] gap-x-6 px-6 py-4 text-sm font-medium text-gray-700">
+          <div className="grid items-center md:grid-cols-[minmax(0,1fr)_22rem_12rem_12rem_12rem] gap-x-6 px-6 py-4 text-sm font-medium text-gray-700">
             <div className="min-w-0">
               <div className="font-medium">Antrag</div>
               <div className="mt-1 text-sm text-muted-foreground tabular-nums truncate">
@@ -434,6 +477,14 @@ const StaffDashboard = () => {
             </div>
             <div className="justify-self-center text-center">
               <button 
+                onClick={() => handleSort('lastAction')}
+                className="inline-flex items-center gap-1 hover:text-gray-900 transition-colors"
+              >
+                <span>Letzte Aktion {getSortIcon('lastAction')}</span>
+              </button>
+            </div>
+            <div className="justify-self-center text-center">
+              <button 
                 onClick={() => handleSort('status')}
                 className="inline-flex items-center gap-1 hover:text-gray-900 transition-colors"
               >
@@ -455,7 +506,7 @@ const StaffDashboard = () => {
           {getSortedServices(filteredServices).map((service) => (
             <div 
               key={service.id} 
-              className="grid items-center md:grid-cols-[minmax(0,1fr)_22rem_12rem_12rem] gap-x-6 px-6 odd:bg-muted/30 hover:bg-muted/50 border-t py-3 cursor-pointer transition-colors"
+              className="grid items-center md:grid-cols-[minmax(0,1fr)_22rem_12rem_12rem_12rem] gap-x-6 px-6 odd:bg-muted/30 hover:bg-muted/50 border-t py-3 cursor-pointer transition-colors"
               onClick={() => navigate(`/services/${service.id}`)}
             >
               {/* Linke Spalte: Titel + Metadaten */}
@@ -498,6 +549,22 @@ const StaffDashboard = () => {
                   </span>
                 </span>
               </div>
+              
+                             {/* Neue Spalte: Letzte Aktion */}
+               <div className="justify-self-center text-center">
+                 {service.activities && service.activities.length > 0 ? (
+                   <div className="space-y-1">
+                     <span className="px-2 py-1 text-xs font-medium text-black bg-gray-100 rounded block">
+                       {getActionText(service.activities[0].action)}
+                     </span>
+                     <span className="text-xs text-gray-500">
+                       ({formatDate(service.activities[0].when)})
+                     </span>
+                   </div>
+                 ) : (
+                   <span className="text-xs text-gray-400">-</span>
+                 )}
+               </div>
               
               {/* Status Spalte */}
               <div className="justify-self-center">

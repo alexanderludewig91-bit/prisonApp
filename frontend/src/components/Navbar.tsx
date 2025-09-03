@@ -27,7 +27,8 @@ const Navbar = () => {
 
     if (isInmate) {
       return [
-        { name: 'Meine Anträge', href: '/my-services' },
+        { name: 'Startseite', href: '/my-services' },
+        { name: 'Alle meine Anträge', href: '/all-my-services' },
         { name: 'Neuer Antrag', href: '/new-service' },
         { name: 'Kontoinformationen', href: '/profile' }
       ]
@@ -55,12 +56,12 @@ const Navbar = () => {
   const isActive = (path: string) => location.pathname === path
 
   return (
-    <nav className="bg-white shadow-lg">
+    <nav className="bg-[var(--nav-bg)] text-[var(--nav-fg)] ring-1 ring-white/10 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <h1 className="text-xl font-bold text-gray-900">
+              <h1 className="text-xl font-bold text-[var(--nav-fg)]">
                 Prisoner Services
               </h1>
             </div>
@@ -71,8 +72,8 @@ const Navbar = () => {
                   to={item.href}
                   className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
                     isActive(item.href)
-                      ? 'border-primary-500 text-gray-900'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                      ? 'border-white text-[var(--nav-fg)]'
+                      : 'border-transparent text-[var(--nav-fg-muted)] hover:border-white/50 hover:text-[var(--nav-fg)]'
                   }`}
                 >
                   {item.name}
@@ -84,12 +85,12 @@ const Navbar = () => {
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
             <div className="ml-3 relative">
               <div className="flex items-center space-x-4">
-                <div className="text-sm text-gray-700">
+                <div className="text-sm text-[var(--nav-fg-muted)]">
                   {user?.firstName} {user?.lastName}
                 </div>
                 <button
                   onClick={logout}
-                  className="flex items-center text-gray-500 hover:text-gray-700"
+                  className="flex items-center text-[var(--nav-fg-muted)] hover:text-[var(--nav-fg)] transition-colors"
                 >
                   <LogOut className="h-5 w-5" />
                   <span className="ml-1">Abmelden</span>
@@ -100,10 +101,10 @@ const Navbar = () => {
 
           {/* Mobile menu button */}
           <div className="flex items-center sm:hidden">
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
-            >
+                          <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="inline-flex items-center justify-center p-2 rounded-md text-white/90 hover:text-white hover:bg-white/10 transition-colors"
+              >
               {isMenuOpen ? (
                 <X className="block h-6 w-6" />
               ) : (
@@ -122,38 +123,38 @@ const Navbar = () => {
               <Link
                 key={item.name}
                 to={item.href}
-                className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
-                  isActive(item.href)
-                    ? 'bg-primary-50 border-primary-500 text-primary-700'
-                    : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'
-                }`}
+                                 className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
+                   isActive(item.href)
+                     ? 'bg-white/10 border-white text-[var(--nav-fg)]'
+                     : 'border-transparent text-[var(--nav-fg-muted)] hover:bg-white/10 hover:border-white/50 hover:text-[var(--nav-fg)]'
+                 }`}
                 onClick={() => setIsMenuOpen(false)}
               >
                 {item.name}
               </Link>
             ))}
           </div>
-          <div className="pt-4 pb-3 border-t border-gray-200">
-            <div className="flex items-center px-4">
-              <div className="flex-shrink-0">
-                <User className="h-8 w-8 text-gray-400" />
-              </div>
-              <div className="ml-3">
-                <div className="text-base font-medium text-gray-800">
-                  {user?.firstName} {user?.lastName}
-                </div>
-                <div className="text-sm font-medium text-gray-500">
-                  {user?.email}
-                </div>
-              </div>
-            </div>
+                     <div className="pt-4 pb-3 border-t border-white/20">
+                           <div className="flex items-center px-4">
+                 <div className="flex-shrink-0">
+                   <User className="h-8 w-8 text-white/90" />
+                 </div>
+                 <div className="ml-3">
+                   <div className="text-base font-medium text-[var(--nav-fg)]">
+                     {user?.firstName} {user?.lastName}
+                   </div>
+                   <div className="text-sm font-medium text-[var(--nav-fg-muted)]">
+                     {user?.email}
+                   </div>
+                 </div>
+               </div>
             <div className="mt-3 space-y-1">
-              <button
-                onClick={logout}
-                className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
-              >
-                Abmelden
-              </button>
+                             <button
+                 onClick={logout}
+                 className="block w-full text-left px-4 py-2 text-base font-medium text-[var(--nav-fg-muted)] hover:text-[var(--nav-fg)] hover:bg-white/10 transition-colors"
+               >
+                 Abmelden
+               </button>
             </div>
           </div>
         </div>

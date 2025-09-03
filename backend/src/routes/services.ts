@@ -1506,13 +1506,52 @@ router.get('/my/services', checkRole(['INMATE']), async (req: AuthenticatedReque
       include: {
         activities: {
           orderBy: { when: 'desc' },
-          take: 3
+          take: 10
+        },
+        createdByUser: {
+          select: {
+            firstName: true,
+            lastName: true,
+            username: true
+          }
         }
       },
       orderBy: { createdAt: 'desc' }
     });
 
-    res.json({ services });
+    // Für jeden Service die Entscheidung und Begründung aus den Activities extrahieren
+    const servicesWithDecision = services.map(service => {
+      // Nach der Entscheidungs-Activity suchen (nur decision_made)
+      const decisionActivity = service.activities.find(activity => 
+        activity.action === 'decision_made'
+      );
+
+      // Nach der Begründungs-Activity suchen (nur decision_made)
+      const reasonActivity = service.activities.find(activity => 
+        activity.action === 'decision_made'
+      );
+
+      // Entscheidung aus der decision_made Activity extrahieren
+      let decision = null;
+      if (decisionActivity && decisionActivity.details) {
+        // Wenn decision_made Activity vorhanden ist, schauen wir in die details
+        if (decisionActivity.details.includes('APPROVED') || decisionActivity.details.includes('genehmigt')) {
+          decision = 'APPROVED';
+        } else if (decisionActivity.details.includes('REJECTED') || decisionActivity.details.includes('abgelehnt')) {
+          decision = 'REJECTED';
+        } else if (decisionActivity.details.includes('RETURNED') || decisionActivity.details.includes('zurückgewiesen')) {
+          decision = 'RETURNED';
+        }
+      }
+
+      return {
+        ...service,
+        decision: decision,
+        decisionReason: reasonActivity?.details || null
+      };
+    });
+
+    res.json({ services: servicesWithDecision });
 
   } catch (error: any) {
     console.error('Get my services error:', error);
@@ -1683,8 +1722,7 @@ router.patch('/:id/priority', [
 // Neuen Service erstellen (nur für Insassen)
 router.post('/my/services', checkRole(['INMATE']), [
   body('title').notEmpty().withMessage('Titel ist erforderlich'),
-  body('description').notEmpty().withMessage('Beschreibung ist erforderlich'),
-  body('priority').optional().isIn(['', 'HIGH', 'URGENT']).withMessage('Ungültige Priorität. Gültige Werte: HIGH, URGENT')
+  body('description').notEmpty().withMessage('Beschreibung ist erforderlich')
 ], async (req: AuthenticatedRequest, res: Response) => {
   try {
     const errors = validationResult(req);
@@ -1693,10 +1731,10 @@ router.post('/my/services', checkRole(['INMATE']), [
     }
 
     const userId = req.user?.userId;
-    const { title, description, priority: rawPriority } = req.body;
+    const { title, description } = req.body;
     
-    // Leeren String als null behandeln
-    const priority = rawPriority === '' ? null : rawPriority;
+    // Default-Priorität für Insassen-Anträge (null = keine besondere Priorität)
+    const priority = null;
 
     if (!userId) {
       return res.status(401).json({ error: 'Benutzer nicht authentifiziert' });

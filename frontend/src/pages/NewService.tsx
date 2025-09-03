@@ -10,8 +10,7 @@ const NewService = () => {
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
-    description: '',
-    priority: ''
+    description: ''
   })
 
   // Prüfe ob Benutzer ein Insasse ist
@@ -93,22 +92,7 @@ const NewService = () => {
             />
           </div>
 
-          <div>
-            <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-2">
-              Priorität
-            </label>
-            <select
-              id="priority"
-              name="priority"
-              value={formData.priority}
-              onChange={handleChange}
-              className="input"
-            >
-              <option value="">Keine besondere Priorität</option>
-              <option value="HIGH">Hohe Priorität</option>
-              <option value="URGENT">Höchste Priorität</option>
-            </select>
-          </div>
+
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="flex items-start">

@@ -6,6 +6,7 @@ import { useAuth } from './contexts/AuthContext'
 
 import ServiceDetail from './pages/ServiceDetail'
 import MyServices from './pages/MyServices'
+import AllMyServices from './pages/AllMyServices'
 import NewService from './pages/NewService'
 import StaffDashboard from './pages/StaffDashboard'
 import AdminDashboard from './pages/AdminDashboard'
@@ -92,7 +93,7 @@ function AppContent() {
   }
 
   return (
-    <>
+    <div className="min-h-screen bg-gray-50">
       {isAuthenticated && <Navbar />}
       <main className="container mx-auto px-4 py-8">
         <Routes>
@@ -112,6 +113,9 @@ function AppContent() {
           } />
           <Route path="/my-services" element={
             isAuthenticated ? <MyServices /> : <Navigate to="/login" replace />
+          } />
+          <Route path="/all-my-services" element={
+            isAuthenticated ? <AllMyServices /> : <Navigate to="/login" replace />
           } />
           <Route path="/new-service" element={
             isAuthenticated ? <NewService /> : <Navigate to="/login" replace />
@@ -136,7 +140,7 @@ function AppContent() {
           } />
         </Routes>
       </main>
-    </>
+    </div>
   )
 }
 
