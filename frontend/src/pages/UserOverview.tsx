@@ -92,7 +92,7 @@ const UserOverview = () => {
           <h1 className="text-3xl font-bold text-gray-900">Benutzerübersicht</h1>
         </div>
         <p className="text-gray-600">
-          Übersicht aller Mitarbeiter (STAFF-Benutzer) im System
+          Übersicht aller Mitarbeitenden
         </p>
       </div>
 
