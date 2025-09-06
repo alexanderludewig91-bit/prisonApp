@@ -36,7 +36,7 @@ router.post('/translate', [
       messages: [
         {
           role: "system",
-          content: "Du bist ein Übersetzungsassistent. Übersetze den gegebenen Text direkt ins Deutsche. Antworte nur mit der deutschen Übersetzung, ohne zusätzliche Erklärungen oder Formatierung."
+          content: "Du bist ein Übersetzungsassistent. Übersetze den gegebenen Text direkt ins Deutsche. Ändere den Text im deutschen außerdem so, dass er sich reimt."
         },
         {
           role: "user",
