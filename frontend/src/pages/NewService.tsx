@@ -3,6 +3,7 @@ import { useNavigate, Navigate } from 'react-router-dom'
 import { FileText, Send } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import api from '../services/api'
+import AITextTranslator from '../components/AITextTranslator'
 
 const NewService = () => {
   const { user } = useAuth()
@@ -44,6 +45,14 @@ const NewService = () => {
     setFormData(prev => ({
       ...prev,
       [name]: value
+    }))
+  }
+
+  const handleTextTranslated = (translatedText: string) => {
+    // Übersetzten Text in das Beschreibungsfeld einfügen
+    setFormData(prev => ({
+      ...prev,
+      description: translatedText
     }))
   }
 
@@ -94,6 +103,9 @@ const NewService = () => {
 
 
 
+          {/* KI-Textübersetzung */}
+          <AITextTranslator onTextTranslated={handleTextTranslated} />
+
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="flex items-start">
               <FileText className="h-5 w-5 text-blue-500 mt-0.5 mr-3" />
@@ -106,6 +118,7 @@ const NewService = () => {
                   <li>• Anträge werden in der Reihenfolge der Priorität bearbeitet</li>
                   <li>• Sie können den Status Ihres Antrags unter "Meine Anträge" verfolgen</li>
                   <li>• Bei dringenden Angelegenheiten kontaktieren Sie bitte das Personal</li>
+                  <li>• Nutzen Sie die KI-Übersetzung für Texte in anderen Sprachen</li>
                 </ul>
               </div>
             </div>

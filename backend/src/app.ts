@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -13,6 +14,7 @@ import groupRoutes from './routes/groups';
 import adminLogRoutes from './routes/adminLogs';
 import houseRoutes from './routes/houses';
 import inmateRoutes from './routes/inmates';
+import aiRoutes from './routes/ai';
 
 const app = express();
 const prisma = new PrismaClient();
@@ -61,6 +63,7 @@ app.use('/api/groups', groupRoutes);
 app.use('/api/admin-logs', adminLogRoutes);
 app.use('/api/houses', houseRoutes);
 app.use('/api/inmates', inmateRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Error handling
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
