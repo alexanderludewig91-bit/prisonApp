@@ -4,14 +4,17 @@ import api from '../services/api'
 
 interface AITextTranslatorProps {
   onTextTranslated?: (translatedText: string) => void
+  onTitleGenerated?: (generatedTitle: string) => void
 }
 
-const AITextTranslator = ({ onTextTranslated }: AITextTranslatorProps) => {
+const AITextTranslator = ({ onTextTranslated, onTitleGenerated }: AITextTranslatorProps) => {
   const [inputText, setInputText] = useState('')
   const [translatedText, setTranslatedText] = useState('')
+  const [generatedTitle, setGeneratedTitle] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [copied, setCopied] = useState(false)
+  const [titleCopied, setTitleCopied] = useState(false)
 
   const handleTranslate = async () => {
     if (!inputText.trim()) {
@@ -22,18 +25,23 @@ const AITextTranslator = ({ onTextTranslated }: AITextTranslatorProps) => {
     setLoading(true)
     setError('')
     setTranslatedText('')
+    setGeneratedTitle('')
 
     try {
       const response = await api.post('/ai/translate', {
         text: inputText
       })
 
-      const { translatedText: result } = response.data
+      const { translatedText: result, generatedTitle: title } = response.data
       setTranslatedText(result)
+      setGeneratedTitle(title)
       
-      // Callback aufrufen, falls vorhanden
+      // Callbacks aufrufen, falls vorhanden
       if (onTextTranslated) {
         onTextTranslated(result)
+      }
+      if (onTitleGenerated) {
+        onTitleGenerated(title)
       }
     } catch (error: any) {
       console.error('Übersetzungsfehler:', error)
@@ -60,9 +68,20 @@ const AITextTranslator = ({ onTextTranslated }: AITextTranslatorProps) => {
     }
   }
 
+  const handleTitleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(generatedTitle)
+      setTitleCopied(true)
+      setTimeout(() => setTitleCopied(false), 2000)
+    } catch (error) {
+      console.error('Fehler beim Kopieren des Titels:', error)
+    }
+  }
+
   const handleClear = () => {
     setInputText('')
     setTranslatedText('')
+    setGeneratedTitle('')
     setError('')
   }
 
@@ -76,7 +95,7 @@ const AITextTranslator = ({ onTextTranslated }: AITextTranslatorProps) => {
       </div>
       
       <p className="text-sm text-blue-700 mb-4">
-        Geben Sie Text in einer beliebigen Sprache ein und lassen Sie ihn ins Deutsche übersetzen und professionell formatieren.
+        Geben Sie Text in einer beliebigen Sprache ein und lassen Sie ihn ins Deutsche übersetzen. Zusätzlich wird automatisch ein kurzer Titel (max. 5 Wörter) generiert.
       </p>
 
       <div className="space-y-4">
@@ -129,6 +148,36 @@ const AITextTranslator = ({ onTextTranslated }: AITextTranslatorProps) => {
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-md p-3">
             <p className="text-sm text-red-700">{error}</p>
+          </div>
+        )}
+
+        {/* Generierter Titel */}
+        {generatedTitle && (
+          <div className="bg-white border border-gray-200 rounded-md p-4">
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Generierter Titel (max. 5 Wörter)
+              </label>
+              <button
+                onClick={handleTitleCopy}
+                className="flex items-center text-sm text-green-600 hover:text-green-800"
+              >
+                {titleCopied ? (
+                  <>
+                    <Check className="h-4 w-4 mr-1" />
+                    Kopiert!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-4 w-4 mr-1" />
+                    Kopieren
+                  </>
+                )}
+              </button>
+            </div>
+            <div className="bg-green-50 rounded-md p-3">
+              <p className="text-green-800 font-medium">{generatedTitle}</p>
+            </div>
           </div>
         )}
 

@@ -56,6 +56,14 @@ const NewService = () => {
     }))
   }
 
+  const handleTitleGenerated = (generatedTitle: string) => {
+    // Generierten Titel in das Titel-Feld einfügen
+    setFormData(prev => ({
+      ...prev,
+      title: generatedTitle
+    }))
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -104,7 +112,10 @@ const NewService = () => {
 
 
           {/* KI-Textübersetzung */}
-          <AITextTranslator onTextTranslated={handleTextTranslated} />
+          <AITextTranslator 
+            onTextTranslated={handleTextTranslated}
+            onTitleGenerated={handleTitleGenerated}
+          />
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="flex items-start">

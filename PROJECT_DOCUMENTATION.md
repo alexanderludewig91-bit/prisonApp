@@ -38,6 +38,8 @@ Dieses Projekt ist eine moderne Webanwendung, die das ursprüngliche Appian-Syst
   - ✅ Echte API-Verbindung zwischen Frontend und Backend
 - ✅ **Rückfragen beantworten:** Insassen können auf Staff-Rückfragen antworten
 - ✅ **Informationen erhalten:** Anzeige von Staff-Informationen zu Anträgen
+- ✅ **KI-Textübersetzung:** Mehrsprachige Eingabe mit automatischer Übersetzung ins Deutsche
+- ✅ **KI-Titel-Generierung:** Automatische Generierung kurzer, prägnanter Titel (max. 5 Wörter)
 
 ### ✅ **Mitarbeiter-Features**
   - ✅ Mitarbeiter-Dashboard mit Service-Übersicht
@@ -70,6 +72,7 @@ Dieses Projekt ist eine moderne Webanwendung, die das ursprüngliche Appian-Syst
   - ✅ Kategoriebasierte Sortierung (ADMIN → STAFF → INMATE → SYSTEM)
   - ✅ In-App Modals statt Browser-Dialoge
   - ✅ **Hausverwaltung** - Vollständiges Zellen-Management-System
+  - ✅ **Benutzerübersicht** - Zentrale Verwaltung aller Mitarbeitenden
 
 ### ✅ **Workflow-Engine (Vereinfacht)**
 - ✅ **Automatische Gruppenzuweisung:** Freitextanträge werden automatisch "PS General Enforcement Service" zugewiesen
@@ -86,6 +89,7 @@ Dieses Projekt ist eine moderne Webanwendung, die das ursprüngliche Appian-Syst
   - ✅ Aktivitätsprotokollierung bei Service-Erstellung
   - ✅ Admin-Aktions-Logging für Audit-Zwecke
   - ✅ **Hausverwaltung API** - Vollständige API für Zellen-Management
+  - ✅ **KI-Integration API** - Multi-Provider-Support für Textübersetzung und Titel-Generierung
 - ✅ **Neue Service-Endpunkte:**
   - ✅ `PATCH /services/:id/priority` - Prioritätsänderung
   - ✅ `POST /services/:id/inquiries` - Rückfragen an Insassen
@@ -95,13 +99,11 @@ Dieses Projekt ist eine moderne Webanwendung, die das ursprüngliche Appian-Syst
   - ✅ `POST /services/:id/complete-with-decision` - Entscheidung finalisieren
   - ✅ `POST /services/:id/complete-with-avd-notification` - AVD-Zuweisung
   - ✅ `POST /services/:id/personal-notification-completed` - Persönliche Eröffnung dokumentieren
+- ✅ **KI-Integration Endpunkte:**
+  - ✅ `POST /api/ai/translate` - Textübersetzung und Titel-Generierung (Multi-Provider)
+  - ✅ `GET /api/ai/health` - Provider-Status-Überprüfung
+  - ✅ `GET /api/ai/providers` - Provider-Informationen
 
-### 🎯 Nächste Schritte
-- **E-Mail-Benachrichtigungen** (Workflow-Engine erweitern)
-- **Dokumenten-Upload** für Anträge
-- **Erweiterte Berichte** und Statistiken
-- **Mehrere Gefängnisse** (Hausverwaltung erweitern)
-- **Zellen-Wartung** (Wartungs- und Instandhaltungs-Features)
 
 ## 🚀 Installation & Setup
 
@@ -175,9 +177,10 @@ Das System wird mit folgenden Testdaten initialisiert:
 - **Styling:** Tailwind CSS
 - **Build Tool:** Vite
 - **Routing:** React Router DOM
-- **State Management:** React Context (AuthContext)
+- **State Management:** React Context (AuthContext, DarkModeContext)
 - **HTTP Client:** Axios
 - **Icons:** Lucide React
+- **UI Features:** Dark Mode Support
 
 ### Backend (Node.js + Express)
 - **Framework:** Express.js mit TypeScript
@@ -185,12 +188,21 @@ Das System wird mit folgenden Testdaten initialisiert:
 - **Authentifizierung:** JWT-Token
 - **Validierung:** Express-validator
 - **Middleware:** Custom Auth- und Admin-Middleware
+- **KI-Integration:** Multi-Provider-Support (OpenAI, Gemini, Claude)
 
 ### Datenbank (SQLite)
 - **ORM:** Prisma
 - **Schema:** Vollständig typisiert mit TypeScript
 - **Migrationen:** Automatische Schema-Updates
 - **Seeding:** Testdaten-Skripte
+
+### KI-Integration (Multi-Provider)
+- **Architektur:** Anbieterunabhängige Provider-Pattern
+- **Provider:** OpenAI GPT, Google Gemini, Anthropic Claude
+- **Funktionen:** Textübersetzung und automatische Titel-Generierung
+- **Fallback:** Automatischer Provider-Wechsel bei Ausfällen
+- **Konfiguration:** Zentrale Umgebungsvariablen
+- **Monitoring:** Provider-Status-Überwachung
 
 ## 🔐 Authentifizierung & Berechtigungen
 
@@ -311,6 +323,11 @@ Das System wird mit folgenden Testdaten initialisiert:
 - ✅ **Aktivitätslog erweitert:** Neue Aktivitätstypen für alle neuen Features
 - ✅ **UI-Verbesserungen:** Kompakte Statistiken, bessere Anzeige, blaue Buttons
 - ✅ **Code-Bereinigung:** Entfernung ungenutzter Features (ProcessManagement, ApplicationProcessing)
+- ✅ **KI-Integration:** Multi-Provider-Support für Textübersetzung und Titel-Generierung (OpenAI, Gemini, Claude)
+- ✅ **Automatische Titel-Generierung:** Kurze, prägnante Titel aus übersetztem Text
+- ✅ **Anbieterunabhängige Architektur:** Einfacher Provider-Wechsel mit automatischem Fallback
+- ✅ **Benutzerübersicht:** Zentrale Verwaltung aller Mitarbeitenden
+- ✅ **Dark Mode:** Unterstützung für dunkles Design
 
 ### Version 1.0 (Dezember 2024)
 - ✅ Basis-System mit Authentifizierung

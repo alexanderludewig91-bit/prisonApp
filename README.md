@@ -6,11 +6,12 @@ Eine moderne Webanwendung für die Verwaltung von Gefängnisdiensten, entwickelt
 
 Diese Anwendung ist ein Nachbau des ursprünglichen Appian-Systems "Prisoner Services" und bietet:
 
-- **Insassen-Features:** Antragstellung, Status-Abfragen, persönliche Übersicht, Rückfragen beantworten
+- **Insassen-Features:** Antragstellung, Status-Abfragen, persönliche Übersicht, Rückfragen beantworten, KI-Textübersetzung
 - **Mitarbeiter-Features:** Antragsbearbeitung, Workflow-Management, Kommentare, Insassen-Übersicht, neue Bearbeiter-Aktionen
-- **Admin-Features:** Gruppenverwaltung, System-Überwachung, Audit-Logs, Hausverwaltung
+- **Admin-Features:** Gruppenverwaltung, System-Überwachung, Audit-Logs, Hausverwaltung, Benutzerübersicht
 - **Hausverwaltung:** Zellen-Management, Insassen-Zuweisungen, Drag & Drop, Automatische Zuweisung
 - **Insassen-Übersicht:** Zentrale Insassen-Verwaltung mit vollständigen Details und Historie
+- **KI-Integration:** Mehrsprachige Textübersetzung mit automatischer Titel-Generierung (OpenAI, Gemini, Claude)
 
 ## 🆕 **Neue Features (Version 2.0)**
 
@@ -46,10 +47,18 @@ Diese Anwendung ist ein Nachbau des ursprünglichen Appian-Systems "Prisoner Ser
 - **Antrag priorisieren:** Prioritätsänderung über Modal
 - **Status zu "In Bearbeitung":** Schnelle Statusänderung für ausstehende Anträge
 
+### 🤖 **KI-Integration (Multi-Provider)**
+- **Anbieterunabhängige Architektur:** OpenAI, Google Gemini, Anthropic Claude
+- **Automatischer Fallback:** Wechsel zu Backup-Provider bei Ausfällen
+- **Mehrsprachige Übersetzung:** Textübersetzung in beliebige Sprachen
+- **Automatische Titel-Generierung:** Kurze, prägnante Titel (max. 5 Wörter) aus übersetztem Text
+- **Zentrale Konfiguration:** Einfacher Provider-Wechsel über Umgebungsvariablen
+- **Provider-Monitoring:** Überwachung aller konfigurierten Provider
+
 ## 🏗️ Projektstruktur
 
 ```
-prisoner-services-web/
+prisonApp/
 ├── backend/                 # Node.js + Express API
 │   ├── src/
 │   │   ├── routes/         # API Routen
@@ -58,7 +67,18 @@ prisoner-services-web/
 │   │   │   ├── users.ts    # Benutzerverwaltung
 │   │   │   ├── groups.ts   # Gruppen-Management
 │   │   │   ├── adminLogs.ts # Admin-Logs
-│   │   │   └── houses.ts   # Hausverwaltung & Zellen-Management
+│   │   │   ├── houses.ts   # Hausverwaltung & Zellen-Management
+│   │   │   ├── inmates.ts  # Insassen-Management
+│   │   │   └── ai.ts       # KI-Integration (Multi-Provider)
+│   │   ├── services/       # Service-Layer
+│   │   │   └── ai/         # KI-Provider-Implementierungen
+│   │   │       ├── AIProvider.ts # Provider-Interface
+│   │   │       ├── AIProviderFactory.ts # Provider-Factory
+│   │   │       ├── OpenAIProvider.ts # OpenAI Implementation
+│   │   │       ├── GeminiProvider.ts # Google Gemini Implementation
+│   │   │       └── ClaudeProvider.ts # Anthropic Claude Implementation
+│   │   ├── config/         # Konfiguration
+│   │   │   └── ai.ts       # KI-Konfiguration
 │   │   ├── middleware/     # Middleware
 │   │   │   ├── auth.ts     # Authentifizierung & Berechtigungen
 │   │   │   └── adminLogging.ts # Admin-Logging
@@ -73,22 +93,33 @@ prisoner-services-web/
 │   ├── src/
 │   │   ├── components/     # React Komponenten
 │   │   │   ├── Navbar.tsx  # Navigation
+│   │   │   ├── AITextTranslator.tsx # KI-Textübersetzung
 │   │   │   ├── DraggableInmate.tsx # Drag & Drop Insassen-Karten
 │   │   │   ├── TransferModal.tsx # Insassen-Verlegung
+│   │   │   ├── CellAssignmentModal.tsx # Zellen-Zuweisung
+│   │   │   ├── SearchFilters.tsx # Suchfilter
 │   │   │   └── ...         # Weitere Komponenten
 │   │   ├── pages/         # Seitenkomponenten
 │   │   │   ├── HouseManagement.tsx # Hausverwaltung
 │   │   │   ├── InmatesOverview.tsx # Insassen-Übersicht
+│   │   │   ├── UserOverview.tsx # Benutzerübersicht
 │   │   │   ├── AdminDashboard.tsx # Admin-Dashboard
+│   │   │   ├── AdminLogs.tsx # Admin-Logs
 │   │   │   ├── ServiceDetail.tsx # Service-Details (erweitert)
 │   │   │   ├── StaffDashboard.tsx # Staff-Dashboard (erweitert)
-│   │   │   └── ...         # Weitere Seiten
+│   │   │   ├── MyServices.tsx # Insassen-Anträge
+│   │   │   ├── AllMyServices.tsx # Alle Insassen-Anträge
+│   │   │   ├── NewService.tsx # Neuer Antrag
+│   │   │   └── Login.tsx # Login-Seite
 │   │   ├── contexts/      # React Contexts
-│   │   │   └── AuthContext.tsx # Authentifizierung
+│   │   │   ├── AuthContext.tsx # Authentifizierung
+│   │   │   └── DarkModeContext.tsx # Dark Mode
 │   │   └── services/      # API Services
+│   │       └── api.ts     # API-Client
 │   └── package.json
 ├── README.md               # Hauptdokumentation
 ├── PROJECT_DOCUMENTATION.md # Detaillierte Projektdokumentation
+├── KI_INTEGRATION_SETUP.md # KI-Integration Setup
 └── .gitignore
 ```
 
@@ -234,6 +265,7 @@ Das System wird mit folgenden Testdaten initialisiert:
 - **JWT** für Authentifizierung
 - **bcryptjs** für Passwort-Hashing
 - **express-validator** für Input-Validierung
+- **KI-Integration:** OpenAI, Google Gemini, Anthropic Claude SDKs
 
 ### Frontend
 - **React 18** mit **TypeScript**
@@ -243,6 +275,7 @@ Das System wird mit folgenden Testdaten initialisiert:
 - **Axios** für API-Kommunikation
 - **Lucide React** für Icons
 - **React Hook Form** für Formulare
+- **Dark Mode** Support
 
 ## 📝 Changelog
 
@@ -259,6 +292,11 @@ Das System wird mit folgenden Testdaten initialisiert:
 - ✅ **Aktivitätslog erweitert:** Neue Aktivitätstypen für alle neuen Features
 - ✅ **UI-Verbesserungen:** Kompakte Statistiken, bessere Anzeige, blaue Buttons
 - ✅ **Code-Bereinigung:** Entfernung ungenutzter Features (ProcessManagement, ApplicationProcessing)
+- ✅ **KI-Integration:** Multi-Provider-Support für Textübersetzung und Titel-Generierung (OpenAI, Gemini, Claude)
+- ✅ **Automatische Titel-Generierung:** Kurze, prägnante Titel aus übersetztem Text
+- ✅ **Anbieterunabhängige Architektur:** Einfacher Provider-Wechsel mit automatischem Fallback
+- ✅ **Benutzerübersicht:** Zentrale Verwaltung aller Mitarbeitenden
+- ✅ **Dark Mode:** Unterstützung für dunkles Design
 
 ### Version 1.0 (Dezember 2024)
 - ✅ Basis-System mit Authentifizierung
@@ -279,13 +317,6 @@ Das System wird mit folgenden Testdaten initialisiert:
 - Admin-Berechtigungsprüfung (Frontend und Backend)
 - Admin-Aktions-Logging für Audit-Zwecke
 
-## 🎯 Nächste Schritte
-
-- **E-Mail-Benachrichtigungen** (Workflow-Engine erweitern)
-- **Dokumenten-Upload** für Anträge
-- **Erweiterte Berichte** und Statistiken
-- **Mehrere Gefängnisse** (Hausverwaltung erweitern)
-- **Zellen-Wartung** (Wartungs- und Instandhaltungs-Features)
 
 ## 🤝 Beitragen
 

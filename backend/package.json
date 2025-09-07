@@ -13,6 +13,8 @@
     "db:seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.24.3",
+    "@google/generative-ai": "^0.2.1",
     "@prisma/client": "^5.7.1",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",

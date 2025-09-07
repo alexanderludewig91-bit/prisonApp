@@ -1,21 +1,22 @@
 import { Router, Request, Response } from 'express'
 import { body, validationResult } from 'express-validator'
-import OpenAI from 'openai'
 import { authenticateToken } from '../middleware/auth'
+import { AIProviderFactory } from '../services/ai/AIProviderFactory'
+import { AIProviderError } from '../services/ai/AIProvider'
+import { AI_CONFIG, validateAIConfig } from '../config/ai'
 
 const router = Router()
 
-// OpenAI Client initialisieren
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || 'your-openai-api-key-here'
-})
-
-// Debug: API Key beim Start prüfen
-console.log('=== OpenAI Configuration ===')
-console.log('API Key vorhanden:', !!process.env.OPENAI_API_KEY)
-console.log('API Key beginnt mit sk-:', process.env.OPENAI_API_KEY?.startsWith('sk-'))
-console.log('API Key Länge:', process.env.OPENAI_API_KEY?.length)
-console.log('============================')
+// AI-Konfiguration beim Start validieren
+console.log('=== AI Configuration ===')
+const configValidation = validateAIConfig()
+console.log('Aktueller Provider:', AI_CONFIG.provider)
+console.log('Verfügbare Provider:', AIProviderFactory.getAvailableProviders())
+console.log('Konfiguration gültig:', configValidation.isValid)
+if (!configValidation.isValid) {
+  console.error('Konfigurationsfehler:', configValidation.errors)
+}
+console.log('========================')
 
 // KI-Textverarbeitung Route
 router.post('/translate', [
@@ -30,49 +31,41 @@ router.post('/translate', [
 
     const { text } = req.body
 
-    // OpenAI API aufrufen
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "system",
-          content: "Du bist ein Übersetzungsassistent. Übersetze den gegebenen Text direkt ins Deutsche. Ändere den Text im deutschen außerdem so, dass er sich reimt."
-        },
-        {
-          role: "user",
-          content: `Übersetze ins Deutsche: "${text}"`
-        }
-      ],
-      max_tokens: 1000,
-      temperature: 0.3
-    })
+    // AI Provider mit Fallback verwenden
+    const aiProvider = AIProviderFactory.getProviderWithFallback()
+    
+    if (AI_CONFIG.debug) {
+      console.log(`Verwende AI Provider: ${aiProvider.getProviderName()}`)
+    }
 
-    const translatedText = completion.choices[0]?.message?.content || 'Übersetzung fehlgeschlagen'
+    // Zuerst Übersetzung, dann Titel-Generierung aus dem übersetzten Text
+    const translatedText = await aiProvider.translate(text)
+    const generatedTitle = await aiProvider.generateTitle(translatedText)
 
     res.json({
       success: true,
       originalText: text,
-      translatedText: translatedText.trim()
+      translatedText: translatedText,
+      generatedTitle: generatedTitle,
+      provider: aiProvider.getProviderName()
     })
 
   } catch (error: any) {
-    console.error('OpenAI API Fehler:', error)
+    console.error('AI API Fehler:', error)
     
-    // Spezifische Fehlerbehandlung
-    if (error.code === 'insufficient_quota') {
-      return res.status(402).json({ 
-        error: 'OpenAI API Limit erreicht. Bitte versuchen Sie es später erneut.' 
-      })
-    }
-    
-    if (error.code === 'invalid_api_key') {
-      return res.status(500).json({ 
-        error: 'OpenAI API Konfigurationsfehler. Bitte kontaktieren Sie den Administrator.' 
+    // AIProviderError behandeln
+    if (error instanceof AIProviderError) {
+      return res.status(error.statusCode).json({ 
+        error: error.message,
+        code: error.code,
+        provider: AI_CONFIG.provider
       })
     }
 
+    // Allgemeine Fehlerbehandlung
     res.status(500).json({ 
-      error: 'Fehler bei der Textverarbeitung. Bitte versuchen Sie es erneut.' 
+      error: 'Fehler bei der Textverarbeitung. Bitte versuchen Sie es erneut.',
+      provider: AI_CONFIG.provider
     })
   }
 })
@@ -80,29 +73,51 @@ router.post('/translate', [
 // Gesundheitscheck für KI-Service
 router.get('/health', async (req: Request, res: Response) => {
   try {
-    // Debug: API Key Status prüfen
-    const apiKey = process.env.OPENAI_API_KEY
-    console.log('OpenAI API Key vorhanden:', !!apiKey)
-    console.log('API Key beginnt mit sk-:', apiKey?.startsWith('sk-'))
-    
-    // Einfacher Test-Aufruf an OpenAI
-    await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [{ role: "user", content: "Test" }],
-      max_tokens: 1
-    })
+    // Alle Provider überprüfen
+    const providerStatus = await AIProviderFactory.checkAllProviders()
+    const currentProvider = AIProviderFactory.getProvider()
+    const isHealthy = await currentProvider.healthCheck()
 
     res.json({
-      status: 'healthy',
-      service: 'OpenAI API',
+      status: isHealthy ? 'healthy' : 'unhealthy',
+      currentProvider: currentProvider.getProviderName(),
+      providerStatus,
+      availableProviders: AIProviderFactory.getAvailableProviders(),
+      config: {
+        provider: AI_CONFIG.provider,
+        fallbackProvider: AI_CONFIG.fallbackProvider,
+        debug: AI_CONFIG.debug
+      },
       timestamp: new Date().toISOString()
     })
   } catch (error) {
+    console.error('AI Health Check Fehler:', error)
     res.status(503).json({
       status: 'unhealthy',
-      service: 'OpenAI API',
-      error: 'Service nicht verfügbar',
+      error: 'AI Service nicht verfügbar',
+      availableProviders: AIProviderFactory.getAvailableProviders(),
       timestamp: new Date().toISOString()
+    })
+  }
+})
+
+// Provider-Status Route (für Debugging)
+router.get('/providers', async (req: Request, res: Response) => {
+  try {
+    const availableProviders = AIProviderFactory.getAvailableProviders()
+    const providerStatus = await AIProviderFactory.checkAllProviders()
+    
+    res.json({
+      availableProviders,
+      providerStatus,
+      currentProvider: AI_CONFIG.provider,
+      fallbackProvider: AI_CONFIG.fallbackProvider,
+      config: AI_CONFIG
+    })
+  } catch (error) {
+    console.error('Provider Status Fehler:', error)
+    res.status(500).json({
+      error: 'Fehler beim Abrufen der Provider-Informationen'
     })
   }
 })
