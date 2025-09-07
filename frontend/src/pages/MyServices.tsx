@@ -3,6 +3,7 @@ import { FileText, Clock, CheckCircle, XCircle, MessageSquare, Plus } from 'luci
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import api from '../services/api'
+import NewServiceModal from '../components/NewServiceModal'
 
 interface Service {
   id: number
@@ -725,94 +726,61 @@ const MyServices = () => {
         </div>
       )}
 
-      {/* Neuer Antrag Modal */}
-      {showNewServiceModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Neuen Antrag stellen
-            </h3>
+      {/* Neuer Antrag Modal mit KI-Integration */}
+      <NewServiceModal
+        isOpen={showNewServiceModal}
+        onClose={() => {
+          setShowNewServiceModal(false)
+          setNewServiceTitle('')
+          setNewServiceDescription('')
+          setNewServiceType('FREETEXT')
+        }}
+        onSubmit={async (title, description) => {
+          setNewServiceTitle(title)
+          setNewServiceDescription(description)
+          setSubmittingNewService(true)
+          
+          try {
+            const serviceData = {
+              title: title.trim(),
+              description: description.trim(),
+              serviceType: newServiceType
+            }
+
+            console.log('Sende neuen Antrag:', serviceData)
+            const response = await api.post('/services/my/services', serviceData)
+            console.log('Antrag erfolgreich erstellt:', response.data)
+
+            // Modal schließen und Daten zurücksetzen
+            setShowNewServiceModal(false)
+            setNewServiceTitle('')
+            setNewServiceDescription('')
+            setNewServiceType('FREETEXT')
+
+            // Anträge neu laden
+            const servicesResponse = await api.get('/services/my/services')
+            const allServices = servicesResponse.data.services || []
             
-            <div className="space-y-4">
-              {/* Antragstyp */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Antragstyp:
-                </label>
-                <div className="grid grid-cols-1 gap-3">
-                  <label className="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                    <input
-                      type="radio"
-                      name="serviceType"
-                      value="FREETEXT"
-                      checked={newServiceType === 'FREETEXT'}
-                      onChange={(e) => setNewServiceType(e.target.value)}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                    />
-                    <div className="ml-3">
-                      <div className="text-sm font-medium text-gray-900">Sonstiges Anliegen</div>
-                      <div className="text-sm text-gray-500">Für allgemeine Anfragen und Anliegen</div>
-                    </div>
-                  </label>
-                </div>
-              </div>
-
-              {/* Titel */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Titel des Antrags: *
-                </label>
-                <input
-                  type="text"
-                  value={newServiceTitle}
-                  onChange={(e) => setNewServiceTitle(e.target.value)}
-                  placeholder="Kurze Beschreibung Ihres Anliegens..."
-                  className="w-full input"
-                  maxLength={100}
-                />
-              </div>
-
-              {/* Beschreibung */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Beschreibung: *
-                </label>
-                <textarea
-                  value={newServiceDescription}
-                  onChange={(e) => setNewServiceDescription(e.target.value)}
-                  placeholder="Detaillierte Beschreibung Ihres Anliegens..."
-                  className="w-full input resize-none"
-                  rows={4}
-                  maxLength={500}
-                />
-              </div>
-
-
-            </div>
+            const openServices = allServices.filter((service: Service) => 
+              service.status === 'PENDING' || service.status === 'IN_PROGRESS'
+            )
+            const completedServices = allServices.filter((service: Service) => 
+              service.status === 'COMPLETED'
+            )
             
-            <div className="flex space-x-3 mt-6">
-              <button
-                onClick={() => {
-                  setShowNewServiceModal(false)
-                  setNewServiceTitle('')
-                  setNewServiceDescription('')
-                  setNewServiceType('FREETEXT')
-                }}
-                className="btn btn-secondary flex-1"
-              >
-                Abbrechen
-              </button>
-              <button
-                onClick={handleSubmitNewService}
-                disabled={!newServiceTitle.trim() || !newServiceDescription.trim() || submittingNewService}
-                className="btn btn-primary flex-1"
-              >
-                {submittingNewService ? 'Wird eingereicht...' : 'Antrag einreichen'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+            setServices(openServices)
+            setCompletedServices(completedServices)
+
+            setShowSuccessMessage(true)
+            setTimeout(() => setShowSuccessMessage(false), 5000)
+          } catch (error) {
+            console.error('Fehler beim Erstellen des Antrags:', error)
+          } finally {
+            setSubmittingNewService(false)
+          }
+        }}
+        isSubmitting={submittingNewService}
+      />
     </div>
   )
 }
