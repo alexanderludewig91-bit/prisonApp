@@ -80,8 +80,6 @@ const MyServices = () => {
   const [selectedService, setSelectedService] = useState<Service | null>(null)
   const [showServiceModal, setShowServiceModal] = useState(false)
   const [showNewServiceModal, setShowNewServiceModal] = useState(false)
-  const [newServiceTitle, setNewServiceTitle] = useState('')
-  const [newServiceDescription, setNewServiceDescription] = useState('')
   const [newServiceType, setNewServiceType] = useState('FREETEXT')
   const [submittingNewService, setSubmittingNewService] = useState(false)
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
@@ -185,58 +183,9 @@ const MyServices = () => {
 
   const handleNewServiceClick = () => {
     setShowNewServiceModal(true)
-    setNewServiceTitle('')
-    setNewServiceDescription('')
     setNewServiceType('FREETEXT')
   }
 
-  const handleSubmitNewService = async () => {
-    if (!newServiceTitle.trim() || !newServiceDescription.trim()) {
-      alert('Bitte füllen Sie alle Pflichtfelder aus.')
-      return
-    }
-
-    setSubmittingNewService(true)
-    try {
-      const serviceData = {
-        title: newServiceTitle.trim(),
-        description: newServiceDescription.trim(),
-        serviceType: newServiceType
-      }
-
-      console.log('Sende neuen Antrag:', serviceData)
-      const response = await api.post('/services/my/services', serviceData)
-      console.log('Antrag erfolgreich erstellt:', response.data)
-
-      // Modal schließen und Daten zurücksetzen
-      setShowNewServiceModal(false)
-      setNewServiceTitle('')
-      setNewServiceDescription('')
-      setNewServiceType('FREETEXT')
-
-      // Anträge neu laden
-      const servicesResponse = await api.get('/services/my/services')
-      const allServices = servicesResponse.data.services || []
-      
-      const openServices = allServices.filter((service: Service) => 
-        service.status === 'PENDING' || service.status === 'IN_PROGRESS'
-      )
-      const completedServices = allServices.filter((service: Service) => 
-        service.status === 'COMPLETED'
-      )
-      
-      setServices(openServices)
-      setCompletedServices(completedServices)
-
-      setShowSuccessMessage(true)
-      setTimeout(() => setShowSuccessMessage(false), 5000) // Nach 5 Sekunden ausblenden
-    } catch (error) {
-      console.error('Fehler beim Erstellen des Antrags:', error)
-      // Fehlermeldung wird über den Button-Status angezeigt (disabled state)
-    } finally {
-      setSubmittingNewService(false)
-    }
-  }
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -505,7 +454,7 @@ const MyServices = () => {
                         </p>
                         {service.decision && (
                           <p className="text-sm text-gray-700 mt-1">
-                            <span className="font-medium">Entscheidung:</span> {getDecisionText(service.decision)}
+                            <span className="font-medium">{t('pages.myServices.decision')}:</span> {getDecisionText(service.decision)}
                           </p>
                         )}
 
@@ -537,17 +486,17 @@ const MyServices = () => {
               {/* Antragsteller-Informationen */}
               <div>
                 <h4 className="text-lg font-semibold text-gray-900 mb-3 border-b border-gray-200 pb-2">
-                  Antragsteller-Informationen
+                  {t('pages.myServices.applicantInfo')}
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <span className="text-sm font-medium text-gray-600">Name:</span>
+                    <span className="text-sm font-medium text-gray-600">{t('pages.myServices.name')}:</span>
                     <p className="text-gray-900 mt-1">
                       {selectedService.createdByUser?.firstName} {selectedService.createdByUser?.lastName}
                     </p>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-gray-600">Buchnummer:</span>
+                    <span className="text-sm font-medium text-gray-600">{t('pages.myServices.bookNumber')}:</span>
                     <p className="text-gray-900 mt-1">{selectedService.createdByUser?.username}</p>
                   </div>
                 </div>
@@ -556,25 +505,25 @@ const MyServices = () => {
               {/* Antragsdetails */}
               <div>
                 <h4 className="text-lg font-semibold text-gray-900 mb-3 border-b border-gray-200 pb-2">
-                  Antragsdetails
+                  {t('pages.myServices.requestDetails')}
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <span className="text-sm font-medium text-gray-600">Antragsdatum:</span>
+                    <span className="text-sm font-medium text-gray-600">{t('pages.myServices.requestDate')}:</span>
                     <p className="text-gray-900 mt-1">
-                      {new Date(selectedService.createdAt).toLocaleDateString(t('pages.myServices.dateFormat'))} um {new Date(selectedService.createdAt).toLocaleTimeString(t('pages.myServices.timeFormat'))}
+                      {new Date(selectedService.createdAt).toLocaleDateString(t('pages.myServices.dateFormat'))} {t('pages.myServices.at')} {new Date(selectedService.createdAt).toLocaleTimeString(t('pages.myServices.timeFormat'))}
                     </p>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-gray-600">Status:</span>
+                    <span className="text-sm font-medium text-gray-600">{t('pages.myServices.status')}:</span>
                     <p className="text-gray-900 mt-1">{getStatusText(selectedService.status)}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-gray-600">Titel:</span>
+                    <span className="text-sm font-medium text-gray-600">{t('pages.myServices.fieldTitle')}:</span>
                     <p className="text-gray-900 mt-1">{selectedService.title}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-gray-600">Beschreibung:</span>
+                    <span className="text-sm font-medium text-gray-600">{t('pages.myServices.description')}:</span>
                     <p className="text-gray-900 mt-1 leading-relaxed">{selectedService.description}</p>
                   </div>
                 </div>
@@ -596,15 +545,15 @@ const MyServices = () => {
                     return (
                       <div>
                         <h4 className="text-lg font-semibold text-gray-900 mb-3 border-b border-gray-200 pb-2">
-                          Zusätzliche Informationen
+                          {t('pages.myServices.additionalInfo')}
                         </h4>
                         <div className="space-y-2">
                           {inquiryActivities.map((activity, index) => (
                             <div key={index} className="py-1">
                               <h5 className="text-sm font-medium text-gray-600 mb-2">
-                                {activity.action === 'inquiry' ? 'Rückfrage' :
-                                 activity.action === 'answer' ? 'Antwort' :
-                                 activity.action === 'information' ? 'Information' : 'Nachricht'} von {activity.who.split(' (')[0]} vom {new Date(activity.when).toLocaleDateString(t('pages.myServices.dateFormat'))} um {new Date(activity.when).toLocaleTimeString(t('pages.myServices.timeFormat'))}
+                                {activity.action === 'inquiry' ? t('pages.myServices.inquiry') :
+                                 activity.action === 'answer' ? t('pages.myServices.answer') :
+                                 activity.action === 'information' ? t('pages.myServices.information') : t('pages.myServices.message')} {t('pages.myServices.from')} {activity.who.split(' (')[0]} {t('pages.myServices.on')} {new Date(activity.when).toLocaleDateString(t('pages.myServices.dateFormat'))} {t('pages.myServices.at')} {new Date(activity.when).toLocaleTimeString(t('pages.myServices.timeFormat'))}
                               </h5>
                               <p className="text-gray-900 leading-relaxed">{activity.details}</p>
                             </div>
@@ -621,16 +570,16 @@ const MyServices = () => {
               {selectedService.decision && selectedService.status === 'COMPLETED' && (
                 <div>
                   <h4 className="text-lg font-semibold text-gray-900 mb-3 border-b border-gray-200 pb-2">
-                    Entscheidung
+                    {t('pages.myServices.decision')}
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <span className="text-sm font-medium text-gray-600">Entscheidung:</span>
+                      <span className="text-sm font-medium text-gray-600">{t('pages.myServices.decision')}:</span>
                       <p className="text-gray-900 mt-1">{getDecisionText(selectedService.decision)}</p>
                     </div>
                     {selectedService.decisionReason && (
                       <div>
-                        <span className="text-sm font-medium text-gray-600">Begründung:</span>
+                        <span className="text-sm font-medium text-gray-600">{t('pages.myServices.reason')}:</span>
                         <p className="text-gray-900 mt-1">{selectedService.decisionReason}</p>
                       </div>
                     )}
@@ -647,7 +596,7 @@ const MyServices = () => {
                 }}
                 className="btn btn-secondary"
               >
-                Schließen
+                {t('pages.myServices.close')}
               </button>
             </div>
           </div>
@@ -733,13 +682,9 @@ const MyServices = () => {
         isOpen={showNewServiceModal}
         onClose={() => {
           setShowNewServiceModal(false)
-          setNewServiceTitle('')
-          setNewServiceDescription('')
           setNewServiceType('FREETEXT')
         }}
         onSubmit={async (title, description, titleInmate, descriptionInmate) => {
-          setNewServiceTitle(title)
-          setNewServiceDescription(description)
           setSubmittingNewService(true)
           
           try {
@@ -757,8 +702,6 @@ const MyServices = () => {
 
             // Modal schließen und Daten zurücksetzen
             setShowNewServiceModal(false)
-            setNewServiceTitle('')
-            setNewServiceDescription('')
             setNewServiceType('FREETEXT')
 
             // Anträge neu laden
