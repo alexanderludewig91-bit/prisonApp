@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { FileText, Clock, CheckCircle, XCircle, MessageSquare, Plus } from 'lucide-react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import api from '../services/api'
 import NewServiceModal from '../components/NewServiceModal'
 
@@ -66,6 +67,7 @@ interface ServiceWithInformation {
 
 const MyServices = () => {
   const { user } = useAuth()
+  const { t } = useLanguage()
   const [services, setServices] = useState<Service[]>([])
   const [completedServices, setCompletedServices] = useState<Service[]>([])
   const [servicesWithInquiries, setServicesWithInquiries] = useState<ServiceWithInquiries[]>([])
@@ -254,13 +256,13 @@ const MyServices = () => {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'PENDING':
-        return 'Ausstehend'
+        return t('status.pending')
       case 'IN_PROGRESS':
-        return 'In Bearbeitung'
+        return t('status.inProgress')
       case 'COMPLETED':
-        return 'Abgeschlossen'
+        return t('status.completed')
       case 'REJECTED':
-        return 'Abgelehnt'
+        return t('status.rejected')
       default:
         return status
     }
@@ -271,13 +273,13 @@ const MyServices = () => {
   const getDecisionText = (decision: string) => {
     switch (decision) {
       case 'APPROVED':
-        return 'Genehmigt'
+        return t('status.approved')
       case 'REJECTED':
-        return 'Abgelehnt'
+        return t('status.rejected')
       case 'RETURNED':
-        return 'Zurückgewiesen'
+        return t('status.returned')
       case 'PENDING':
-        return 'Ausstehend'
+        return t('status.pending')
       default:
         return decision
     }
@@ -286,7 +288,7 @@ const MyServices = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-lg">Laden...</div>
+        <div className="text-lg">{t('messages.loading')}</div>
       </div>
     )
   }
@@ -296,7 +298,7 @@ const MyServices = () => {
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
-            Willkommen {user?.firstName} {user?.lastName}
+            {t('pages.myServices.title')} {user?.firstName} {user?.lastName}
           </h1>
         </div>
         <div className="flex space-x-3">
@@ -305,14 +307,14 @@ const MyServices = () => {
             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-[#060E5D] hover:bg-[#050B4A] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#060E5D]/40 shadow-sm"
           >
             <Plus className="h-5 w-5 mr-2" />
-            Neuen Antrag stellen
+            {t('pages.myServices.newRequest')}
           </button>
           <button
             onClick={() => window.location.href = '/all-my-services'}
             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-[#060E5D] hover:bg-[#050B4A] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#060E5D]/40 shadow-sm"
           >
             <Clock className="h-5 w-5 mr-2" />
-            Alle meine Anträge
+            {t('pages.myServices.allRequests')}
           </button>
         </div>
       </div>
@@ -326,8 +328,8 @@ const MyServices = () => {
               <FileText className="h-5 w-5 text-green-500" />
               <span>
                 {servicesWithInformation.length > 0 
-                  ? `Es gibt neue Informationen für Sie (${servicesWithInformation.length})`
-                  : 'Aktuell gibt es keine neuen Informationen'
+                  ? `${t('pages.myServices.newInformation')} (${servicesWithInformation.length})`
+                  : t('pages.myServices.noNewInformation')
                 }
               </span>
             </h2>
@@ -344,13 +346,13 @@ const MyServices = () => {
                       <FileText className="h-5 w-5 text-green-500" />
                       <div>
                         <h3 className="text-lg font-medium text-gray-900">
-                          Information zum Antrag "{service.title}"
+                          {t('pages.myServices.informationForRequest')} "{service.title}"
                         </h3>
                         <p className="text-sm text-gray-600">
                           {service.activities[0]?.details}
                         </p>
                         <p className="text-xs text-gray-500 mt-1">
-                          Information erhalten am {new Date(service.activities[0]?.when || '').toLocaleDateString('de-DE')}
+                          {t('pages.myServices.informationReceived')} {new Date(service.activities[0]?.when || '').toLocaleDateString(t('pages.myServices.dateFormat'))}
                         </p>
                       </div>
                     </div>
@@ -368,8 +370,8 @@ const MyServices = () => {
               <MessageSquare className="h-5 w-5 text-blue-500" />
               <span>
                 {servicesWithInquiries.length > 0 
-                  ? `Es gibt neue Rückfragen für Sie (${servicesWithInquiries.length})`
-                  : 'Aktuell gibt es keine neuen Rückfragen'
+                  ? `${t('pages.myServices.newInquiries')} (${servicesWithInquiries.length})`
+                  : t('pages.myServices.noNewInquiries')
                 }
               </span>
             </h2>
@@ -387,18 +389,18 @@ const MyServices = () => {
                       <MessageSquare className="h-5 w-5 text-blue-500" />
                       <div>
                         <h3 className="text-lg font-medium text-gray-900">
-                          Rückfrage zum Antrag "{service.title}"
+                          {t('pages.myServices.inquiryForRequest')} "{service.title}"
                         </h3>
                         <p className="text-sm text-gray-600">
                           {service.activities[0]?.details}
                         </p>
                         <p className="text-xs text-gray-500 mt-1">
-                          Rückfrage gestellt am {new Date(service.activities[0]?.when || '').toLocaleDateString('de-DE')}
+                          {t('pages.myServices.inquiryReceived')} {new Date(service.activities[0]?.when || '').toLocaleDateString(t('pages.myServices.dateFormat'))}
                         </p>
                       </div>
                     </div>
                     <div className="text-blue-600">
-                      <span className="text-sm">Antworten</span>
+                      <span className="text-sm">{t('pages.myServices.reply')}</span>
                     </div>
                   </div>
                 </div>
@@ -414,23 +416,23 @@ const MyServices = () => {
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">
-              Ihre zuletzt gestellten Anträge
+              {t('pages.myServices.recentRequests')}
             </h2>
           </div>
           {services.length === 0 ? (
             <div className="p-8 text-center">
               <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Keine offenen Anträge
+                {t('pages.myServices.noOpenRequests')}
               </h3>
               <p className="text-gray-600 mb-4">
-                Sie haben derzeit keine offenen Anträge.
+                {t('pages.myServices.noOpenRequestsDescription')}
               </p>
               <button
                 onClick={handleNewServiceClick}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#060E5D] hover:bg-[#050B4A] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#060E5D]/40"
               >
-                Neuen Antrag stellen
+{t('pages.myServices.newRequest')}
               </button>
             </div>
           ) : (
@@ -449,7 +451,7 @@ const MyServices = () => {
                           {service.title}
                         </h3>
                         <p className="text-xs text-gray-500 mt-1">
-                          Eingereicht am {new Date(service.createdAt).toLocaleDateString('de-DE')}
+                          {t('pages.myServices.submittedOn')} {new Date(service.createdAt).toLocaleDateString(t('pages.myServices.dateFormat'))}
                         </p>
                       </div>
                     </div>
@@ -470,17 +472,17 @@ const MyServices = () => {
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">
-              Ihre zuletzt abgeschlossenen Anträge
+              {t('pages.myServices.recentCompletedRequests')}
             </h2>
           </div>
           {completedServices.length === 0 ? (
             <div className="p-8 text-center">
               <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Keine abgeschlossenen Anträge
+                {t('pages.myServices.noCompletedRequests')}
               </h3>
               <p className="text-gray-600">
-                Sie haben noch keine Anträge abgeschlossen.
+                {t('pages.myServices.noCompletedRequestsDescription')}
               </p>
             </div>
           ) : (
@@ -499,7 +501,7 @@ const MyServices = () => {
                           {service.title}
                         </h3>
                         <p className="text-xs text-gray-500 mt-1">
-                          Eingereicht am {new Date(service.createdAt).toLocaleDateString('de-DE')}
+                          {t('pages.myServices.submittedOn')} {new Date(service.createdAt).toLocaleDateString(t('pages.myServices.dateFormat'))}
                         </p>
                         {service.decision && (
                           <p className="text-sm text-gray-700 mt-1">
@@ -560,7 +562,7 @@ const MyServices = () => {
                   <div>
                     <span className="text-sm font-medium text-gray-600">Antragsdatum:</span>
                     <p className="text-gray-900 mt-1">
-                      {new Date(selectedService.createdAt).toLocaleDateString('de-DE')} um {new Date(selectedService.createdAt).toLocaleTimeString('de-DE')}
+                      {new Date(selectedService.createdAt).toLocaleDateString(t('pages.myServices.dateFormat'))} um {new Date(selectedService.createdAt).toLocaleTimeString(t('pages.myServices.timeFormat'))}
                     </p>
                   </div>
                   <div>
@@ -602,7 +604,7 @@ const MyServices = () => {
                               <h5 className="text-sm font-medium text-gray-600 mb-2">
                                 {activity.action === 'inquiry' ? 'Rückfrage' :
                                  activity.action === 'answer' ? 'Antwort' :
-                                 activity.action === 'information' ? 'Information' : 'Nachricht'} von {activity.who.split(' (')[0]} vom {new Date(activity.when).toLocaleDateString('de-DE')} um {new Date(activity.when).toLocaleTimeString('de-DE')}
+                                 activity.action === 'information' ? 'Information' : 'Nachricht'} von {activity.who.split(' (')[0]} vom {new Date(activity.when).toLocaleDateString(t('pages.myServices.dateFormat'))} um {new Date(activity.when).toLocaleTimeString(t('pages.myServices.timeFormat'))}
                               </h5>
                               <p className="text-gray-900 leading-relaxed">{activity.details}</p>
                             </div>
@@ -672,7 +674,7 @@ const MyServices = () => {
                 <h4 className="text-sm font-medium text-blue-700 mb-2">Rückfrage:</h4>
                 <p className="text-blue-900">{selectedInquiry.activities[0]?.details}</p>
                 <p className="text-xs text-blue-600 mt-2">
-                  Gestellt von: {selectedInquiry.activities[0]?.who} am {new Date(selectedInquiry.activities[0]?.when || '').toLocaleDateString('de-DE')}
+                  Gestellt von: {selectedInquiry.activities[0]?.who} am {new Date(selectedInquiry.activities[0]?.when || '').toLocaleDateString(t('pages.myServices.dateFormat'))}
                 </p>
               </div>
 
@@ -735,7 +737,7 @@ const MyServices = () => {
           setNewServiceDescription('')
           setNewServiceType('FREETEXT')
         }}
-        onSubmit={async (title, description) => {
+        onSubmit={async (title, description, titleInmate, descriptionInmate) => {
           setNewServiceTitle(title)
           setNewServiceDescription(description)
           setSubmittingNewService(true)
@@ -743,7 +745,9 @@ const MyServices = () => {
           try {
             const serviceData = {
               title: title.trim(),
+              titleInmate: titleInmate?.trim() || null,
               description: description.trim(),
+              descriptionInmate: descriptionInmate?.trim() || null,
               serviceType: newServiceType
             }
 

@@ -131,6 +131,136 @@ Text: "${text}"`
     }
   }
 
+  async generateOriginalTitle(text: string): Promise<string> {
+    try {
+      const model = this.client.getGenerativeModel({
+        model: this.config.model,
+        generationConfig: {
+          maxOutputTokens: 20, // Sehr kurz für Titel
+          temperature: 0.7, // Höhere Temperatur für bessere Spracherkennung
+        }
+      })
+
+      const prompt = `You are an assistant for creating short, concise titles. You will receive a text and need to create a title in the EXACT SAME LANGUAGE as the input text. Do NOT translate to German, English, or any other language. Keep the original language. The title should summarize the content precisely. Respond only with the title, without quotes or additional explanations.
+
+Examples:
+- Persian text → Persian title
+- Arabic text → Arabic title  
+- Spanish text → Spanish title
+- French text → French title
+
+Text: "${text}"
+
+Create a short title (max 5 words) in the EXACT SAME LANGUAGE as the text above. The title must be in the same language as the input text - do not translate it to any other language.`
+
+      const result = await model.generateContent(prompt)
+      const response = await result.response
+      const title = response.text()
+
+      if (!title) {
+        throw new AIProviderError('Kein Original-Titel generiert', 'NO_RESPONSE', 500)
+      }
+
+      return title.trim()
+    } catch (error: any) {
+      console.error('Gemini Original-Titel-Generierung Fehler:', error)
+      
+      // Gleiche Fehlerbehandlung wie bei generateTitle
+      if (error.message?.includes('quota')) {
+        throw new AIProviderError(
+          'Gemini API Limit erreicht. Bitte versuchen Sie es später erneut.',
+          'QUOTA_EXCEEDED',
+          402
+        )
+      }
+      
+      if (error.message?.includes('API key')) {
+        throw new AIProviderError(
+          'Gemini API Konfigurationsfehler. Bitte kontaktieren Sie den Administrator.',
+          'INVALID_API_KEY',
+          500
+        )
+      }
+
+      if (error.message?.includes('rate limit')) {
+        throw new AIProviderError(
+          'Rate Limit erreicht. Bitte versuchen Sie es später erneut.',
+          'RATE_LIMIT',
+          429
+        )
+      }
+
+      throw new AIProviderError(
+        'Fehler bei der Original-Titel-Generierung. Bitte versuchen Sie es erneut.',
+        'UNKNOWN_ERROR',
+        500
+      )
+    }
+  }
+
+  async translateTitleToOriginal(germanTitle: string, originalText: string): Promise<string> {
+    try {
+      const model = this.client.getGenerativeModel({
+        model: this.config.model,
+        generationConfig: {
+          maxOutputTokens: 20, // Sehr kurz für Titel
+          temperature: 0.3, // Niedrige Temperatur für konsistente Übersetzung
+        }
+      })
+
+      const prompt = `You are a translation assistant. You will receive a German title and an original text. Translate the German title into the EXACT SAME LANGUAGE as the original text. Do NOT translate to English or any other language. Keep the original language. Respond only with the translated title, without quotes or additional explanations.
+
+German title: "${germanTitle}"
+
+Original text: "${originalText}"
+
+Translate the German title into the EXACT SAME LANGUAGE as the original text.`
+
+      const result = await model.generateContent(prompt)
+      const response = await result.response
+      const translatedTitle = response.text()
+
+      if (!translatedTitle) {
+        throw new AIProviderError('Kein übersetzter Titel generiert', 'NO_RESPONSE', 500)
+      }
+
+      return translatedTitle.trim()
+    } catch (error: any) {
+      console.error('Gemini Titel-Übersetzung Fehler:', error)
+      
+      // Gleiche Fehlerbehandlung wie bei anderen Methoden
+      if (error.message?.includes('quota')) {
+        throw new AIProviderError(
+          'Gemini API Limit erreicht. Bitte versuchen Sie es später erneut.',
+          'QUOTA_EXCEEDED',
+          402
+        )
+      }
+      
+      if (error.message?.includes('API key')) {
+        throw new AIProviderError(
+          'Gemini API Konfigurationsfehler. Bitte kontaktieren Sie den Administrator.',
+          'INVALID_API_KEY',
+          500
+        )
+      }
+
+      if (error.message?.includes('rate limit')) {
+        throw new AIProviderError(
+          'Rate Limit erreicht. Bitte versuchen Sie es später erneut.',
+          'RATE_LIMIT',
+          429
+        )
+      }
+
+      throw new AIProviderError(
+        'Fehler bei der Titel-Übersetzung. Bitte versuchen Sie es erneut.',
+        'UNKNOWN_ERROR',
+        500
+      )
+    }
+  }
+
   async healthCheck(): Promise<boolean> {
     try {
       const model = this.client.getGenerativeModel({ model: this.config.model })

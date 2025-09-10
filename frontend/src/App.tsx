@@ -15,6 +15,7 @@ import HouseManagement from './pages/HouseManagement'
 import InmatesOverview from './pages/InmatesOverview'
 import UserOverview from './pages/UserOverview'
 import { AuthProvider } from './contexts/AuthContext'
+import { LanguageProvider } from './contexts/LanguageContext'
 import './App.css'
 
 // Komponente für Dashboard-Weiterleitung basierend auf Benutzerrolle
@@ -146,11 +147,13 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <AppContent />
-      </Router>
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </AuthProvider>
+    </LanguageProvider>
   )
 }
 

@@ -1,19 +1,22 @@
 import { useState } from 'react'
 import { Languages, Loader2, Check, X } from 'lucide-react'
+import { useLanguage } from '../contexts/LanguageContext'
 import api from '../services/api'
 
 interface NewServiceModalProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (title: string, description: string) => Promise<void>
+  onSubmit: (title: string, description: string, titleInmate?: string, descriptionInmate?: string) => Promise<void>
   isSubmitting: boolean
 }
 
 const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewServiceModalProps) => {
+  const { t } = useLanguage()
   const [step, setStep] = useState<'input' | 'processing' | 'review'>('input')
   const [originalText, setOriginalText] = useState('')
   const [translatedText, setTranslatedText] = useState('')
   const [generatedTitle, setGeneratedTitle] = useState('')
+  const [originalTitle, setOriginalTitle] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -23,13 +26,14 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
     setOriginalText('')
     setTranslatedText('')
     setGeneratedTitle('')
+    setOriginalTitle('')
     setError('')
     onClose()
   }
 
   const handlePrepareRequest = async () => {
     if (!originalText.trim()) {
-      setError('Bitte geben Sie einen Text ein')
+      setError(t('messages.required'))
       return
     }
 
@@ -42,9 +46,10 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
         text: originalText
       })
 
-      const { translatedText: result, generatedTitle: title } = response.data
+      const { translatedText: result, generatedTitle: title, originalTitle: origTitle } = response.data
       setTranslatedText(result)
       setGeneratedTitle(title)
+      setOriginalTitle(origTitle)
       setStep('review')
     } catch (error: any) {
       console.error('KI-Verarbeitung Fehler:', error)
@@ -63,14 +68,17 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
   }
 
   const handleSubmit = async () => {
-    // Formatierung: "[Original] / [Deutsch]" für Titel
-    const originalTitle = originalText.split(' ').slice(0, 5).join(' ')
-    const formattedTitle = `${originalTitle} / ${generatedTitle}`
+    // Deutscher Titel (KI-generiert)
+    const germanTitle = generatedTitle
     
-    // Formatierung: "[Original] - mit KI übersetzt: [Deutsch]" für Beschreibung
-    const formattedDescription = `${originalText} - mit KI übersetzt: ${translatedText}`
+    // Original-Titel (KI-generiert)
+    const originalTitleGenerated = originalTitle
     
-    await onSubmit(formattedTitle, formattedDescription)
+    // Getrennte Beschreibungen
+    const germanDescription = translatedText
+    const originalDescription = originalText
+    
+    await onSubmit(germanTitle, germanDescription, originalTitleGenerated, originalDescription)
     handleClose()
   }
 
@@ -78,7 +86,20 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
     setStep('input')
     setTranslatedText('')
     setGeneratedTitle('')
+    setOriginalTitle('')
     setError('')
+  }
+
+  // Debug: Zeige KI-generierte Titel in der Konsole
+  const debugTitleGeneration = () => {
+    if (originalText) {
+      console.log('🔍 KI-Titel-Generierung Debug:', {
+        original: originalText,
+        germanTitle: generatedTitle,
+        originalTitle: originalTitle,
+        wordCount: originalText.split(/\s+/).length
+      })
+    }
   }
 
   if (!isOpen) return null
@@ -88,7 +109,7 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
       <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-lg font-semibold text-gray-900">
-            Neuen Antrag stellen
+            {t('modals.newService.title')}
           </h3>
           <button
             onClick={handleClose}
@@ -103,7 +124,7 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
             {/* Antragstyp */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Antragstyp:
+                {t('modals.newService.serviceType')}
               </label>
               <div className="grid grid-cols-1 gap-3">
                 <label className="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
@@ -115,8 +136,8 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                   />
                   <div className="ml-3">
-                    <div className="text-sm font-medium text-gray-900">Sonstiges Anliegen</div>
-                    <div className="text-sm text-gray-500">Für allgemeine Anfragen und Anliegen</div>
+                    <div className="text-sm font-medium text-gray-900">{t('modals.newService.freetext')}</div>
+                    <div className="text-sm text-gray-500">{t('modals.newService.freetextDescription')}</div>
                   </div>
                 </label>
               </div>
@@ -125,18 +146,18 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
             {/* Beschreibung */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Beschreibung Ihres Anliegens: *
+                {t('modals.newService.description')} *
               </label>
               <textarea
                 value={originalText}
                 onChange={(e) => setOriginalText(e.target.value)}
-                placeholder="Beschreiben Sie Ihr Anliegen in Ihrer gewünschten Sprache..."
+                placeholder={t('modals.newService.descriptionPlaceholder')}
                 className="w-full input resize-none"
                 rows={4}
                 maxLength={500}
               />
               <p className="text-sm text-gray-500 mt-1">
-                Sie können Ihren Text in jeder Sprache eingeben. Die KI wird ihn ins Deutsche übersetzen und einen passenden Titel generieren.
+                {t('modals.newService.descriptionHelp')}
               </p>
             </div>
 
@@ -153,15 +174,18 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                 onClick={handleClose}
                 className="btn btn-secondary flex-1"
               >
-                Abbrechen
+                {t('buttons.cancel')}
               </button>
               <button
-                onClick={handlePrepareRequest}
+                onClick={() => {
+                  debugTitleGeneration()
+                  handlePrepareRequest()
+                }}
                 disabled={!originalText.trim()}
                 className="btn btn-primary flex-1 flex items-center justify-center"
               >
                 <Languages className="h-4 w-4 mr-2" />
-                Antrag vorbereiten
+                {t('modals.newService.prepareRequest')}
               </button>
             </div>
           </div>
@@ -171,10 +195,10 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
           <div className="text-center py-12">
             <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
             <h4 className="text-lg font-medium text-gray-900 mb-2">
-              Antrag wird vorbereitet...
+              {t('messages.aiProcessing')}
             </h4>
             <p className="text-gray-600">
-              Die KI übersetzt Ihren Text und generiert einen passenden Titel.
+              {t('messages.aiProcessingDescription')}
             </p>
           </div>
         )}
@@ -202,26 +226,48 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
               <div className="space-y-4">
                 <h4 className="font-medium text-gray-900">Finale Antragsdaten:</h4>
                 
-                {/* Formatierten Titel */}
+                {/* Getrennte Titel */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Titel:
+                    Titel (für Mitarbeiter):
                   </label>
                   <div className="bg-green-50 border border-green-200 rounded-lg p-3">
                     <p className="text-green-800 font-medium">
-                      {originalText.split(' ').slice(0, 5).join(' ')} / {generatedTitle}
+                      {generatedTitle}
                     </p>
                   </div>
                 </div>
 
-                {/* Formatierte Beschreibung */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Beschreibung:
+                    Titel (Original):
+                  </label>
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                    <p className="text-gray-800 font-medium">
+                      {originalTitle}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Getrennte Beschreibungen */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Beschreibung (für Mitarbeiter):
                   </label>
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                     <p className="text-blue-800 whitespace-pre-wrap">
-                      {originalText} - mit KI übersetzt: {translatedText}
+                      {translatedText}
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Beschreibung (Original):
+                  </label>
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                    <p className="text-gray-800 whitespace-pre-wrap">
+                      {originalText}
                     </p>
                   </div>
                 </div>

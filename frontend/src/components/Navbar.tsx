@@ -1,10 +1,13 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import { LogOut, User, Menu, X } from 'lucide-react'
 import { useState } from 'react'
+import LanguageSelector from './LanguageSelector'
 
 const Navbar = () => {
   const { user, logout } = useAuth()
+  const { t } = useLanguage()
   const location = useLocation()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
@@ -27,10 +30,10 @@ const Navbar = () => {
 
     if (isInmate) {
       return [
-        { name: 'Startseite', href: '/my-services' },
-        { name: 'Alle meine Anträge', href: '/all-my-services' },
-        { name: 'Neuer Antrag', href: '/new-service' },
-        { name: 'Kontoinformationen', href: '/profile' }
+        { name: t('navigation.home'), href: '/my-services' },
+        { name: t('navigation.allMyRequests'), href: '/all-my-services' },
+        { name: t('navigation.newService'), href: '/new-service' },
+        { name: t('navigation.accountInfo'), href: '/profile' }
       ]
     } else if (isStaff || isAdmin) {
              const staffNavigation = [
@@ -85,6 +88,10 @@ const Navbar = () => {
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
             <div className="ml-3 relative">
               <div className="flex items-center space-x-4">
+                {/* Language Selector nur für Insassen anzeigen */}
+                {user?.groups?.some(g => g.name === 'PS Inmates') && (
+                  <LanguageSelector />
+                )}
                 <div className="text-sm text-[var(--nav-fg-muted)]">
                   {user?.firstName} {user?.lastName}
                 </div>
@@ -93,7 +100,7 @@ const Navbar = () => {
                   className="flex items-center text-[var(--nav-fg-muted)] hover:text-[var(--nav-fg)] transition-colors"
                 >
                   <LogOut className="h-5 w-5" />
-                  <span className="ml-1">Abmelden</span>
+                  <span className="ml-1">{t('navigation.logout')}</span>
                 </button>
               </div>
             </div>
@@ -149,11 +156,17 @@ const Navbar = () => {
                  </div>
                </div>
             <div className="mt-3 space-y-1">
+              {/* Language Selector für Mobile nur für Insassen */}
+              {user?.groups?.some(g => g.name === 'PS Inmates') && (
+                <div className="px-4 py-2">
+                  <LanguageSelector />
+                </div>
+              )}
                              <button
                  onClick={logout}
                  className="block w-full text-left px-4 py-2 text-base font-medium text-[var(--nav-fg-muted)] hover:text-[var(--nav-fg)] hover:bg-white/10 transition-colors"
                >
-                 Abmelden
+                 {t('navigation.logout')}
                </button>
             </div>
           </div>

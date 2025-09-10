@@ -38,15 +38,19 @@ router.post('/translate', [
       console.log(`Verwende AI Provider: ${aiProvider.getProviderName()}`)
     }
 
-    // Zuerst Übersetzung, dann Titel-Generierung aus dem übersetzten Text
+    // Schritt 1: Übersetzung und deutscher Titel
     const translatedText = await aiProvider.translate(text)
     const generatedTitle = await aiProvider.generateTitle(translatedText)
+    
+    // Schritt 2: Original-Titel als Übersetzung des deutschen Titels
+    const originalTitle = await aiProvider.translateTitleToOriginal(generatedTitle, text)
 
     res.json({
       success: true,
       originalText: text,
       translatedText: translatedText,
       generatedTitle: generatedTitle,
+      originalTitle: originalTitle,
       provider: aiProvider.getProviderName()
     })
 

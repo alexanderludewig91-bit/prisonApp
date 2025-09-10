@@ -1731,7 +1731,7 @@ router.post('/my/services', checkRole(['INMATE']), [
     }
 
     const userId = req.user?.userId;
-    const { title, description } = req.body;
+    const { title, description, titleInmate, descriptionInmate } = req.body;
     
     // Default-Priorität für Insassen-Anträge (null = keine besondere Priorität)
     const priority = null;
@@ -1779,7 +1779,9 @@ router.post('/my/services', checkRole(['INMATE']), [
     const service = await prisma.service.create({
       data: {
         title,
+        titleInmate: titleInmate || null,
         description,
+        descriptionInmate: descriptionInmate || null,
         priority,
         createdBy: userId,
         assignedToGroup: assignedToGroup as any

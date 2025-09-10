@@ -72,8 +72,10 @@ model UserGroup {
 // Service Management
 model Service {
   id          Int      @id @default(autoincrement())
-  title       String
-  description String?
+  title       String   // Deutscher Titel (für Mitarbeiter)
+  titleInmate String?  // Titel in Originalsprache des Insassen
+  description String?  // Deutsche Beschreibung (für Mitarbeiter)
+  descriptionInmate String? // Beschreibung in Originalsprache des Insassen
   status      String   @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED
   decision    String?  // APPROVED, REJECTED, RETURNED, null (keine Entscheidung)
   priority    String?  // HIGH, URGENT, null (keine Priorität)
