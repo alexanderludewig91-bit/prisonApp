@@ -23,7 +23,7 @@ export class GeminiProvider implements AIProvider {
         }
       })
 
-      const prompt = `Du bist ein Übersetzungsassistent. Übersetze den gegebenen Text direkt ins Deutsche. Antworte nur mit der deutschen Übersetzung, ohne zusätzliche Erklärungen oder Formatierung.
+      const prompt = `Du bist ein Übersetzungsassistent für das digitale Antragswesen von Gefangenen im Gefängnis. Übersetze den gegebenen Text direkt ins Deutsche. Sollte der Text bereits in deutscher Sprache übermittelt werden, lasse ihn unverändert. Antworte nur mit der deutschen Übersetzung, ohne zusätzliche Erklärungen oder Formatierung.
 
 Text: "${text}"`
 
@@ -82,7 +82,7 @@ Text: "${text}"`
         }
       })
 
-      const prompt = `Du bist ein Assistent für die Erstellung von kurzen, prägnanten Titeln. Erstelle einen Titel mit maximal 5 Wörtern, der den Inhalt des Textes präzise zusammenfasst. Antworte nur mit dem Titel, ohne Anführungszeichen oder zusätzliche Erklärungen.
+      const prompt = `Du bist ein Assistent für die Erstellung von kurzen, prägnanten Titeln im digitalen Antragswesen von Gefangenen im Gefängnis. Erstelle einen Titel mit maximal 5 Wörtern, der den Inhalt des Antrags präzise zusammenfasst. Der Titel soll für Mitarbeiter verständlich sein. Antworte nur mit dem Titel, ohne Anführungszeichen oder zusätzliche Erklärungen.
 
 Text: "${text}"`
 
@@ -131,72 +131,6 @@ Text: "${text}"`
     }
   }
 
-  async generateOriginalTitle(text: string): Promise<string> {
-    try {
-      const model = this.client.getGenerativeModel({
-        model: this.config.model,
-        generationConfig: {
-          maxOutputTokens: 20, // Sehr kurz für Titel
-          temperature: 0.7, // Höhere Temperatur für bessere Spracherkennung
-        }
-      })
-
-      const prompt = `You are an assistant for creating short, concise titles. You will receive a text and need to create a title in the EXACT SAME LANGUAGE as the input text. Do NOT translate to German, English, or any other language. Keep the original language. The title should summarize the content precisely. Respond only with the title, without quotes or additional explanations.
-
-Examples:
-- Persian text → Persian title
-- Arabic text → Arabic title  
-- Spanish text → Spanish title
-- French text → French title
-
-Text: "${text}"
-
-Create a short title (max 5 words) in the EXACT SAME LANGUAGE as the text above. The title must be in the same language as the input text - do not translate it to any other language.`
-
-      const result = await model.generateContent(prompt)
-      const response = await result.response
-      const title = response.text()
-
-      if (!title) {
-        throw new AIProviderError('Kein Original-Titel generiert', 'NO_RESPONSE', 500)
-      }
-
-      return title.trim()
-    } catch (error: any) {
-      console.error('Gemini Original-Titel-Generierung Fehler:', error)
-      
-      // Gleiche Fehlerbehandlung wie bei generateTitle
-      if (error.message?.includes('quota')) {
-        throw new AIProviderError(
-          'Gemini API Limit erreicht. Bitte versuchen Sie es später erneut.',
-          'QUOTA_EXCEEDED',
-          402
-        )
-      }
-      
-      if (error.message?.includes('API key')) {
-        throw new AIProviderError(
-          'Gemini API Konfigurationsfehler. Bitte kontaktieren Sie den Administrator.',
-          'INVALID_API_KEY',
-          500
-        )
-      }
-
-      if (error.message?.includes('rate limit')) {
-        throw new AIProviderError(
-          'Rate Limit erreicht. Bitte versuchen Sie es später erneut.',
-          'RATE_LIMIT',
-          429
-        )
-      }
-
-      throw new AIProviderError(
-        'Fehler bei der Original-Titel-Generierung. Bitte versuchen Sie es erneut.',
-        'UNKNOWN_ERROR',
-        500
-      )
-    }
-  }
 
   async translateTitleToOriginal(germanTitle: string, originalText: string): Promise<string> {
     try {
@@ -208,13 +142,15 @@ Create a short title (max 5 words) in the EXACT SAME LANGUAGE as the text above.
         }
       })
 
-      const prompt = `You are a translation assistant. You will receive a German title and an original text. Translate the German title into the EXACT SAME LANGUAGE as the original text. Do NOT translate to English or any other language. Keep the original language. Respond only with the translated title, without quotes or additional explanations.
+      const prompt = `Du bist ein Übersetzungsassistent für das digitale Antragswesen von Gefangenen im Gefängnis. Du erhältst einen kurzen deutschen Titel von einem Antrag und einen zugeöhrigen beschreibenden Text, den ein Insasse in einer fremden Sprache geschrieben hat, der möglicherweise Fehler enthält. Der zugehörige Text ist in einer anderen Sprache als der deutsche Titel. Es wird ein Titel benötigt, der in der gleichen Sprache wie der beschreibende Text ist. Erstelle daher einen kurzen und prägnanten Titel, der in der gleichen Sprache wie der beschreibende Text ist und orientiere dich inhaltlich (nicht sprachlich) an dem deutschen Titel. Antworte nur mit dem neu übersetzten Titel, ohne Anführungszeichen oder zusätzliche Erklärungen.
 
-German title: "${germanTitle}"
+Hier sind ein deutscher Titel und der beschreibende dazugehörige nicht-deutsche Text, an dessen Sprache du dich orientieren sollst:
 
-Original text: "${originalText}"
+Deutscher Titel: "${germanTitle}"
 
-Translate the German title into the EXACT SAME LANGUAGE as the original text.`
+Beschreibender Text, an dessen Sprache du dich orientieren sollst: "${originalText}"
+
+Generiere einen neuen Titel, der in der gleichen Sprache sein MUSS wie der beschreibende Text und orientiere dich inhaltlich (nicht sprachlich) an dem deutschen Titel. WICHTIG: Auch bei fehlerhaften Texten MUSS der neue Titel in der gleichen Sprache sein wie der beschreibende Text, auch wenn diese Sprache nicht perfekt ist.`
 
       const result = await model.generateContent(prompt)
       const response = await result.response

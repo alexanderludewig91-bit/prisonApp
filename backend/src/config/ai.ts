@@ -7,7 +7,7 @@ export const AI_CONFIG = {
   
   // Model-Konfigurationen für verschiedene Provider
   models: {
-    openai: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
+    openai: process.env.OPENAI_MODEL || 'gpt-4o-mini',
     gemini: process.env.GEMINI_MODEL || 'gemini-pro',
     claude: process.env.CLAUDE_MODEL || 'claude-3-sonnet-20240229'
   },

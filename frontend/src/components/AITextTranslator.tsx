@@ -29,7 +29,8 @@ const AITextTranslator = ({ onTextTranslated, onTitleGenerated }: AITextTranslat
 
     try {
       const response = await api.post('/ai/translate', {
-        text: inputText
+        text: inputText,
+        language: 'auto' // Für AITextTranslator immer Übersetzungsmodus
       })
 
       const { translatedText: result, generatedTitle: title } = response.data

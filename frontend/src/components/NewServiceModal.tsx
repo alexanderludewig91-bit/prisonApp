@@ -11,7 +11,7 @@ interface NewServiceModalProps {
 }
 
 const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewServiceModalProps) => {
-  const { t } = useLanguage()
+  const { t, currentLanguage } = useLanguage()
   const [step, setStep] = useState<'input' | 'processing' | 'review'>('input')
   const [originalText, setOriginalText] = useState('')
   const [translatedText, setTranslatedText] = useState('')
@@ -43,14 +43,22 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
 
     try {
       const response = await api.post('/ai/translate', {
-        text: originalText
+        text: originalText,
+        language: currentLanguage // Sprachparameter hinzufügen
       })
 
-      const { translatedText: result, generatedTitle: title, originalTitle: origTitle } = response.data
+      const { translatedText: result, generatedTitle: title, originalTitle: origTitle, languageMode } = response.data
       setTranslatedText(result)
       setGeneratedTitle(title)
       setOriginalTitle(origTitle)
       setStep('review')
+      
+      // Debug: Zeige verwendeten Modus
+      if (languageMode === 'german') {
+        console.log('🇩🇪 Deutsch-Modus: Nur Titel generiert')
+      } else {
+        console.log('🌍 Übersetzungs-Modus: Vollständige KI-Pipeline')
+      }
     } catch (error: any) {
       console.error('KI-Verarbeitung Fehler:', error)
       

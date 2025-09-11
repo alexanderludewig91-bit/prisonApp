@@ -22,11 +22,11 @@ export class OpenAIProvider implements AIProvider {
         messages: [
           {
             role: "system",
-            content: "Du bist ein Übersetzungsassistent. Übersetze den gegebenen Text direkt ins Deutsche. Antworte nur mit der deutschen Übersetzung, ohne zusätzliche Erklärungen oder Formatierung."
+            content: "Du bist ein Übersetzungsassistent für das digitale Antragswesen von Gefangenen im Gefängnis. Übersetze den gegebenen Text direkt ins Deutsche. Sollte der Text bereits in deutscher Sprache übermittelt werden, lasse ihn unverändert. Antworte nur mit der deutschen Übersetzung, ohne zusätzliche Erklärungen oder Formatierung."
           },
           {
             role: "user",
-            content: `Übersetze ins Deutsche: "${text}"`
+            content: `Übersetze ins Deutsche, falls es nicht bereits deutsch ist: "${text}"`
           }
         ],
         max_tokens: this.config.maxTokens,
@@ -82,7 +82,7 @@ export class OpenAIProvider implements AIProvider {
         messages: [
           {
             role: "system",
-            content: "Du bist ein Assistent für die Erstellung von kurzen, prägnanten Titeln. Erstelle einen Titel mit maximal 5 Wörtern, der den Inhalt des Textes präzise zusammenfasst. Antworte nur mit dem Titel, ohne Anführungszeichen oder zusätzliche Erklärungen."
+            content: "Du bist ein Assistent für die Erstellung von kurzen, prägnanten Titeln im digitalen Antragswesen von Gefangenen im Gefängnis. Erstelle einen Titel mit maximal 5 Wörtern, der den Inhalt des Antrags präzise zusammenfasst. Der Titel soll für Mitarbeiter verständlich sein. Antworte nur mit dem Titel, ohne Anführungszeichen oder zusätzliche Erklärungen."
           },
           {
             role: "user",
@@ -135,65 +135,6 @@ export class OpenAIProvider implements AIProvider {
     }
   }
 
-  async generateOriginalTitle(text: string): Promise<string> {
-    try {
-      const completion = await this.client.chat.completions.create({
-        model: this.config.model,
-        messages: [
-          {
-            role: "system",
-            content: "You are an assistant for creating short, concise titles. You will receive a text and need to create a title in the EXACT SAME LANGUAGE as the input text. Do NOT translate to German, English, or any other language. Keep the original language. The title should summarize the content precisely. Respond only with the title, without quotes or additional explanations.\n\nExamples:\n- Persian text → Persian title\n- Arabic text → Arabic title\n- Spanish text → Spanish title\n- French text → French title"
-          },
-          {
-            role: "user",
-            content: `Create a short title (max 5 words) in the EXACT SAME LANGUAGE as this text. The title must be in the same language as the input text - do not translate it to any other language: "${text}"`
-          }
-        ],
-        max_tokens: 20, // Sehr kurz für Titel
-        temperature: 0.7 // Höhere Temperatur für bessere Spracherkennung
-      })
-
-      const title = completion.choices[0]?.message?.content
-      if (!title) {
-        throw new AIProviderError('Kein Original-Titel generiert', 'NO_RESPONSE', 500)
-      }
-
-      return title.trim()
-    } catch (error: any) {
-      console.error('OpenAI Original-Titel-Generierung Fehler:', error)
-      
-      // Gleiche Fehlerbehandlung wie bei generateTitle
-      if (error.code === 'insufficient_quota') {
-        throw new AIProviderError(
-          'OpenAI API Limit erreicht. Bitte versuchen Sie es später erneut.',
-          'QUOTA_EXCEEDED',
-          402
-        )
-      }
-      
-      if (error.code === 'invalid_api_key') {
-        throw new AIProviderError(
-          'OpenAI API Konfigurationsfehler. Bitte kontaktieren Sie den Administrator.',
-          'INVALID_API_KEY',
-          500
-        )
-      }
-
-      if (error.code === 'rate_limit_exceeded') {
-        throw new AIProviderError(
-          'Rate Limit erreicht. Bitte versuchen Sie es später erneut.',
-          'RATE_LIMIT',
-          429
-        )
-      }
-
-      throw new AIProviderError(
-        'Fehler bei der Original-Titel-Generierung. Bitte versuchen Sie es erneut.',
-        'UNKNOWN_ERROR',
-        500
-      )
-    }
-  }
 
   async translateTitleToOriginal(germanTitle: string, originalText: string): Promise<string> {
     try {
@@ -202,11 +143,11 @@ export class OpenAIProvider implements AIProvider {
         messages: [
           {
             role: "system",
-            content: "You are a translation assistant. You will receive a German title and an original text. Translate the German title into the EXACT SAME LANGUAGE as the original text. Do NOT translate to English or any other language. Keep the original language. Respond only with the translated title, without quotes or additional explanations."
+            content: "Du bist ein Übersetzungsassistent für das digitale Antragswesen von Gefangenen im Gefängnis. Du erhältst einen kurzen deutschen Titel von einem Antrag und einen zugeöhrigen beschreibenden Text, den ein Insasse in einer fremden Sprache geschrieben hat, der möglicherweise Fehler enthält. Der zugehörige Text ist in einer anderen Sprache als der deutsche Titel. Es wird ein Titel benötigt, der in der gleichen Sprache wie der beschreibende Text ist. Erstelle daher einen kurzen und prägnanten Titel, der in der gleichen Sprache wie der beschreibende Text ist und orientiere dich inhaltlich (nicht sprachlich) an dem deutschen Titel. Antworte nur mit dem neu übersetzten Titel, ohne Anführungszeichen oder zusätzliche Erklärungen."
           },
           {
             role: "user",
-            content: `Translate this German title into the same language as the original text below:\n\nGerman title: "${germanTitle}"\n\nOriginal text: "${originalText}"\n\nTranslate the German title into the EXACT SAME LANGUAGE as the original text.`
+            content: `Hier sind ein deutscher Titel und der beschreibende dazugehörige nicht-deutsche Text, an dessen Sprache du dich orientieren sollst:\n\nDeutscher Titel: "${germanTitle}"\n\nBeschreibender Text, an dessen Sprache du dich orientieren sollst: "${originalText}"\n\n Generiere einen neuen Titel, der in der gleichen Sprache sein MUSS wie der beschreibende Text und orientiere dich inhaltlich (nicht sprachlich) an dem deutschen Titel. WICHTIG: Auch bei fehlerhaften Texten MUSS der neue Titel in der gleichen Sprache sein wie der beschreibende Text, auch wenn diese Sprache nicht perfekt ist.`
           }
         ],
         max_tokens: 20, // Sehr kurz für Titel

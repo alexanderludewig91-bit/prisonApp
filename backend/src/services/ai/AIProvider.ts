@@ -17,12 +17,6 @@ export interface AIProvider {
    */
   generateTitle(text: string): Promise<string>
 
-  /**
-   * Generiert einen Titel in der Originalsprache des Textes
-   * @param text - Der Text für die Titel-Generierung
-   * @returns Promise mit dem generierten Titel in der Originalsprache
-   */
-  generateOriginalTitle(text: string): Promise<string>
 
   /**
    * Übersetzt einen deutschen Titel in die Originalsprache

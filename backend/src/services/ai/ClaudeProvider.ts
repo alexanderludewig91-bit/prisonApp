@@ -21,11 +21,11 @@ export class ClaudeProvider implements AIProvider {
         model: this.config.model,
         max_tokens: this.config.maxTokens,
         temperature: this.config.temperature,
-        system: "Du bist ein Übersetzungsassistent. Übersetze den gegebenen Text direkt ins Deutsche. Antworte nur mit der deutschen Übersetzung, ohne zusätzliche Erklärungen oder Formatierung.",
+        system: "Du bist ein Übersetzungsassistent für das digitale Antragswesen von Gefangenen im Gefängnis. Übersetze den gegebenen Text direkt ins Deutsche. Sollte der Text bereits in deutscher Sprache übermittelt werden, lasse ihn unverändert. Antworte nur mit der deutschen Übersetzung, ohne zusätzliche Erklärungen oder Formatierung.",
         messages: [
           {
             role: "user",
-            content: `Übersetze ins Deutsche: "${text}"`
+            content: `Übersetze ins Deutsche, falls es nicht bereits deutsch ist: "${text}"`
           }
         ]
       })
@@ -79,7 +79,7 @@ export class ClaudeProvider implements AIProvider {
         model: this.config.model,
         max_tokens: 20, // Sehr kurz für Titel
         temperature: 0.3, // Niedrige Temperatur für konsistente Ergebnisse
-        system: "Du bist ein Assistent für die Erstellung von kurzen, prägnanten Titeln. Erstelle einen Titel mit maximal 5 Wörtern, der den Inhalt des Textes präzise zusammenfasst. Antworte nur mit dem Titel, ohne Anführungszeichen oder zusätzliche Erklärungen.",
+        system: "Du bist ein Assistent für die Erstellung von kurzen, prägnanten Titeln im digitalen Antragswesen von Gefangenen im Gefängnis. Erstelle einen Titel mit maximal 5 Wörtern, der den Inhalt des Antrags präzise zusammenfasst. Der Titel soll für Mitarbeiter verständlich sein. Antworte nur mit dem Titel, ohne Anführungszeichen oder zusätzliche Erklärungen.",
         messages: [
           {
             role: "user",
@@ -131,63 +131,6 @@ export class ClaudeProvider implements AIProvider {
     }
   }
 
-  async generateOriginalTitle(text: string): Promise<string> {
-    try {
-      const message = await this.client.messages.create({
-        model: this.config.model,
-        max_tokens: 20, // Sehr kurz für Titel
-        temperature: 0.7, // Höhere Temperatur für bessere Spracherkennung
-        system: "You are an assistant for creating short, concise titles. You will receive a text and need to create a title in the EXACT SAME LANGUAGE as the input text. Do NOT translate to German, English, or any other language. Keep the original language. The title should summarize the content precisely. Respond only with the title, without quotes or additional explanations.\n\nExamples:\n- Persian text → Persian title\n- Arabic text → Arabic title\n- Spanish text → Spanish title\n- French text → French title",
-        messages: [
-          {
-            role: "user",
-            content: `Create a short title (max 5 words) in the EXACT SAME LANGUAGE as this text. The title must be in the same language as the input text - do not translate it to any other language: "${text}"`
-          }
-        ]
-      })
-
-      const title = message.content[0]?.type === 'text' ? message.content[0].text : null
-
-      if (!title) {
-        throw new AIProviderError('Kein Original-Titel generiert', 'NO_RESPONSE', 500)
-      }
-
-      return title.trim()
-    } catch (error: any) {
-      console.error('Claude Original-Titel-Generierung Fehler:', error)
-      
-      // Gleiche Fehlerbehandlung wie bei generateTitle
-      if (error.status === 402) {
-        throw new AIProviderError(
-          'Claude API Limit erreicht. Bitte versuchen Sie es später erneut.',
-          'QUOTA_EXCEEDED',
-          402
-        )
-      }
-      
-      if (error.status === 401) {
-        throw new AIProviderError(
-          'Claude API Konfigurationsfehler. Bitte kontaktieren Sie den Administrator.',
-          'INVALID_API_KEY',
-          500
-        )
-      }
-
-      if (error.status === 429) {
-        throw new AIProviderError(
-          'Rate Limit erreicht. Bitte versuchen Sie es später erneut.',
-          'RATE_LIMIT',
-          429
-        )
-      }
-
-      throw new AIProviderError(
-        'Fehler bei der Original-Titel-Generierung. Bitte versuchen Sie es erneut.',
-        'UNKNOWN_ERROR',
-        500
-      )
-    }
-  }
 
   async translateTitleToOriginal(germanTitle: string, originalText: string): Promise<string> {
     try {
@@ -195,11 +138,11 @@ export class ClaudeProvider implements AIProvider {
         model: this.config.model,
         max_tokens: 20, // Sehr kurz für Titel
         temperature: 0.3, // Niedrige Temperatur für konsistente Übersetzung
-        system: "You are a translation assistant. You will receive a German title and an original text. Translate the German title into the EXACT SAME LANGUAGE as the original text. Do NOT translate to English or any other language. Keep the original language. Respond only with the translated title, without quotes or additional explanations.",
+        system: "Du bist ein Übersetzungsassistent für das digitale Antragswesen von Gefangenen im Gefängnis. Du erhältst einen kurzen deutschen Titel von einem Antrag und einen zugeöhrigen beschreibenden Text, den ein Insasse in einer fremden Sprache geschrieben hat, der möglicherweise Fehler enthält. Der zugehörige Text ist in einer anderen Sprache als der deutsche Titel. Es wird ein Titel benötigt, der in der gleichen Sprache wie der beschreibende Text ist. Erstelle daher einen kurzen und prägnanten Titel, der in der gleichen Sprache wie der beschreibende Text ist und orientiere dich inhaltlich (nicht sprachlich) an dem deutschen Titel. Antworte nur mit dem neu übersetzten Titel, ohne Anführungszeichen oder zusätzliche Erklärungen.",
         messages: [
           {
             role: "user",
-            content: `Translate this German title into the same language as the original text below:\n\nGerman title: "${germanTitle}"\n\nOriginal text: "${originalText}"\n\nTranslate the German title into the EXACT SAME LANGUAGE as the original text.`
+            content: `Hier sind ein deutscher Titel und der beschreibende dazugehörige nicht-deutsche Text, an dessen Sprache du dich orientieren sollst:\n\nDeutscher Titel: "${germanTitle}"\n\nBeschreibender Text, an dessen Sprache du dich orientieren sollst: "${originalText}"\n\n Generiere einen neuen Titel, der in der gleichen Sprache sein MUSS wie der beschreibende Text und orientiere dich inhaltlich (nicht sprachlich) an dem deutschen Titel. WICHTIG: Auch bei fehlerhaften Texten MUSS der neue Titel in der gleichen Sprache sein wie der beschreibende Text, auch wenn diese Sprache nicht perfekt ist.`
           }
         ]
       })

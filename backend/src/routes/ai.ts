@@ -21,7 +21,8 @@ console.log('========================')
 // KI-Textverarbeitung Route
 router.post('/translate', [
   authenticateToken,
-  body('text').notEmpty().withMessage('Text ist erforderlich').isLength({ min: 1, max: 2000 }).withMessage('Text muss zwischen 1 und 2000 Zeichen lang sein')
+  body('text').notEmpty().withMessage('Text ist erforderlich').isLength({ min: 1, max: 2000 }).withMessage('Text muss zwischen 1 und 2000 Zeichen lang sein'),
+  body('language').optional().isString().withMessage('Sprache muss ein String sein')
 ], async (req: Request, res: Response) => {
   try {
     const errors = validationResult(req)
@@ -29,30 +30,46 @@ router.post('/translate', [
       return res.status(400).json({ errors: errors.array() })
     }
 
-    const { text } = req.body
+    const { text, language } = req.body
 
     // AI Provider mit Fallback verwenden
     const aiProvider = AIProviderFactory.getProviderWithFallback()
     
     if (AI_CONFIG.debug) {
       console.log(`Verwende AI Provider: ${aiProvider.getProviderName()}`)
+      console.log(`Eingestellte Sprache: ${language}`)
     }
 
-    // Schritt 1: Übersetzung und deutscher Titel
-    const translatedText = await aiProvider.translate(text)
-    const generatedTitle = await aiProvider.generateTitle(translatedText)
-    
-    // Schritt 2: Original-Titel als Übersetzung des deutschen Titels
-    const originalTitle = await aiProvider.translateTitleToOriginal(generatedTitle, text)
+    // Sprachbasierte Logik: Wenn Deutsch, dann nur Titel generieren
+    if (language === 'de') {
+      // Nur Titel generieren (aus dem deutschen Text)
+      const generatedTitle = await aiProvider.generateTitle(text)
+      
+      res.json({
+        success: true,
+        originalText: text,
+        translatedText: text, // Keine Übersetzung nötig
+        generatedTitle: generatedTitle,
+        originalTitle: generatedTitle, // Beide Titel identisch auf Deutsch
+        provider: aiProvider.getProviderName(),
+        languageMode: 'german'
+      })
+    } else {
+      // Vollständige KI-Pipeline: Übersetzung + beide Titel
+      const translatedText = await aiProvider.translate(text)
+      const generatedTitle = await aiProvider.generateTitle(translatedText)
+      const originalTitle = await aiProvider.translateTitleToOriginal(generatedTitle, text)
 
-    res.json({
-      success: true,
-      originalText: text,
-      translatedText: translatedText,
-      generatedTitle: generatedTitle,
-      originalTitle: originalTitle,
-      provider: aiProvider.getProviderName()
-    })
+      res.json({
+        success: true,
+        originalText: text,
+        translatedText: translatedText,
+        generatedTitle: generatedTitle,
+        originalTitle: originalTitle,
+        provider: aiProvider.getProviderName(),
+        languageMode: 'translation'
+      })
+    }
 
   } catch (error: any) {
     console.error('AI API Fehler:', error)
