@@ -530,7 +530,7 @@ const MyServices = () => {
                   </div>
                   <div>
                     <span className="text-sm font-medium text-gray-600">{t('pages.myServices.description')}:</span>
-                    <p className="text-gray-900 mt-1 leading-relaxed">{selectedService.description}</p>
+                    <p className="text-gray-900 mt-1 leading-relaxed">{selectedService.descriptionInmate || selectedService.description}</p>
                   </div>
                 </div>
               </div>

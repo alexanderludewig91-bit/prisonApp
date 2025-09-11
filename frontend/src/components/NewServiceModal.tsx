@@ -216,39 +216,19 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
             {/* Header */}
             <div className="flex items-center space-x-2 text-green-600">
               <Check className="h-5 w-5" />
-              <span className="font-medium">Antrag erfolgreich vorbereitet</span>
+              <span className="font-medium">{t('modals.newService.successfullyPrepared')}</span>
             </div>
 
-            {/* Zwei-Spalten Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Linke Spalte - Original */}
+            {/* Bedingte Anzeige basierend auf Sprache */}
+            {currentLanguage === 'de' ? (
+              /* Ein-Spalten Layout für Deutsch */
               <div className="space-y-4">
-                <h4 className="font-medium text-gray-900">Ihr ursprünglicher Text:</h4>
+                <h4 className="font-medium text-gray-900">{t('modals.newService.originalText')}:</h4>
                 
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <p className="text-gray-800 whitespace-pre-wrap">{originalText}</p>
-                </div>
-              </div>
-
-              {/* Rechte Spalte - Finale Formatierung */}
-              <div className="space-y-4">
-                <h4 className="font-medium text-gray-900">Finale Antragsdaten:</h4>
-                
-                {/* Getrennte Titel */}
+                {/* Titel */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Titel (für Mitarbeiter):
-                  </label>
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                    <p className="text-green-800 font-medium">
-                      {generatedTitle}
-                    </p>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Titel (Original):
+                    {t('modals.newService.originalTitle')}:
                   </label>
                   <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
                     <p className="text-gray-800 font-medium">
@@ -257,21 +237,10 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                   </div>
                 </div>
 
-                {/* Getrennte Beschreibungen */}
+                {/* Beschreibung */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Beschreibung (für Mitarbeiter):
-                  </label>
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <p className="text-blue-800 whitespace-pre-wrap">
-                      {translatedText}
-                    </p>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Beschreibung (Original):
+                    {t('modals.newService.originalDescription')}:
                   </label>
                   <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
                     <p className="text-gray-800 whitespace-pre-wrap">
@@ -280,7 +249,68 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                   </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              /* Zwei-Spalten Layout für andere Sprachen */
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Linke Spalte - Insassen-Sprache */}
+                <div className="space-y-4">
+                  <h4 className="font-medium text-gray-900">{t('modals.newService.originalText')}:</h4>
+                  
+                  {/* Titel in Insassen-Sprache */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('modals.newService.originalTitle')}:
+                    </label>
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                      <p className="text-gray-800 font-medium">
+                        {originalTitle}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Beschreibung in Insassen-Sprache */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('modals.newService.originalDescription')}:
+                    </label>
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                      <p className="text-gray-800 whitespace-pre-wrap">
+                        {originalText}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Rechte Spalte - Mitarbeiter-Sprache */}
+                <div className="space-y-4">
+                  <h4 className="font-medium text-gray-900">{t('modals.newService.forStaff')}:</h4>
+                  
+                  {/* Titel für Mitarbeiter */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('modals.newService.germanTitle')}:
+                    </label>
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                      <p className="text-green-800 font-medium">
+                        {generatedTitle}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Beschreibung für Mitarbeiter */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('modals.newService.germanDescription')}:
+                    </label>
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <p className="text-blue-800 whitespace-pre-wrap">
+                        {translatedText}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Buttons */}
             <div className="flex space-x-3">
@@ -288,7 +318,7 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                 onClick={handleBackToInput}
                 className="btn btn-secondary flex-1"
               >
-                Zurück bearbeiten
+                {t('modals.newService.back')}
               </button>
               <button
                 onClick={handleSubmit}
@@ -298,10 +328,10 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                 {isSubmitting ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Wird eingereicht...
+                    {t('modals.newService.submitting')}
                   </>
                 ) : (
-                  'Antrag einreichen'
+                  t('modals.newService.submitRequest')
                 )}
               </button>
             </div>

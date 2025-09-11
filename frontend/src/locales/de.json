@@ -126,7 +126,10 @@
       "originalDescription": "Beschreibung (Original)",
       "prepareRequest": "Antrag vorbereiten",
       "submitRequest": "Antrag einreichen",
-      "back": "Zurück"
+      "back": "Zurück",
+      "successfullyPrepared": "Antrag erfolgreich vorbereitet",
+      "forStaff": "Für Mitarbeiter (Deutsch)",
+      "submitting": "Wird eingereicht..."
     },
     "aiTranslator": {
       "title": "KI-Textübersetzung",
@@ -199,7 +202,18 @@
       "serviceType": "Antragsart",
       "freetext": "Sonstiges Anliegen",
       "medical": "Medizinischer Antrag",
-      "allowance": "Taschengeld-Antrag"
+      "allowance": "Taschengeld-Antrag",
+      "description": "Beschreibung",
+      "prepareRequest": "Antrag vorbereiten",
+      "submitRequest": "Antrag einreichen",
+      "backToEdit": "Zurück bearbeiten",
+      "successfullyPrepared": "Antrag erfolgreich vorbereitet",
+      "yourRequest": "Ihr Antrag",
+      "yourRequestLanguage": "Ihr Antrag (Ihre Sprache)",
+      "forStaff": "Für Mitarbeiter (Deutsch)",
+      "titleLabel": "Titel",
+      "descriptionLabel": "Beschreibung",
+      "submitting": "Wird eingereicht..."
     }
   },
   "languages": {
