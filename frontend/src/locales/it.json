@@ -88,7 +88,9 @@
     "tooShort": "Troppo corto",
     "tooLong": "Troppo lungo",
     "aiProcessing": "Elaborazione AI...",
+    "aiProcessingDescription": "La tua richiesta è in preparazione, per favore abbi un momento di pazienza.",
     "aiError": "Errore elaborazione AI",
+    "requestSubmittedSuccessfully": "La tua richiesta è stata inviata con successo!",
     "translationSuccess": "Traduzione riuscita",
     "titleGenerated": "Titolo generato"
   },

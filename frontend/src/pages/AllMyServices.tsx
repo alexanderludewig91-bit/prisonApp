@@ -34,11 +34,13 @@ interface Service {
 const AllMyServices = () => {
   const { user } = useAuth()
   const [services, setServices] = useState<Service[]>([])
+  const [servicesWithInformation, setServicesWithInformation] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedService, setSelectedService] = useState<Service | null>(null)
   const [showServiceModal, setShowServiceModal] = useState(false)
-  const [sortField, setSortField] = useState<'createdAt' | 'title' | 'status' | 'decision'>('createdAt')
+  const [sortField, setSortField] = useState<'id' | 'createdAt' | 'title' | 'status' | 'decision'>('createdAt')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
+  const [activeTab, setActiveTab] = useState<'all' | 'information'>('all')
 
   // Prüfe ob Benutzer ein Insasse ist
   const userGroups = user?.groups?.map(g => g.name) || []
@@ -61,12 +63,12 @@ const AllMyServices = () => {
         const allServices = servicesResponse.data.services || []
         setServices(allServices)
 
-        // Rückfragen laden - aktuell nicht verwendet
+        // Informationen laden
         if (user?.id) {
-          console.log('Lade Rückfragen für Benutzer:', user.id)
-          const inquiriesResponse = await api.get(`/services/inquiries/${user.id}`)
-          console.log('Rückfragen geladen:', inquiriesResponse.data)
-          // setServicesWithInquiries(inquiriesResponse.data.services || [])
+          console.log('Lade Informationen für Benutzer:', user.id)
+          const informationResponse = await api.get(`/services/information/${user.id}`)
+          console.log('Informationen geladen:', informationResponse.data)
+          setServicesWithInformation(informationResponse.data.services || [])
         }
       } catch (error) {
         console.error('Fehler beim Laden der Daten:', error)
@@ -84,7 +86,7 @@ const AllMyServices = () => {
     setShowServiceModal(true)
   }
 
-  const handleSort = (field: 'createdAt' | 'title' | 'status' | 'decision') => {
+  const handleSort = (field: 'id' | 'createdAt' | 'title' | 'status' | 'decision') => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
     } else {
@@ -140,14 +142,20 @@ const AllMyServices = () => {
     return new Date(dateString).toLocaleDateString('de-DE') + ' um ' + new Date(dateString).toLocaleTimeString('de-DE')
   }
 
+  // Gefilterte Services basierend auf aktivem Tab
+  const filteredServices = activeTab === 'information' ? servicesWithInformation : services
+
   // Sortierte Services
-  const sortedServices = [...services].sort((a, b) => {
+  const sortedServices = [...filteredServices].sort((a, b) => {
     let aValue: any = a[sortField]
     let bValue: any = b[sortField]
     
     if (sortField === 'createdAt') {
       aValue = new Date(aValue).getTime()
       bValue = new Date(bValue).getTime()
+    } else if (sortField === 'id') {
+      aValue = Number(aValue)
+      bValue = Number(bValue)
     }
     
     if (sortDirection === 'asc') {
@@ -184,34 +192,84 @@ const AllMyServices = () => {
           </button>
         </div>
 
+        {/* Tab Navigation */}
+        <div className="bg-white rounded-lg shadow overflow-hidden mb-6">
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8 px-6" aria-label="Tabs">
+              <button
+                onClick={() => setActiveTab('all')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'all'
+                    ? 'border-[#060E5D] text-[#060E5D]'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Alle Anträge ({services.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('information')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'information'
+                    ? 'border-[#060E5D] text-[#060E5D]'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Informationen ({servicesWithInformation.length})
+              </button>
+            </nav>
+          </div>
+        </div>
+
         {/* Anträge Tabelle */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">
-              Anträge ({services.length})
+              {activeTab === 'all' ? 'Alle Anträge' : 'Informationen'} ({sortedServices.length})
             </h2>
           </div>
           
-          {services.length === 0 ? (
+          {sortedServices.length === 0 ? (
             <div className="p-8 text-center">
               <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Keine Anträge vorhanden
+                {activeTab === 'all' ? 'Keine Anträge vorhanden' : 'Keine Informationen vorhanden'}
               </h3>
               <p className="text-gray-600 mb-4">
-                Sie haben noch keine Anträge eingereicht.
+                {activeTab === 'all' 
+                  ? 'Sie haben noch keine Anträge eingereicht.'
+                  : 'Es sind noch keine Informationen für Ihre Anträge verfügbar.'
+                }
               </p>
-              <button
-                onClick={() => window.location.href = '/my-services'}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#060E5D] hover:bg-[#050B4A] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#060E5D]/40"
-              >
-                Zurück zur Startseite
-              </button>
+              {activeTab === 'all' && (
+                <button
+                  onClick={() => window.location.href = '/my-services'}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#060E5D] hover:bg-[#050B4A] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#060E5D]/40"
+                >
+                  Zurück zur Startseite
+                </button>
+              )}
             </div>
           ) : (
             <>
                              {/* Tabellen-Header */}
-               <div className="grid grid-cols-[14rem_minmax(0,2fr)_12rem_12rem] gap-x-2 px-6 py-4 bg-white/95 backdrop-blur border-b border-gray-200 sticky top-0 z-10">
+               <div className={`grid gap-x-2 px-6 py-4 bg-white/95 backdrop-blur border-b border-gray-200 sticky top-0 z-10 ${
+                 activeTab === 'information' 
+                   ? 'grid-cols-[8rem_14rem_minmax(0,2fr)_20rem]' 
+                   : 'grid-cols-[8rem_14rem_minmax(0,2fr)_12rem_12rem]'
+               }`}>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => handleSort('id')}
+                    className="px-6 py-2 text-left text-sm font-semibold text-muted-foreground hover:text-gray-700 flex items-center space-x-1"
+                  >
+                    <span>#</span>
+                    {sortField === 'id' && (
+                      <span className="text-gray-400">
+                        {sortDirection === 'asc' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </button>
+                </div>
                 <div className="flex items-center space-x-2">
                                      <button
                      onClick={() => handleSort('createdAt')}
@@ -238,32 +296,41 @@ const AllMyServices = () => {
                     )}
                   </button>
                 </div>
-                <div className="flex items-center space-x-2">
-                                     <button
-                     onClick={() => handleSort('status')}
-                     className="px-6 py-2 text-left text-sm font-semibold text-muted-foreground hover:text-gray-700 flex items-center space-x-1"
-                   >
-                    <span>Status</span>
-                    {sortField === 'status' && (
-                      <span className="text-gray-400">
-                        {sortDirection === 'asc' ? '↑' : '↓'}
-                      </span>
-                    )}
-                  </button>
-                </div>
-                <div className="flex items-center space-x-2">
-                                     <button
-                     onClick={() => handleSort('decision')}
-                     className="px-6 py-2 text-left text-sm font-semibold text-muted-foreground hover:text-gray-700 flex items-center space-x-1"
-                   >
-                    <span>Entscheidung</span>
-                    {sortField === 'decision' && (
-                      <span className="text-gray-400">
-                        {sortDirection === 'asc' ? '↑' : '↓'}
-                      </span>
-                    )}
-                  </button>
-                </div>
+                {activeTab === 'all' && (
+                  <>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => handleSort('status')}
+                        className="px-6 py-2 text-left text-sm font-semibold text-muted-foreground hover:text-gray-700 flex items-center space-x-1"
+                      >
+                        <span>Status</span>
+                        {sortField === 'status' && (
+                          <span className="text-gray-400">
+                            {sortDirection === 'asc' ? '↑' : '↓'}
+                          </span>
+                        )}
+                      </button>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => handleSort('decision')}
+                        className="px-6 py-2 text-left text-sm font-semibold text-muted-foreground hover:text-gray-700 flex items-center space-x-1"
+                      >
+                        <span>Entscheidung</span>
+                        {sortField === 'decision' && (
+                          <span className="text-gray-400">
+                            {sortDirection === 'asc' ? '↑' : '↓'}
+                          </span>
+                        )}
+                      </button>
+                    </div>
+                  </>
+                )}
+                {activeTab === 'information' && (
+                  <div className="flex items-center space-x-2">
+                    <span className="px-6 py-2 text-left text-sm font-semibold text-muted-foreground">Information</span>
+                  </div>
+                )}
               </div>
 
               {/* Tabellen-Zeilen */}
@@ -271,43 +338,68 @@ const AllMyServices = () => {
                 {sortedServices.map((service) => (
                   <div 
                     key={service.id} 
-                    className="grid grid-cols-[14rem_minmax(0,2fr)_12rem_12rem] gap-x-2 px-6 py-4 bg-white border-t border-gray-100 rounded-md transition-all duration-150 hover:bg-white hover:shadow-sm hover:ring-1 hover:ring-blue-500/10 motion-safe:hover:-translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 cursor-pointer"
+                    className={`grid gap-x-2 px-6 py-4 bg-white border-t border-gray-100 rounded-md transition-all duration-150 hover:bg-white hover:shadow-sm hover:ring-1 hover:ring-blue-500/10 motion-safe:hover:-translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 cursor-pointer ${
+                      activeTab === 'information' 
+                        ? 'grid-cols-[8rem_14rem_minmax(0,2fr)_20rem]' 
+                        : 'grid-cols-[8rem_14rem_minmax(0,2fr)_12rem_12rem]'
+                    }`}
                     onClick={() => handleServiceClick(service)}
                   >
+                    {/* Antragsnummer */}
+                    <div className="flex items-center px-6 py-2">
+                      <p className="text-sm font-medium text-gray-900">
+                        #{service.id}
+                      </p>
+                    </div>
                     {/* Datum */}
-                    <div className="flex items-center">
+                    <div className="flex items-center px-6 py-2">
                       <p className="text-sm text-gray-900">
                         {formatDate(service.createdAt)}
                       </p>
                     </div>
 
                     {/* Titel */}
-                    <div className="min-w-0">
+                    <div className="min-w-0 px-6 py-2">
                       <p className="text-sm font-medium text-gray-900 truncate">
                         {service.title}
                       </p>
                     </div>
 
-                    {/* Status */}
-                    <div className="flex items-center">
-                      <div className="flex items-center space-x-2">
-                        {getStatusIcon(service.status)}
-                        <span className="text-sm text-gray-900">
-                          {getStatusText(service.status)}
-                        </span>
-                      </div>
-                    </div>
+                    {activeTab === 'all' && (
+                      <>
+                        {/* Status */}
+                        <div className="flex items-center px-6 py-2">
+                          <div className="flex items-center space-x-2">
+                            {getStatusIcon(service.status)}
+                            <span className="text-sm text-gray-900">
+                              {getStatusText(service.status)}
+                            </span>
+                          </div>
+                        </div>
 
-                    {/* Entscheidung */}
-                    <div className="flex items-center">
-                      {service.decision ? (
-                        <span className="text-sm text-gray-900">
-                          {getDecisionText(service.decision)}
-                        </span>
-                      ) : (
-                        <span className="text-sm text-gray-400">-</span>
-                      )}
-                    </div>
+                        {/* Entscheidung */}
+                        <div className="flex items-center px-6 py-2">
+                          {service.decision ? (
+                            <span className="text-sm text-gray-900">
+                              {getDecisionText(service.decision)}
+                            </span>
+                          ) : (
+                            <span className="text-sm text-gray-400">-</span>
+                          )}
+                        </div>
+                      </>
+                    )}
+                    {activeTab === 'information' && (
+                      /* Information */
+                      <div className="flex items-center px-6 py-2">
+                        <div className="flex items-center space-x-2">
+                          <FileText className="h-4 w-4 text-green-500" />
+                          <span className="text-sm text-gray-900">
+                            {service.activities?.find(a => a.action === 'INFORMATION')?.details || 'Information verfügbar'}
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -358,6 +450,10 @@ const AllMyServices = () => {
                     <div>
                       <span className="text-sm font-medium text-gray-600">Status:</span>
                       <p className="text-gray-900 mt-1">{getStatusText(selectedService.status)}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-600">Antragsnummer:</span>
+                      <p className="text-gray-900 mt-1">#{selectedService.id}</p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-gray-600">Titel:</span>

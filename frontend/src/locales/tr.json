@@ -88,7 +88,9 @@
     "tooShort": "Çok kısa",
     "tooLong": "Çok uzun",
     "aiProcessing": "AI işleniyor...",
+    "aiProcessingDescription": "Talebiniz hazırlanıyor, lütfen bir an sabırlı olun.",
     "aiError": "AI işleme hatası",
+    "requestSubmittedSuccessfully": "Talebiniz başarıyla gönderildi!",
     "translationSuccess": "Çeviri başarılı",
     "titleGenerated": "Başlık oluşturuldu"
   },

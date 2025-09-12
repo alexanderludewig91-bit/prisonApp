@@ -88,8 +88,9 @@
     "tooShort": "Zu kurz",
     "tooLong": "Zu lang",
     "aiProcessing": "KI verarbeitet...",
-    "aiProcessingDescription": "Die KI übersetzt Ihren Text und generiert einen passenden Titel.",
+    "aiProcessingDescription": "Ihr Antrag wird vorbereitet, bitte haben Sie einen Moment Geduld.",
     "aiError": "Fehler bei der KI-Verarbeitung",
+    "requestSubmittedSuccessfully": "Ihr Antrag wurde erfolgreich eingereicht!",
     "translationSuccess": "Übersetzung erfolgreich",
     "titleGenerated": "Titel generiert"
   },

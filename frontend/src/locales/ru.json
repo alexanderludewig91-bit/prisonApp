@@ -88,7 +88,9 @@
     "tooShort": "Слишком коротко",
     "tooLong": "Слишком длинно",
     "aiProcessing": "Обработка ИИ...",
+    "aiProcessingDescription": "Ваш запрос готовится, пожалуйста, наберитесь терпения на мгновение.",
     "aiError": "Ошибка обработки ИИ",
+    "requestSubmittedSuccessfully": "Ваш запрос был успешно отправлен!",
     "translationSuccess": "Перевод успешен",
     "titleGenerated": "Заголовок создан"
   },

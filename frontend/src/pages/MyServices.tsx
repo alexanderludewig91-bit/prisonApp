@@ -301,7 +301,7 @@ const MyServices = () => {
                       <FileText className="h-5 w-5 text-green-500" />
                       <div>
                         <h3 className="text-lg font-medium text-gray-900">
-                          {t('pages.myServices.informationForRequest')} "{service.titleInmate || service.title}"
+                          {t('pages.myServices.informationForRequest')} "#{service.id} {service.titleInmate || service.title}"
                         </h3>
                         <p className="text-sm text-gray-600">
                           {service.activities[0]?.details}
@@ -344,7 +344,7 @@ const MyServices = () => {
                       <MessageSquare className="h-5 w-5 text-blue-500" />
                       <div>
                         <h3 className="text-lg font-medium text-gray-900">
-                          {t('pages.myServices.inquiryForRequest')} "{service.titleInmate || service.title}"
+                          {t('pages.myServices.inquiryForRequest')} "#{service.id} {service.titleInmate || service.title}"
                         </h3>
                         <p className="text-sm text-gray-600">
                           {service.activities[0]?.details}
@@ -403,7 +403,7 @@ const MyServices = () => {
                       {getStatusIcon(service.status)}
                       <div>
                         <h3 className="text-lg font-medium text-gray-900">
-                          {service.titleInmate || service.title}
+                          #{service.id} {service.titleInmate || service.title}
                         </h3>
                         <p className="text-xs text-gray-500 mt-1">
                           {t('pages.myServices.submittedOn')} {new Date(service.createdAt).toLocaleDateString(t('pages.myServices.dateFormat'))}
@@ -453,7 +453,7 @@ const MyServices = () => {
                       {getStatusIcon(service.status)}
                       <div className="flex-1">
                         <h3 className="text-lg font-medium text-gray-900">
-                          {service.titleInmate || service.title}
+                          #{service.id} {service.titleInmate || service.title}
                         </h3>
                         <p className="text-xs text-gray-500 mt-1">
                           {t('pages.myServices.submittedOn')} {new Date(service.createdAt).toLocaleDateString(t('pages.myServices.dateFormat'))}
@@ -526,7 +526,7 @@ const MyServices = () => {
                   </div>
                   <div>
                     <span className="text-sm font-medium text-gray-600">{t('pages.myServices.fieldTitle')}:</span>
-                    <p className="text-gray-900 mt-1">{selectedService.titleInmate || selectedService.title}</p>
+                    <p className="text-gray-900 mt-1">#{selectedService.id} {selectedService.titleInmate || selectedService.title}</p>
                   </div>
                   <div>
                     <span className="text-sm font-medium text-gray-600">{t('pages.myServices.description')}:</span>
@@ -677,7 +677,7 @@ const MyServices = () => {
           <div className="bg-green-500 text-white px-8 py-4 rounded-lg shadow-lg">
             <div className="flex items-center space-x-3">
               <CheckCircle className="h-6 w-6" />
-              <span className="text-lg font-medium">Ihr Antrag wurde erfolgreich eingereicht!</span>
+              <span className="text-lg font-medium">{t('messages.requestSubmittedSuccessfully')}</span>
             </div>
           </div>
         </div>
