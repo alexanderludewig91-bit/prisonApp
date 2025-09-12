@@ -514,6 +514,47 @@ router.get('/information/:userId', [
         createdBy: Number(userId),
         activities: {
           some: {
+            action: 'information',
+            isActive: true
+          } as any
+        }
+      },
+      include: {
+        activities: {
+          where: {
+            action: 'information',
+            isActive: true
+          } as any,
+          orderBy: { when: 'desc' }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    console.log('Gefundene Services mit Informationen:', servicesWithInformation.length);
+    console.log('Services:', servicesWithInformation);
+
+    res.json({ services: servicesWithInformation });
+  } catch (error: any) {
+    console.error('Informationen abrufen error:', error);
+    res.status(500).json({ error: 'Fehler beim Abrufen der Informationen' });
+  }
+});
+
+// Alle Informationen für einen Benutzer abrufen (auch inaktive)
+router.get('/information/:userId/all', [
+  authenticateToken
+], async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { userId } = req.params;
+    console.log('Suche alle Informationen für Benutzer:', userId);
+
+    // Services des Insassen mit allen Informationen finden (auch inaktive)
+    const servicesWithInformation = await prisma.service.findMany({
+      where: {
+        createdBy: Number(userId),
+        activities: {
+          some: {
             action: 'information'
           } as any
         }
@@ -529,13 +570,73 @@ router.get('/information/:userId', [
       orderBy: { createdAt: 'desc' }
     });
 
-    console.log('Gefundene Services mit Informationen:', servicesWithInformation.length);
-    console.log('Services:', servicesWithInformation);
+    console.log('Gefundene Services mit allen Informationen:', servicesWithInformation.length);
 
     res.json({ services: servicesWithInformation });
   } catch (error: any) {
-    console.error('Informationen abrufen error:', error);
-    res.status(500).json({ error: 'Fehler beim Abrufen der Informationen' });
+    console.error('Alle Informationen abrufen error:', error);
+    res.status(500).json({ error: 'Fehler beim Abrufen aller Informationen' });
+  }
+});
+
+// Informations-Aktivität ausblenden
+router.patch('/information/:activityId/hide', [
+  authenticateToken
+], async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { activityId } = req.params;
+    
+    // Aktivität finden und prüfen, ob es eine Informations-Aktivität ist
+    const activity = await prisma.activity.findFirst({
+      where: {
+        id: Number(activityId),
+        action: 'information',
+        isActive: true
+      },
+      include: {
+        service: {
+          select: {
+            createdBy: true
+          }
+        }
+      }
+    });
+
+    if (!activity) {
+      return res.status(404).json({ error: 'Informations-Aktivität nicht gefunden' });
+    }
+
+    // Prüfen, ob der Benutzer berechtigt ist, diese Aktivität auszublenden
+    console.log('Debug Hide Information:', {
+      activityId: activity.id,
+      serviceCreatedBy: activity.service?.createdBy,
+      userId: req.user?.userId,
+      userIdType: typeof req.user?.userId,
+      serviceCreatedByType: typeof activity.service?.createdBy
+    });
+    
+    if (Number(activity.service?.createdBy) !== Number(req.user?.userId)) {
+      console.log('Berechtigung verweigert:', {
+        serviceCreatedBy: activity.service?.createdBy,
+        userId: req.user?.userId
+      });
+      return res.status(403).json({ error: 'Nicht berechtigt, diese Aktivität auszublenden' });
+    }
+
+    // Aktivität als inaktiv markieren
+    const updatedActivity = await prisma.activity.update({
+      where: { id: Number(activityId) },
+      data: { isActive: false }
+    });
+
+    res.json({ 
+      message: 'Informations-Aktivität erfolgreich ausgeblendet',
+      activity: updatedActivity 
+    });
+
+  } catch (error: any) {
+    console.error('Information hide error:', error);
+    res.status(500).json({ error: 'Fehler beim Ausblenden der Informations-Aktivität' });
   }
 });
 

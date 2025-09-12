@@ -7,7 +7,9 @@ import api from '../services/api'
 interface Service {
   id: number
   title: string
+  titleInmate?: string
   description: string
+  descriptionInmate?: string
   status: string
   priority: string
   createdAt: string
@@ -26,6 +28,7 @@ interface Service {
     details: string
     when: string
     who: string
+    isActive: boolean
   }>
 }
 
@@ -63,11 +66,11 @@ const AllMyServices = () => {
         const allServices = servicesResponse.data.services || []
         setServices(allServices)
 
-        // Informationen laden
+        // Informationen laden (alle, auch inaktive)
         if (user?.id) {
-          console.log('Lade Informationen für Benutzer:', user.id)
-          const informationResponse = await api.get(`/services/information/${user.id}`)
-          console.log('Informationen geladen:', informationResponse.data)
+          console.log('Lade alle Informationen für Benutzer:', user.id)
+          const informationResponse = await api.get(`/services/information/${user.id}/all`)
+          console.log('Alle Informationen geladen:', informationResponse.data)
           setServicesWithInformation(informationResponse.data.services || [])
         }
       } catch (error) {
@@ -254,7 +257,7 @@ const AllMyServices = () => {
                              {/* Tabellen-Header */}
                <div className={`grid gap-x-2 px-6 py-4 bg-white/95 backdrop-blur border-b border-gray-200 sticky top-0 z-10 ${
                  activeTab === 'information' 
-                   ? 'grid-cols-[8rem_14rem_minmax(0,2fr)_20rem]' 
+                   ? 'grid-cols-[8rem_14rem_minmax(0,2fr)_28rem]' 
                    : 'grid-cols-[8rem_14rem_minmax(0,2fr)_12rem_12rem]'
                }`}>
                 <div className="flex items-center space-x-2">
@@ -340,7 +343,7 @@ const AllMyServices = () => {
                     key={service.id} 
                     className={`grid gap-x-2 px-6 py-4 bg-white border-t border-gray-100 rounded-md transition-all duration-150 hover:bg-white hover:shadow-sm hover:ring-1 hover:ring-blue-500/10 motion-safe:hover:-translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 cursor-pointer ${
                       activeTab === 'information' 
-                        ? 'grid-cols-[8rem_14rem_minmax(0,2fr)_20rem]' 
+                        ? 'grid-cols-[8rem_14rem_minmax(0,2fr)_28rem]' 
                         : 'grid-cols-[8rem_14rem_minmax(0,2fr)_12rem_12rem]'
                     }`}
                     onClick={() => handleServiceClick(service)}
@@ -354,14 +357,20 @@ const AllMyServices = () => {
                     {/* Datum */}
                     <div className="flex items-center px-6 py-2">
                       <p className="text-sm text-gray-900">
-                        {formatDate(service.createdAt)}
+                        {activeTab === 'information' 
+                          ? formatDate(service.activities?.[0]?.when || service.createdAt)
+                          : formatDate(service.createdAt)
+                        }
                       </p>
                     </div>
 
                     {/* Titel */}
                     <div className="min-w-0 px-6 py-2">
                       <p className="text-sm font-medium text-gray-900 truncate">
-                        {service.title}
+                        {activeTab === 'information' 
+                          ? (service.titleInmate || service.title)
+                          : service.title
+                        }
                       </p>
                     </div>
 
@@ -393,9 +402,10 @@ const AllMyServices = () => {
                       /* Information */
                       <div className="flex items-center px-6 py-2">
                         <div className="flex items-center space-x-2">
-                          <FileText className="h-4 w-4 text-green-500" />
-                          <span className="text-sm text-gray-900">
-                            {service.activities?.find(a => a.action === 'INFORMATION')?.details || 'Information verfügbar'}
+                          <FileText className={`h-4 w-4 ${service.activities?.[0]?.isActive ? 'text-green-500' : 'text-gray-400'}`} />
+                          <span className={`text-sm ${service.activities?.[0]?.isActive ? 'text-gray-900' : 'text-gray-500'}`}>
+                            {service.activities?.[0]?.details || 'Information verfügbar'}
+                            {!service.activities?.[0]?.isActive && ' (ausgeblendet)'}
                           </span>
                         </div>
                       </div>

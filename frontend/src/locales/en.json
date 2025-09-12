@@ -91,6 +91,7 @@
     "aiProcessingDescription": "Your request is being prepared, please have a moment of patience.",
     "aiError": "AI processing error",
     "requestSubmittedSuccessfully": "Your request has been successfully submitted!",
+    "hideInformationConfirm": "Do you want to hide the information?",
     "translationSuccess": "Translation successful",
     "titleGenerated": "Title generated"
   },
@@ -158,6 +159,7 @@
       "informationReceived": "Information received on",
       "inquiryReceived": "Inquiry received on",
       "reply": "Reply",
+    "hide": "Hide",
       "recentRequests": "Your recent requests",
       "noOpenRequests": "No open requests",
       "noOpenRequestsDescription": "You currently have no open requests.",

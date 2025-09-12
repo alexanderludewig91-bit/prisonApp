@@ -91,6 +91,7 @@
     "aiProcessingDescription": "Su solicitud se está preparando, por favor tenga un momento de paciencia.",
     "aiError": "Error de procesamiento IA",
     "requestSubmittedSuccessfully": "¡Su solicitud ha sido enviada exitosamente!",
+    "hideInformationConfirm": "¿Desea ocultar la información?",
     "translationSuccess": "Traducción exitosa",
     "titleGenerated": "Título generado"
   },
@@ -158,6 +159,7 @@
       "informationReceived": "Información recibida el",
       "inquiryReceived": "Consulta recibida el",
       "reply": "Responder",
+    "hide": "Ocultar",
       "recentRequests": "Sus solicitudes recientes",
       "noOpenRequests": "No hay solicitudes abiertas",
       "noOpenRequestsDescription": "Actualmente no tiene solicitudes abiertas.",

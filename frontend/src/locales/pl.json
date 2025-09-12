@@ -91,6 +91,7 @@
     "aiProcessingDescription": "Twój wniosek jest przygotowywany, proszę o chwilę cierpliwości.",
     "aiError": "Błąd przetwarzania AI",
     "requestSubmittedSuccessfully": "Twój wniosek został pomyślnie złożony!",
+    "hideInformationConfirm": "Czy chcesz ukryć informacje?",
     "translationSuccess": "Tłumaczenie udane",
     "titleGenerated": "Tytuł wygenerowany"
   },
@@ -158,6 +159,7 @@
       "informationReceived": "Informacja otrzymana",
       "inquiryReceived": "Pytanie otrzymane",
       "reply": "Odpowiedz",
+    "hide": "Ukryj",
       "recentRequests": "Twoje ostatnie wnioski",
       "noOpenRequests": "Brak otwartych wniosków",
       "noOpenRequestsDescription": "Obecnie nie masz otwartych wniosków.",

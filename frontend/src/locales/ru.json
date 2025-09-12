@@ -91,6 +91,7 @@
     "aiProcessingDescription": "Ваш запрос готовится, пожалуйста, наберитесь терпения на мгновение.",
     "aiError": "Ошибка обработки ИИ",
     "requestSubmittedSuccessfully": "Ваш запрос был успешно отправлен!",
+    "hideInformationConfirm": "Хотите скрыть информацию?",
     "translationSuccess": "Перевод успешен",
     "titleGenerated": "Заголовок создан"
   },
@@ -158,6 +159,7 @@
       "informationReceived": "Информация получена",
       "inquiryReceived": "Вопрос получен",
       "reply": "Ответить",
+    "hide": "Скрыть",
       "recentRequests": "Ваши недавние запросы",
       "noOpenRequests": "Нет открытых запросов",
       "noOpenRequestsDescription": "У вас в настоящее время нет открытых запросов.",

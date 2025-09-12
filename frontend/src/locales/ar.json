@@ -91,6 +91,7 @@
     "aiProcessingDescription": "طلبك قيد التحضير، يرجى التحلي بالصبر لحظة.",
     "aiError": "خطأ في معالجة الذكاء الاصطناعي",
     "requestSubmittedSuccessfully": "تم إرسال طلبك بنجاح!",
+    "hideInformationConfirm": "هل تريد إخفاء المعلومات؟",
     "translationSuccess": "تمت الترجمة بنجاح",
     "titleGenerated": "تم إنشاء العنوان"
   },
@@ -158,6 +159,7 @@
       "informationReceived": "تم استلام المعلومات في",
       "inquiryReceived": "تم استلام الاستفسار في",
       "reply": "رد",
+    "hide": "إخفاء",
       "recentRequests": "طلباتك الأخيرة",
       "noOpenRequests": "لا توجد طلبات مفتوحة",
       "noOpenRequestsDescription": "ليس لديك حالياً أي طلبات مفتوحة.",

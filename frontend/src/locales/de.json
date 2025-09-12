@@ -91,6 +91,7 @@
     "aiProcessingDescription": "Ihr Antrag wird vorbereitet, bitte haben Sie einen Moment Geduld.",
     "aiError": "Fehler bei der KI-Verarbeitung",
     "requestSubmittedSuccessfully": "Ihr Antrag wurde erfolgreich eingereicht!",
+    "hideInformationConfirm": "Möchten Sie die Informationen ausblenden?",
     "translationSuccess": "Übersetzung erfolgreich",
     "titleGenerated": "Titel generiert"
   },
@@ -159,6 +160,7 @@
       "informationReceived": "Information erhalten am",
       "inquiryReceived": "Rückfrage erhalten am",
       "reply": "Antworten",
+    "hide": "Ausblenden",
       "dateFormat": "de-DE",
       "timeFormat": "de-DE",
       "recentRequests": "Ihre zuletzt gestellten Anträge",

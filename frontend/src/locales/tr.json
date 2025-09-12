@@ -91,6 +91,7 @@
     "aiProcessingDescription": "Talebiniz hazırlanıyor, lütfen bir an sabırlı olun.",
     "aiError": "AI işleme hatası",
     "requestSubmittedSuccessfully": "Talebiniz başarıyla gönderildi!",
+    "hideInformationConfirm": "Bilgileri gizlemek istiyor musunuz?",
     "translationSuccess": "Çeviri başarılı",
     "titleGenerated": "Başlık oluşturuldu"
   },
@@ -158,6 +159,7 @@
       "informationReceived": "Bilgi alındı",
       "inquiryReceived": "Soru alındı",
       "reply": "Yanıtla",
+    "hide": "Gizle",
       "recentRequests": "Son talepleriniz",
       "noOpenRequests": "Açık talep yok",
       "noOpenRequestsDescription": "Şu anda açık talebiniz bulunmuyor.",

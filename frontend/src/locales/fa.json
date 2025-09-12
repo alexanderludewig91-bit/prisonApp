@@ -91,6 +91,7 @@
     "aiProcessingDescription": "درخواست شما در حال آماده‌سازی است، لطفاً لحظه‌ای صبر کنید.",
     "aiError": "خطا در پردازش هوش مصنوعی",
     "requestSubmittedSuccessfully": "درخواست شما با موفقیت ارسال شد!",
+    "hideInformationConfirm": "آیا می‌خواهید اطلاعات را مخفی کنید؟",
     "translationSuccess": "ترجمه موفق",
     "titleGenerated": "عنوان تولید شد"
   },
@@ -158,6 +159,7 @@
       "informationReceived": "اطلاعات دریافت شده در",
       "inquiryReceived": "سوال دریافت شده در",
       "reply": "پاسخ",
+    "hide": "مخفی کردن",
       "recentRequests": "درخواست‌های اخیر شما",
       "noOpenRequests": "درخواست باز وجود ندارد",
       "noOpenRequestsDescription": "در حال حاضر هیچ درخواست بازی ندارید.",

@@ -180,6 +180,36 @@ const MyServices = () => {
     }
   }
 
+  const handleHideInformation = async (service: ServiceWithInformation) => {
+    if (!service.activities || service.activities.length === 0) return
+
+    const activity = service.activities[0] // Erste (neueste) Aktivität
+    if (!activity) return
+
+    // Bestätigungsdialog
+    const confirmed = window.confirm(t('messages.hideInformationConfirm'))
+    if (!confirmed) return
+
+    try {
+      const response = await api.patch(`/services/information/${activity.id}/hide`)
+      console.log('Information ausgeblendet:', response.data)
+
+      // Daten neu laden
+      const fetchData = async () => {
+        try {
+          const informationResponse = await api.get(`/services/information/${user?.id}`)
+          setServicesWithInformation(informationResponse.data.services || [])
+        } catch (error) {
+          console.error('Fehler beim Neuladen der Informationen:', error)
+        }
+      }
+      fetchData()
+
+    } catch (error) {
+      console.error('Fehler beim Ausblenden der Information:', error)
+    }
+  }
+
   const handleServiceClick = (service: Service) => {
     setSelectedService(service)
     setShowServiceModal(true)
@@ -310,6 +340,17 @@ const MyServices = () => {
                           {t('pages.myServices.informationReceived')} {new Date(service.activities[0]?.when || '').toLocaleDateString(t('pages.myServices.dateFormat'))}
                         </p>
                       </div>
+                    </div>
+                    <div className="text-blue-600">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleHideInformation(service)
+                        }}
+                        className="text-sm hover:underline"
+                      >
+                        {t('pages.myServices.hide')}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -526,7 +567,7 @@ const MyServices = () => {
                   </div>
                   <div>
                     <span className="text-sm font-medium text-gray-600">{t('pages.myServices.fieldTitle')}:</span>
-                    <p className="text-gray-900 mt-1">#{selectedService.id} {selectedService.titleInmate || selectedService.title}</p>
+                    <p className="text-gray-900 mt-1">{selectedService.titleInmate || selectedService.title}</p>
                   </div>
                   <div>
                     <span className="text-sm font-medium text-gray-600">{t('pages.myServices.description')}:</span>
