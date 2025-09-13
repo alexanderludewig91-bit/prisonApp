@@ -190,6 +190,47 @@ export class ClaudeProvider implements AIProvider {
     }
   }
 
+  async translateToLanguage(text: string, targetLanguage: string): Promise<string> {
+    try {
+      const response = await this.client.messages.create({
+        model: this.config.model,
+        max_tokens: this.config.maxTokens,
+        temperature: this.config.temperature,
+        messages: [
+          {
+            role: "user",
+            content: `Du bist ein Übersetzungsassistent für das digitale Antragswesen von Gefangenen im Gefängnis. Übersetze den gegebenen deutschen Text in die Zielsprache. Antworte nur mit der Übersetzung, ohne zusätzliche Erklärungen oder Formatierung.
+
+Übersetze den folgenden deutschen Text in ${targetLanguage}: "${text}"`
+          }
+        ]
+      })
+
+      const translatedText = response.content[0]?.text
+      if (!translatedText) {
+        throw new AIProviderError('Keine Übersetzung erhalten', 'NO_RESPONSE', 500)
+      }
+
+      return translatedText.trim()
+    } catch (error: any) {
+      console.error('Claude Übersetzung Fehler:', error)
+      
+      if (error.status === 401) {
+        throw new AIProviderError(
+          'Claude API Konfigurationsfehler. Bitte kontaktieren Sie den Administrator.',
+          'INVALID_API_KEY',
+          500
+        )
+      }
+      
+      throw new AIProviderError(
+        'Fehler bei der Übersetzung. Bitte versuchen Sie es erneut.',
+        'TRANSLATION_ERROR',
+        500
+      )
+    }
+  }
+
   async healthCheck(): Promise<boolean> {
     try {
       await this.client.messages.create({

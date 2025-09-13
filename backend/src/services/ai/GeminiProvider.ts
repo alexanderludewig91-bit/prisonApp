@@ -197,6 +197,41 @@ Generiere einen neuen Titel, der in der gleichen Sprache sein MUSS wie der besch
     }
   }
 
+  async translateToLanguage(text: string, targetLanguage: string): Promise<string> {
+    try {
+      const model = this.client.getGenerativeModel({ model: this.config.model })
+      const prompt = `Du bist ein Übersetzungsassistent für das digitale Antragswesen von Gefangenen im Gefängnis. Übersetze den gegebenen deutschen Text in die Zielsprache. Antworte nur mit der Übersetzung, ohne zusätzliche Erklärungen oder Formatierung.
+
+Übersetze den folgenden deutschen Text in ${targetLanguage}: "${text}"`
+
+      const result = await model.generateContent(prompt)
+      const response = await result.response
+      const translatedText = response.text()
+
+      if (!translatedText) {
+        throw new AIProviderError('Keine Übersetzung erhalten', 'NO_RESPONSE', 500)
+      }
+
+      return translatedText.trim()
+    } catch (error: any) {
+      console.error('Gemini Übersetzung Fehler:', error)
+      
+      if (error.message?.includes('API_KEY_INVALID')) {
+        throw new AIProviderError(
+          'Gemini API Konfigurationsfehler. Bitte kontaktieren Sie den Administrator.',
+          'INVALID_API_KEY',
+          500
+        )
+      }
+      
+      throw new AIProviderError(
+        'Fehler bei der Übersetzung. Bitte versuchen Sie es erneut.',
+        'TRANSLATION_ERROR',
+        500
+      )
+    }
+  }
+
   async healthCheck(): Promise<boolean> {
     try {
       const model = this.client.getGenerativeModel({ model: this.config.model })

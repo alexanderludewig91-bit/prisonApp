@@ -196,6 +196,57 @@ export class OpenAIProvider implements AIProvider {
     }
   }
 
+  async translateToLanguage(text: string, targetLanguage: string): Promise<string> {
+    try {
+      const completion = await this.client.chat.completions.create({
+        model: this.config.model,
+        messages: [
+          {
+            role: "system",
+            content: `Du bist ein Übersetzungsassistent für das digitale Antragswesen von Gefangenen im Gefängnis. Übersetze den gegebenen deutschen Text in die Zielsprache. Antworte nur mit der Übersetzung, ohne zusätzliche Erklärungen oder Formatierung.`
+          },
+          {
+            role: "user",
+            content: `Übersetze den folgenden deutschen Text in ${targetLanguage}: "${text}"`
+          }
+        ],
+        max_tokens: this.config.maxTokens,
+        temperature: this.config.temperature
+      })
+
+      const translatedText = completion.choices[0]?.message?.content
+      if (!translatedText) {
+        throw new AIProviderError('Keine Übersetzung erhalten', 'NO_RESPONSE', 500)
+      }
+
+      return translatedText.trim()
+    } catch (error: any) {
+      console.error('OpenAI Übersetzung Fehler:', error)
+      
+      if (error.code === 'insufficient_quota') {
+        throw new AIProviderError(
+          'OpenAI API Limit erreicht. Bitte versuchen Sie es später erneut.',
+          'QUOTA_EXCEEDED',
+          402
+        )
+      }
+      
+      if (error.code === 'invalid_api_key') {
+        throw new AIProviderError(
+          'OpenAI API Konfigurationsfehler. Bitte kontaktieren Sie den Administrator.',
+          'INVALID_API_KEY',
+          500
+        )
+      }
+      
+      throw new AIProviderError(
+        'Fehler bei der Übersetzung. Bitte versuchen Sie es erneut.',
+        'TRANSLATION_ERROR',
+        500
+      )
+    }
+  }
+
   async healthCheck(): Promise<boolean> {
     try {
       await this.client.chat.completions.create({

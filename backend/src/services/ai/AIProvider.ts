@@ -27,6 +27,14 @@ export interface AIProvider {
   translateTitleToOriginal(germanTitle: string, originalText: string): Promise<string>
 
   /**
+   * Übersetzt deutschen Text in eine bestimmte Zielsprache
+   * @param text - Der deutsche Text
+   * @param targetLanguage - Die Zielsprache (z.B. 'en', 'tr', 'ar')
+   * @returns Promise mit der Übersetzung in die Zielsprache
+   */
+  translateToLanguage(text: string, targetLanguage: string): Promise<string>
+
+  /**
    * Überprüft die Verfügbarkeit des AI-Services
    * @returns Promise mit dem Gesundheitsstatus
    */

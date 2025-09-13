@@ -1,9 +1,11 @@
 import { Router, Request, Response } from 'express'
 import { body, validationResult } from 'express-validator'
-import { authenticateToken } from '../middleware/auth'
+import { authenticateToken, AuthenticatedRequest } from '../middleware/auth'
 import { AIProviderFactory } from '../services/ai/AIProviderFactory'
 import { AIProviderError } from '../services/ai/AIProvider'
 import { AI_CONFIG, validateAIConfig } from '../config/ai'
+import { PrismaClient } from '@prisma/client'
+const prisma = new PrismaClient()
 
 const router = Router()
 
@@ -140,6 +142,88 @@ router.get('/providers', async (req: Request, res: Response) => {
     res.status(500).json({
       error: 'Fehler beim Abrufen der Provider-Informationen'
     })
+  }
+})
+
+// Activity-Übersetzung
+router.post('/translate-activity', [
+  authenticateToken,
+  body('activityId').isInt().withMessage('Activity ID ist erforderlich'),
+  body('targetLanguage').optional().isString().withMessage('Zielsprache muss ein String sein')
+], async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() })
+    }
+
+    const { activityId, targetLanguage } = req.body
+
+    // Activity finden
+    const activity = await prisma.activity.findUnique({
+      where: { id: Number(activityId) },
+      include: {
+        service: {
+          select: {
+            createdBy: true
+          }
+        }
+      }
+    })
+
+    if (!activity) {
+      return res.status(404).json({ error: 'Aktivität nicht gefunden' })
+    }
+
+    // Prüfen, ob der Benutzer berechtigt ist
+    if (activity.service?.createdBy !== req.user?.userId) {
+      return res.status(403).json({ error: 'Nicht berechtigt, diese Aktivität zu übersetzen' })
+    }
+
+    // Übersetzung wird immer neu erstellt (für besseres Testen)
+
+    // AI Provider initialisieren
+    const aiProvider = AIProviderFactory.createProvider(AI_CONFIG.provider)
+    if (!aiProvider) {
+      return res.status(500).json({ error: 'AI Provider nicht verfügbar' })
+    }
+
+    // Text übersetzen (nur wenn targetLanguage nicht 'de' ist)
+    let translatedText = activity.details || ''
+    if (targetLanguage && targetLanguage !== 'de') {
+      // Für Rückfragen: Deutsche Rückfrage in die Zielsprache übersetzen
+      try {
+        translatedText = await aiProvider.translateToLanguage(activity.details || '', targetLanguage)
+      } catch (error) {
+        console.error('Fehler bei Rückfragen-Übersetzung:', error)
+        // Fallback: Originaltext beibehalten
+        translatedText = activity.details || ''
+      }
+    }
+
+    // Übersetzung in der Datenbank speichern
+    await prisma.activity.update({
+      where: { id: Number(activityId) },
+      data: { translatedDetails: translatedText } as any // Temporärer Workaround bis Prisma-Client neu generiert ist
+    })
+
+    res.json({
+      success: true,
+      translatedText: translatedText,
+      message: 'Aktivität erfolgreich übersetzt'
+    })
+
+  } catch (error: any) {
+    console.error('Activity translation error:', error)
+    
+    if (error instanceof AIProviderError) {
+      return res.status(500).json({ 
+        error: 'AI-Übersetzungsfehler', 
+        details: error.message 
+      })
+    }
+    
+    res.status(500).json({ error: 'Fehler beim Übersetzen der Aktivität' })
   }
 })
 

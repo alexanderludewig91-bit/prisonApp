@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { body, validationResult } from 'express-validator';
 import { authenticateToken, checkPermission, checkGroup, AuthenticatedRequest } from '../middleware/auth';
 import { logAdminActionManually } from '../middleware/adminLogging';
+import { AIProviderFactory } from '../services/ai/AIProviderFactory';
 
 // Workflow-Regeln mit Antragstyp-Unterstützung
 interface WorkflowRule {
@@ -340,15 +341,34 @@ router.post('/:id/answers', [
     // Benutzername für Aktivität erstellen
     const who = `${user.firstName} ${user.lastName} (${user.username})`;
 
-    // Antwort als Aktivität speichern
+    // AI Provider für Übersetzung initialisieren
+    const aiProvider = AIProviderFactory.createProvider('openai'); // Temporär hardcoded
+    let translatedContent = content; // Fallback: Original verwenden
+    let originalContent = content;   // Fallback: Original verwenden
+
+    try {
+      // Versuche zu übersetzen (nur wenn AI verfügbar)
+      if (aiProvider) {
+        translatedContent = await aiProvider.translate(content);
+        originalContent = content; // Original in translatedDetails speichern
+      }
+    } catch (error) {
+      console.error('Übersetzungsfehler bei Antwort:', error);
+      // Bei Fehler: Original in beide Felder
+      translatedContent = content;
+      originalContent = content;
+    }
+
+    // Antwort als Aktivität speichern (umgekehrte Logik)
     const activity = await prisma.activity.create({
       data: {
         recordId: service.id,
         who: who,
         action: 'answer',
-        details: content,
+        details: translatedContent,        // Deutsche Übersetzung für Mitarbeiter
+        translatedDetails: originalContent, // Original für Insassen
         userId: user.id
-      }
+      } as any // Temporärer Workaround bis Prisma-Client neu generiert ist
     });
 
     // Die zugehörige Rückfrage auf inaktiv setzen

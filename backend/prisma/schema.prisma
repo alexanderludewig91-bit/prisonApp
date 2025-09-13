@@ -105,6 +105,7 @@ model Activity {
   who       String?  // Benutzername
   action    String?  // Aktion (z.B. "created", "updated", "status_changed")
   details   String?  // Details der Aktion
+  translatedDetails String? // Übersetzte Details (für Rückfragen und Antworten)
   when      DateTime @default(now())
   isActive  Boolean  @default(true) // Aktivitätsstatus (für Rückfragen: true=offen, false=beantwortet)
   

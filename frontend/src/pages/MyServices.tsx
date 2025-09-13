@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { FileText, Clock, CheckCircle, XCircle, MessageSquare, Plus } from 'lucide-react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
@@ -28,6 +28,7 @@ interface Service {
     id: number
     action: string
     details: string
+    translatedDetails?: string
     when: string
     who: string
   }>
@@ -73,7 +74,7 @@ interface ServiceWithInformation {
 
 const MyServices = () => {
   const { user } = useAuth()
-  const { t } = useLanguage()
+  const { t, currentLanguage } = useLanguage()
   const [services, setServices] = useState<Service[]>([])
   const [completedServices, setCompletedServices] = useState<Service[]>([])
   const [servicesWithInquiries, setServicesWithInquiries] = useState<ServiceWithInquiries[]>([])
@@ -83,6 +84,10 @@ const MyServices = () => {
   const [inquiryResponse, setInquiryResponse] = useState('')
   const [showInquiryModal, setShowInquiryModal] = useState(false)
   const [sendingResponse, setSendingResponse] = useState(false)
+  const [inquiryTranslation, setInquiryTranslation] = useState<string | null>(null)
+  const [translatingInquiry, setTranslatingInquiry] = useState(false)
+  const [answerTranslation, setAnswerTranslation] = useState<string | null>(null)
+  const [translatingAnswer, setTranslatingAnswer] = useState(false)
   const [showHideConfirmModal, setShowHideConfirmModal] = useState(false)
   const [selectedInformationToHide, setSelectedInformationToHide] = useState<ServiceWithInformation | null>(null)
   const [selectedService, setSelectedService] = useState<Service | null>(null)
@@ -150,10 +155,42 @@ const MyServices = () => {
     fetchData()
   }, [user?.id])
 
-  const handleInquiryClick = (service: ServiceWithInquiries) => {
+  const handleInquiryClick = async (service: ServiceWithInquiries) => {
     setSelectedInquiry(service)
     setInquiryResponse('')
+    setInquiryTranslation(null)
     setShowInquiryModal(true)
+
+    // Automatische Übersetzung nur bei Fremdsprachen (nicht bei Deutsch)
+    if (currentLanguage !== 'de') {
+      await translateInquiry(service)
+    }
+  }
+
+  const translateInquiry = async (service: ServiceWithInquiries) => {
+    if (!service.activities || service.activities.length === 0) return
+
+    const activity = service.activities[0] // Erste (neueste) Aktivität
+    if (!activity) return
+
+    // Übersetzung wird immer neu erstellt (für besseres Testen)
+
+    setTranslatingInquiry(true)
+    try {
+      const response = await api.post('/ai/translate-activity', {
+        activityId: activity.id,
+        targetLanguage: currentLanguage
+      })
+
+      if (response.data.success) {
+        setInquiryTranslation(response.data.translatedText)
+      }
+    } catch (error) {
+      console.error('Fehler beim Übersetzen der Rückfrage:', error)
+      // Bei Fehler: Keine Übersetzung anzeigen, nur Original
+    } finally {
+      setTranslatingInquiry(false)
+    }
   }
 
   const handleSendResponse = async () => {
@@ -169,6 +206,10 @@ const MyServices = () => {
       setShowInquiryModal(false)
       setSelectedInquiry(null)
       setInquiryResponse('')
+      setInquiryTranslation(null)
+      setTranslatingInquiry(false)
+      setAnswerTranslation(null)
+      setTranslatingAnswer(false)
       
       // Daten neu laden
       if (user?.id) {
@@ -180,6 +221,50 @@ const MyServices = () => {
     } finally {
       setSendingResponse(false)
     }
+  }
+
+  // Live-Übersetzung der Antwort
+  const translateAnswer = async (text: string) => {
+    if (!text.trim() || currentLanguage === 'de') {
+      setAnswerTranslation(null)
+      return
+    }
+
+    setTranslatingAnswer(true)
+    try {
+      const response = await api.post('/ai/translate', {
+        text: text,
+        language: currentLanguage
+      })
+
+      if (response.data.success) {
+        setAnswerTranslation(response.data.translatedText)
+      }
+    } catch (error) {
+      console.error('Fehler beim Übersetzen der Antwort:', error)
+      setAnswerTranslation(null)
+    } finally {
+      setTranslatingAnswer(false)
+    }
+  }
+
+  // Debounced Übersetzung
+  const debouncedTranslateAnswer = useMemo(() => {
+    let timeoutId: number
+    return (text: string) => {
+      clearTimeout(timeoutId)
+      timeoutId = window.setTimeout(() => {
+        translateAnswer(text)
+      }, 1500) // 1.5 Sekunden Pause
+    }
+  }, [currentLanguage])
+
+  const handleInquiryResponseChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value
+    setInquiryResponse(value)
+    
+    // Live-Übersetzung auslösen
+    debouncedTranslateAnswer(value)
   }
 
   const handleHideInformation = (service: ServiceWithInformation) => {
@@ -686,7 +771,27 @@ const MyServices = () => {
               {/* Rückfrage */}
               <div className="bg-blue-50 p-4 rounded-lg">
                 <h4 className="text-sm font-medium text-blue-700 mb-2">{t('pages.myServices.inquiry')}:</h4>
-                <p className="text-blue-900">{selectedInquiry.activities[0]?.details}</p>
+                
+                {/* Original-Rückfrage */}
+                <div className="mb-3">
+                  <p className="text-blue-900 font-medium">Original:</p>
+                  <p className="text-blue-900">{selectedInquiry.activities[0]?.details}</p>
+                </div>
+
+                {/* Übersetzung (nur bei Fremdsprachen) */}
+                {currentLanguage !== 'de' && (
+                  <div className="mb-3">
+                    <p className="text-blue-900 font-medium">Übersetzung:</p>
+                    {translatingInquiry ? (
+                      <p className="text-blue-600 italic">Übersetzung wird geladen...</p>
+                    ) : inquiryTranslation ? (
+                      <p className="text-blue-900">{inquiryTranslation}</p>
+                    ) : (
+                      <p className="text-blue-600 italic">Übersetzung nicht verfügbar</p>
+                    )}
+                  </div>
+                )}
+
                 <p className="text-xs text-blue-600 mt-2">
                   {t('pages.myServices.askedBy')} {selectedInquiry.activities[0]?.who} {t('pages.myServices.on')} {new Date(selectedInquiry.activities[0]?.when || '').toLocaleDateString(t('pages.myServices.dateFormat'))}
                 </p>
@@ -697,13 +802,41 @@ const MyServices = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('pages.myServices.yourAnswer')}
                 </label>
-                <textarea
-                  value={inquiryResponse}
-                  onChange={(e) => setInquiryResponse(e.target.value)}
-                  placeholder={t('pages.myServices.answerPlaceholder')}
-                  className="w-full input resize-none"
-                  rows={4}
-                />
+                
+                {/* Zwei-Spalten-Layout für Antwort */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Linke Spalte: Original-Antwort */}
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                      {currentLanguage === 'de' ? 'Ihre Antwort' : 'Your Answer'}
+                    </label>
+                    <textarea
+                      value={inquiryResponse}
+                      onChange={handleInquiryResponseChange}
+                      placeholder={t('pages.myServices.answerPlaceholder')}
+                      className="w-full input resize-none"
+                      rows={4}
+                    />
+                  </div>
+                  
+                  {/* Rechte Spalte: Deutsche Übersetzung (nur bei Fremdsprachen) */}
+                  {currentLanguage !== 'de' && (
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                        Deutsche Übersetzung
+                      </label>
+                      <div className="w-full input resize-none bg-gray-50 border border-gray-300 rounded-md p-3 min-h-[100px]">
+                        {translatingAnswer ? (
+                          <p className="text-gray-500 italic text-sm">Übersetzung wird geladen...</p>
+                        ) : answerTranslation ? (
+                          <p className="text-gray-900 text-sm">{answerTranslation}</p>
+                        ) : (
+                          <p className="text-gray-400 italic text-sm">Übersetzung erscheint hier...</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             
@@ -713,6 +846,10 @@ const MyServices = () => {
                   setShowInquiryModal(false)
                   setSelectedInquiry(null)
                   setInquiryResponse('')
+                  setInquiryTranslation(null)
+                  setTranslatingInquiry(false)
+                  setAnswerTranslation(null)
+                  setTranslatingAnswer(false)
                 }}
                 className="btn btn-secondary flex-1"
               >
