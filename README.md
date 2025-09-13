@@ -12,6 +12,7 @@ Diese Anwendung ist ein Nachbau des ursprünglichen Appian-Systems "Prisoner Ser
 - **Hausverwaltung:** Zellen-Management, Insassen-Zuweisungen, Drag & Drop, Automatische Zuweisung
 - **Insassen-Übersicht:** Zentrale Insassen-Verwaltung mit vollständigen Details und Historie
 - **KI-Integration:** Mehrsprachige Textübersetzung mit automatischer Titel-Generierung (OpenAI, Gemini, Claude)
+- **Multi-Language Support:** Vollständige Internationalisierung (i18n) mit 10 Sprachen
 
 ## 🆕 **Neue Features (Version 2.0)**
 
@@ -52,8 +53,18 @@ Diese Anwendung ist ein Nachbau des ursprünglichen Appian-Systems "Prisoner Ser
 - **Automatischer Fallback:** Wechsel zu Backup-Provider bei Ausfällen
 - **Mehrsprachige Übersetzung:** Textübersetzung in beliebige Sprachen
 - **Automatische Titel-Generierung:** Kurze, prägnante Titel (max. 5 Wörter) aus übersetztem Text
+- **Live-Übersetzung:** Echtzeit-Übersetzung in Rückfragen-Modals
+- **Rückfragen-Übersetzung:** Automatische Übersetzung von Staff-Rückfragen
+- **Antwort-Übersetzung:** Live-Übersetzung von Insassen-Antworten
 - **Zentrale Konfiguration:** Einfacher Provider-Wechsel über Umgebungsvariablen
 - **Provider-Monitoring:** Überwachung aller konfigurierten Provider
+
+### 🌍 **Multi-Language Support (i18n)**
+- **10 unterstützte Sprachen:** Deutsch, Englisch, Spanisch, Französisch, Arabisch, Persisch, Türkisch, Russisch, Polnisch, Italienisch
+- **RTL-Unterstützung:** Vollständige Unterstützung für rechts-nach-links Sprachen (Arabisch, Persisch)
+- **Sprache-abhängige KI:** Intelligente KI-Funktionen basierend auf UI-Sprache
+- **Statische Übersetzungen:** JSON-basierte Übersetzungsdateien
+- **Dynamische Inhalte:** KI-Übersetzung für dynamische Inhalte
 
 ## 🏗️ Projektstruktur
 
@@ -113,7 +124,14 @@ prisonApp/
 │   │   │   └── Login.tsx # Login-Seite
 │   │   ├── contexts/      # React Contexts
 │   │   │   ├── AuthContext.tsx # Authentifizierung
-│   │   │   └── DarkModeContext.tsx # Dark Mode
+│   │   │   ├── DarkModeContext.tsx # Dark Mode
+│   │   │   └── LanguageContext.tsx # Multi-Language Support
+│   │   ├── locales/       # Übersetzungsdateien
+│   │   │   ├── de.json    # Deutsche Übersetzungen
+│   │   │   ├── en.json    # Englische Übersetzungen
+│   │   │   ├── ar.json    # Arabische Übersetzungen
+│   │   │   ├── fa.json    # Persische Übersetzungen
+│   │   │   └── ...        # Weitere Sprachen
 │   │   └── services/      # API Services
 │   │       └── api.ts     # API-Client
 │   └── package.json
@@ -294,7 +312,13 @@ Das System wird mit folgenden Testdaten initialisiert:
 - ✅ **Code-Bereinigung:** Entfernung ungenutzter Features (ProcessManagement, ApplicationProcessing)
 - ✅ **KI-Integration:** Multi-Provider-Support für Textübersetzung und Titel-Generierung (OpenAI, Gemini, Claude)
 - ✅ **Automatische Titel-Generierung:** Kurze, prägnante Titel aus übersetztem Text
+- ✅ **Live-Übersetzung:** Echtzeit-Übersetzung in Rückfragen-Modals
+- ✅ **Rückfragen-Übersetzung:** Automatische Übersetzung von Staff-Rückfragen
+- ✅ **Antwort-Übersetzung:** Live-Übersetzung von Insassen-Antworten
 - ✅ **Anbieterunabhängige Architektur:** Einfacher Provider-Wechsel mit automatischem Fallback
+- ✅ **Multi-Language Support:** Vollständige Internationalisierung (i18n) mit 10 Sprachen
+- ✅ **RTL-Unterstützung:** Vollständige Unterstützung für rechts-nach-links Sprachen
+- ✅ **Sprache-abhängige KI:** Intelligente KI-Funktionen basierend auf UI-Sprache
 - ✅ **Benutzerübersicht:** Zentrale Verwaltung aller Mitarbeitenden
 - ✅ **Dark Mode:** Unterstützung für dunkles Design
 

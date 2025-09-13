@@ -40,6 +40,10 @@ Dieses Projekt ist eine moderne Webanwendung, die das ursprüngliche Appian-Syst
 - ✅ **Informationen erhalten:** Anzeige von Staff-Informationen zu Anträgen
 - ✅ **KI-Textübersetzung:** Mehrsprachige Eingabe mit automatischer Übersetzung ins Deutsche
 - ✅ **KI-Titel-Generierung:** Automatische Generierung kurzer, prägnanter Titel (max. 5 Wörter)
+- ✅ **Live-Übersetzung:** Echtzeit-Übersetzung in Rückfragen-Modals
+- ✅ **Rückfragen-Übersetzung:** Automatische Übersetzung von Staff-Rückfragen
+- ✅ **Antwort-Übersetzung:** Live-Übersetzung von Insassen-Antworten
+- ✅ **Multi-Language Support:** Vollständige Internationalisierung (i18n) mit 10 Sprachen
 
 ### ✅ **Mitarbeiter-Features**
   - ✅ Mitarbeiter-Dashboard mit Service-Übersicht
@@ -90,6 +94,7 @@ Dieses Projekt ist eine moderne Webanwendung, die das ursprüngliche Appian-Syst
   - ✅ Admin-Aktions-Logging für Audit-Zwecke
   - ✅ **Hausverwaltung API** - Vollständige API für Zellen-Management
   - ✅ **KI-Integration API** - Multi-Provider-Support für Textübersetzung und Titel-Generierung
+- ✅ **Multi-Language API** - Vollständige Internationalisierung (i18n) mit 10 Sprachen
 - ✅ **Neue Service-Endpunkte:**
   - ✅ `PATCH /services/:id/priority` - Prioritätsänderung
   - ✅ `POST /services/:id/inquiries` - Rückfragen an Insassen
@@ -101,6 +106,7 @@ Dieses Projekt ist eine moderne Webanwendung, die das ursprüngliche Appian-Syst
   - ✅ `POST /services/:id/personal-notification-completed` - Persönliche Eröffnung dokumentieren
 - ✅ **KI-Integration Endpunkte:**
   - ✅ `POST /api/ai/translate` - Textübersetzung und Titel-Generierung (Multi-Provider)
+  - ✅ `POST /api/ai/translate-activity` - Rückfragen-Übersetzung
   - ✅ `GET /api/ai/health` - Provider-Status-Überprüfung
   - ✅ `GET /api/ai/providers` - Provider-Informationen
 
@@ -177,10 +183,11 @@ Das System wird mit folgenden Testdaten initialisiert:
 - **Styling:** Tailwind CSS
 - **Build Tool:** Vite
 - **Routing:** React Router DOM
-- **State Management:** React Context (AuthContext, DarkModeContext)
+- **State Management:** React Context (AuthContext, DarkModeContext, LanguageContext)
 - **HTTP Client:** Axios
 - **Icons:** Lucide React
-- **UI Features:** Dark Mode Support
+- **UI Features:** Dark Mode Support, Multi-Language Support (i18n)
+- **Internationalisierung:** react-i18next mit 10 Sprachen
 
 ### Backend (Node.js + Express)
 - **Framework:** Express.js mit TypeScript
@@ -195,14 +202,25 @@ Das System wird mit folgenden Testdaten initialisiert:
 - **Schema:** Vollständig typisiert mit TypeScript
 - **Migrationen:** Automatische Schema-Updates
 - **Seeding:** Testdaten-Skripte
+- **Erweiterte Felder:** `titleInmate`, `descriptionInmate`, `translatedDetails` für Multi-Language Support
 
 ### KI-Integration (Multi-Provider)
 - **Architektur:** Anbieterunabhängige Provider-Pattern
 - **Provider:** OpenAI GPT, Google Gemini, Anthropic Claude
-- **Funktionen:** Textübersetzung und automatische Titel-Generierung
+- **Funktionen:** Textübersetzung, automatische Titel-Generierung, Live-Übersetzung
+- **Rückfragen-Übersetzung:** Automatische Übersetzung von Staff-Rückfragen
+- **Antwort-Übersetzung:** Live-Übersetzung von Insassen-Antworten
 - **Fallback:** Automatischer Provider-Wechsel bei Ausfällen
 - **Konfiguration:** Zentrale Umgebungsvariablen
 - **Monitoring:** Provider-Status-Überwachung
+
+### Multi-Language Support (i18n)
+- **Unterstützte Sprachen:** 10 Sprachen (Deutsch, Englisch, Spanisch, Französisch, Arabisch, Persisch, Türkisch, Russisch, Polnisch, Italienisch)
+- **RTL-Unterstützung:** Vollständige Unterstützung für rechts-nach-links Sprachen
+- **Sprache-abhängige KI:** Intelligente KI-Funktionen basierend auf UI-Sprache
+- **Statische Übersetzungen:** JSON-basierte Übersetzungsdateien
+- **Dynamische Inhalte:** KI-Übersetzung für dynamische Inhalte
+- **Context-Management:** LanguageContext für zentrale Sprachverwaltung
 
 ## 🔐 Authentifizierung & Berechtigungen
 
@@ -325,7 +343,13 @@ Das System wird mit folgenden Testdaten initialisiert:
 - ✅ **Code-Bereinigung:** Entfernung ungenutzter Features (ProcessManagement, ApplicationProcessing)
 - ✅ **KI-Integration:** Multi-Provider-Support für Textübersetzung und Titel-Generierung (OpenAI, Gemini, Claude)
 - ✅ **Automatische Titel-Generierung:** Kurze, prägnante Titel aus übersetztem Text
+- ✅ **Live-Übersetzung:** Echtzeit-Übersetzung in Rückfragen-Modals
+- ✅ **Rückfragen-Übersetzung:** Automatische Übersetzung von Staff-Rückfragen
+- ✅ **Antwort-Übersetzung:** Live-Übersetzung von Insassen-Antworten
 - ✅ **Anbieterunabhängige Architektur:** Einfacher Provider-Wechsel mit automatischem Fallback
+- ✅ **Multi-Language Support:** Vollständige Internationalisierung (i18n) mit 10 Sprachen
+- ✅ **RTL-Unterstützung:** Vollständige Unterstützung für rechts-nach-links Sprachen
+- ✅ **Sprache-abhängige KI:** Intelligente KI-Funktionen basierend auf UI-Sprache
 - ✅ **Benutzerübersicht:** Zentrale Verwaltung aller Mitarbeitenden
 - ✅ **Dark Mode:** Unterstützung für dunkles Design
 
