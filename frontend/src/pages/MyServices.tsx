@@ -673,34 +673,34 @@ const MyServices = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Rückfrage zum Antrag "{selectedInquiry.titleInmate || selectedInquiry.title}"
+              {t('pages.myServices.inquiryTitle')} "{selectedInquiry.titleInmate || selectedInquiry.title}"
             </h3>
             
             <div className="space-y-4">
               {/* Antragsdetails */}
               <div className="bg-gray-50 p-4 rounded-lg">
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Ihr Antrag:</h4>
+                <h4 className="text-sm font-medium text-gray-700 mb-2">{t('pages.myServices.yourRequest')}</h4>
                 <p className="text-gray-900">{selectedInquiry.description}</p>
               </div>
 
               {/* Rückfrage */}
               <div className="bg-blue-50 p-4 rounded-lg">
-                <h4 className="text-sm font-medium text-blue-700 mb-2">Rückfrage:</h4>
+                <h4 className="text-sm font-medium text-blue-700 mb-2">{t('pages.myServices.inquiry')}:</h4>
                 <p className="text-blue-900">{selectedInquiry.activities[0]?.details}</p>
                 <p className="text-xs text-blue-600 mt-2">
-                  Gestellt von: {selectedInquiry.activities[0]?.who} am {new Date(selectedInquiry.activities[0]?.when || '').toLocaleDateString(t('pages.myServices.dateFormat'))}
+                  {t('pages.myServices.askedBy')} {selectedInquiry.activities[0]?.who} {t('pages.myServices.on')} {new Date(selectedInquiry.activities[0]?.when || '').toLocaleDateString(t('pages.myServices.dateFormat'))}
                 </p>
               </div>
 
               {/* Antwort */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Ihre Antwort:
+                  {t('pages.myServices.yourAnswer')}
                 </label>
                 <textarea
                   value={inquiryResponse}
                   onChange={(e) => setInquiryResponse(e.target.value)}
-                  placeholder="Geben Sie hier Ihre Antwort auf die Rückfrage ein..."
+                  placeholder={t('pages.myServices.answerPlaceholder')}
                   className="w-full input resize-none"
                   rows={4}
                 />
@@ -716,14 +716,14 @@ const MyServices = () => {
                 }}
                 className="btn btn-secondary flex-1"
               >
-                Abbrechen
+                {t('buttons.cancel')}
               </button>
               <button
                 onClick={handleSendResponse}
                 disabled={!inquiryResponse.trim() || sendingResponse}
                 className="btn btn-primary flex-1"
               >
-                {sendingResponse ? 'Senden...' : 'Antwort senden'}
+                {sendingResponse ? t('pages.myServices.sending') : t('pages.myServices.sendAnswer')}
               </button>
             </div>
           </div>
