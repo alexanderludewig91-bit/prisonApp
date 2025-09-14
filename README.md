@@ -13,6 +13,7 @@ Diese Anwendung ist ein Nachbau des ursprünglichen Appian-Systems "Prisoner Ser
 - **Insassen-Übersicht:** Zentrale Insassen-Verwaltung mit vollständigen Details und Historie
 - **KI-Integration:** Mehrsprachige Textübersetzung mit automatischer Titel-Generierung (OpenAI, Gemini, Claude)
 - **Multi-Language Support:** Vollständige Internationalisierung (i18n) mit 10 Sprachen
+- **Information-Modal:** Anklickbare Informationsliste mit KI-Übersetzung und Ausblenden-Funktion
 
 ## 🆕 **Neue Features (Version 2.0)**
 
@@ -56,6 +57,7 @@ Diese Anwendung ist ein Nachbau des ursprünglichen Appian-Systems "Prisoner Ser
 - **Live-Übersetzung:** Echtzeit-Übersetzung in Rückfragen-Modals
 - **Rückfragen-Übersetzung:** Automatische Übersetzung von Staff-Rückfragen
 - **Antwort-Übersetzung:** Live-Übersetzung von Insassen-Antworten
+- **Information-Übersetzung:** Automatische Übersetzung von Staff-Informationen im Modal
 - **Zentrale Konfiguration:** Einfacher Provider-Wechsel über Umgebungsvariablen
 - **Provider-Monitoring:** Überwachung aller konfigurierten Provider
 
@@ -297,7 +299,7 @@ Das System wird mit folgenden Testdaten initialisiert:
 
 ## 📝 Changelog
 
-### Version 2.0 (Januar 2025)
+### Version 2.0
 - ✅ **Neue Status/Entscheidungs-Architektur:** Trennung von Workflow-Phase und Ergebnis
 - ✅ **Vereinfachte Prioritäten:** Nur noch HIGH und URGENT, null als Standard
 - ✅ **Neue Bearbeiter-Aktionen:** Insassen kontaktieren, weiterleiten, entscheiden, persönliche Eröffnung
@@ -319,10 +321,11 @@ Das System wird mit folgenden Testdaten initialisiert:
 - ✅ **Multi-Language Support:** Vollständige Internationalisierung (i18n) mit 10 Sprachen
 - ✅ **RTL-Unterstützung:** Vollständige Unterstützung für rechts-nach-links Sprachen
 - ✅ **Sprache-abhängige KI:** Intelligente KI-Funktionen basierend auf UI-Sprache
+- ✅ **Information-Modal:** Anklickbare Informationsliste mit KI-Übersetzung und Ausblenden-Funktion
 - ✅ **Benutzerübersicht:** Zentrale Verwaltung aller Mitarbeitenden
 - ✅ **Dark Mode:** Unterstützung für dunkles Design
 
-### Version 1.0 (Dezember 2024)
+### Version 1.0
 - ✅ Basis-System mit Authentifizierung
 - ✅ Insassen- und Mitarbeiter-Features
 - ✅ Admin-Dashboard und Gruppen-Management
@@ -363,5 +366,4 @@ Dieses Projekt ist für interne Zwecke entwickelt und nicht zur öffentlichen Ve
 ---
 
 **Entwickelt für:** Prisoner Services System  
-**Version:** 2.0  
-**Letzte Aktualisierung:** Januar 2025
+**Version:** 2.0

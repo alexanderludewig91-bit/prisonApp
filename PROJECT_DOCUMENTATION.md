@@ -9,7 +9,7 @@ Dieses Projekt ist eine moderne Webanwendung, die das ursprüngliche Appian-Syst
 
 ## 🚀 Aktueller Status
 
-### ✅ Implementiert (Stand: Januar 2025)
+### ✅ Implementiert
 - **Backend:** Node.js + Express + TypeScript + Prisma + SQLite
 - **Frontend:** React + TypeScript + Tailwind CSS + Vite
 - **Authentifizierung:** JWT-Token basiert mit flexibler Gruppen-basierter Rollenverwaltung
@@ -43,6 +43,8 @@ Dieses Projekt ist eine moderne Webanwendung, die das ursprüngliche Appian-Syst
 - ✅ **Live-Übersetzung:** Echtzeit-Übersetzung in Rückfragen-Modals
 - ✅ **Rückfragen-Übersetzung:** Automatische Übersetzung von Staff-Rückfragen
 - ✅ **Antwort-Übersetzung:** Live-Übersetzung von Insassen-Antworten
+- ✅ **Information-Übersetzung:** Automatische Übersetzung von Staff-Informationen im Modal
+- ✅ **Information-Modal:** Anklickbare Informationsliste mit KI-Übersetzung und Ausblenden-Funktion
 - ✅ **Multi-Language Support:** Vollständige Internationalisierung (i18n) mit 10 Sprachen
 
 ### ✅ **Mitarbeiter-Features**
@@ -350,10 +352,11 @@ Das System wird mit folgenden Testdaten initialisiert:
 - ✅ **Multi-Language Support:** Vollständige Internationalisierung (i18n) mit 10 Sprachen
 - ✅ **RTL-Unterstützung:** Vollständige Unterstützung für rechts-nach-links Sprachen
 - ✅ **Sprache-abhängige KI:** Intelligente KI-Funktionen basierend auf UI-Sprache
+- ✅ **Information-Modal:** Anklickbare Informationsliste mit KI-Übersetzung und Ausblenden-Funktion
 - ✅ **Benutzerübersicht:** Zentrale Verwaltung aller Mitarbeitenden
 - ✅ **Dark Mode:** Unterstützung für dunkles Design
 
-### Version 1.0 (Dezember 2024)
+### Version 1.0
 - ✅ Basis-System mit Authentifizierung
 - ✅ Insassen- und Mitarbeiter-Features
 - ✅ Admin-Dashboard und Gruppen-Management
@@ -386,5 +389,4 @@ Dieses Projekt ist für interne Zwecke entwickelt und nicht zur öffentlichen Ve
 ---
 
 **Entwickelt für:** Prisoner Services System  
-**Version:** 2.0  
-**Letzte Aktualisierung:** Januar 2025
+**Version:** 2.0
