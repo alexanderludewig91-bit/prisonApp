@@ -167,6 +167,8 @@ prisonApp/
    ```bash
    cd frontend
    npm install
+   # Für Multi-Language Support (i18n):
+   npm install i18next react-i18next i18next-browser-languagedetector
    ```
 
 3. **Anwendung starten:**
