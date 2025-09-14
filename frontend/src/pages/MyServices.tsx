@@ -67,6 +67,7 @@ interface ServiceWithInformation {
     id: number
     action: string
     details: string
+    translatedDetails?: string
     when: string
     who: string
   }>
@@ -96,6 +97,18 @@ const MyServices = () => {
   const [newServiceType, setNewServiceType] = useState('FREETEXT')
   const [submittingNewService, setSubmittingNewService] = useState(false)
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
+  
+  // States für Service-Details-Modal Übersetzungen
+  const [activityTranslations, setActivityTranslations] = useState<{[key: number]: string}>({})
+  const [translatingActivities, setTranslatingActivities] = useState<Set<number>>(new Set())
+  
+  // States für Information-Modal
+  const [selectedInformation, setSelectedInformation] = useState<ServiceWithInformation | null>(null)
+  const [showInformationModal, setShowInformationModal] = useState(false)
+  
+  // States für Information-Modal Übersetzungen
+  const [informationTranslations, setInformationTranslations] = useState<{[key: number]: string}>({})
+  const [translatingInformation, setTranslatingInformation] = useState<Set<number>>(new Set())
 
   // Prüfe ob Benutzer ein Insasse ist
   const userGroups = user?.groups?.map(g => g.name) || []
@@ -313,9 +326,14 @@ const MyServices = () => {
     setSelectedInformationToHide(null)
   }
 
-  const handleServiceClick = (service: Service) => {
+  const handleServiceClick = async (service: Service) => {
     setSelectedService(service)
     setShowServiceModal(true)
+    
+    // Übersetzungen laden (nur bei nicht-deutscher UI)
+    if (currentLanguage !== 'de') {
+      await loadServiceTranslations(service)
+    }
   }
 
 
@@ -323,6 +341,120 @@ const MyServices = () => {
   const handleNewServiceClick = () => {
     setShowNewServiceModal(true)
     setNewServiceType('FREETEXT')
+  }
+
+  // Handler für Information-Modal
+  const handleInformationClick = async (service: ServiceWithInformation) => {
+    setSelectedInformation(service)
+    setShowInformationModal(true)
+    
+    // Übersetzungen laden (nur bei Fremdsprachen)
+    if (currentLanguage !== 'de') {
+      await loadInformationTranslations(service)
+    }
+  }
+
+  const handleCloseInformationModal = () => {
+    setShowInformationModal(false)
+    setSelectedInformation(null)
+    // Reset Übersetzungs-States
+    setInformationTranslations({})
+    setTranslatingInformation(new Set())
+  }
+
+  // Übersetzungsfunktion für Information-Modal
+  const translateInformationActivity = async (activityId: number, _details: string) => {
+    if (currentLanguage === 'de') {
+      return
+    }
+
+    setTranslatingInformation(prev => new Set([...prev, activityId]))
+    try {
+      const response = await api.post('/ai/translate-activity', {
+        activityId: activityId,
+        targetLanguage: currentLanguage
+      })
+
+      if (response.data.success) {
+        setInformationTranslations(prev => ({
+          ...prev,
+          [activityId]: response.data.translatedText
+        }))
+      }
+    } catch (error) {
+      console.error('Fehler beim Übersetzen der Information:', error)
+    } finally {
+      setTranslatingInformation(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(activityId)
+        return newSet
+      })
+    }
+  }
+
+  // Lade Übersetzungen für Information-Modal
+  const loadInformationTranslations = async (service: ServiceWithInformation) => {
+    if (service.activities) {
+      const informationActivities = service.activities.filter(activity =>
+        activity.action === 'information'
+      )
+      for (const activity of informationActivities) {
+        await translateInformationActivity(activity.id, activity.details)
+      }
+    }
+  }
+
+  // Reset-Funktion für Service-Details-Modal
+  const resetServiceModalStates = () => {
+    setActivityTranslations({})
+    setTranslatingActivities(new Set())
+  }
+
+  // Übersetzungsfunktionen für Service-Details-Modal
+  const translateActivity = async (activityId: number, _details: string) => {
+    // Keine Übersetzung für Antworten
+    if (currentLanguage === 'de') {
+      return
+    }
+
+    setTranslatingActivities(prev => new Set([...prev, activityId]))
+    try {
+      const response = await api.post('/ai/translate-activity', {
+        activityId: activityId,
+        targetLanguage: currentLanguage
+      })
+
+      if (response.data.success) {
+        setActivityTranslations(prev => ({
+          ...prev,
+          [activityId]: response.data.translatedText
+        }))
+      }
+    } catch (error) {
+      console.error('Fehler beim Übersetzen der Aktivität:', error)
+    } finally {
+      setTranslatingActivities(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(activityId)
+        return newSet
+      })
+    }
+  }
+
+
+  const loadServiceTranslations = async (service: Service) => {
+    // Übersetzungen für alle relevanten Aktivitäten laden
+    if (service.activities) {
+      const translatableActivities = service.activities.filter(activity => 
+        activity.action === 'inquiry' || 
+        activity.action === 'information' ||
+        activity.action === 'decision_made' // Auch decision_made übersetzen, wird separat angezeigt
+      )
+      
+      for (const activity of translatableActivities) {
+        await translateActivity(activity.id, activity.details)
+      }
+    }
   }
 
 
@@ -427,7 +559,8 @@ const MyServices = () => {
               {servicesWithInformation.map((service) => (
                 <div 
                   key={service.id} 
-                  className="px-6 py-4 bg-white border-t border-gray-100 rounded-md transition-all duration-150 hover:bg-white hover:shadow-sm hover:ring-1 hover:ring-blue-500/10 motion-safe:hover:-translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+                  className="px-6 py-4 bg-white border-t border-gray-100 rounded-md transition-all duration-150 hover:bg-white hover:shadow-sm hover:ring-1 hover:ring-blue-500/10 motion-safe:hover:-translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 cursor-pointer"
+                  onClick={() => handleInformationClick(service)}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
@@ -683,6 +816,7 @@ const MyServices = () => {
               {(() => {
                 if (selectedService.activities && selectedService.activities.length > 0) {
                   // Alle Rückfrage-bezogenen Activities finden und chronologisch sortieren (älteste zuerst)
+                  // decision_made wird separat neben der Entscheidung angezeigt
                   const inquiryActivities = selectedService.activities
                     .filter(activity => 
                       activity.action === 'inquiry' || 
@@ -703,9 +837,32 @@ const MyServices = () => {
                               <h5 className="text-sm font-medium text-gray-600 mb-2">
                                 {activity.action === 'inquiry' ? t('pages.myServices.inquiry') :
                                  activity.action === 'answer' ? t('pages.myServices.answer') :
-                                 activity.action === 'information' ? t('pages.myServices.information') : t('pages.myServices.message')} {t('pages.myServices.from')} {activity.who.split(' (')[0]} {t('pages.myServices.on')} {new Date(activity.when).toLocaleDateString(t('pages.myServices.dateFormat'))} {t('pages.myServices.at')} {new Date(activity.when).toLocaleTimeString(t('pages.myServices.timeFormat'))}
+                                 activity.action === 'information' ? t('pages.myServices.information') :
+                                 activity.action === 'decision_made' ? t('pages.myServices.reason') : t('pages.myServices.message')} {t('pages.myServices.from')} {activity.who.split(' (')[0]} {t('pages.myServices.on')} {new Date(activity.when).toLocaleDateString(t('pages.myServices.dateFormat'))} {t('pages.myServices.at')} {new Date(activity.when).toLocaleTimeString(t('pages.myServices.timeFormat'))}
                               </h5>
-                              <p className="text-gray-900 leading-relaxed">{activity.details}</p>
+                              
+                              {/* Für Antworten: Nur translatedDetails anzeigen */}
+                              {activity.action === 'answer' ? (
+                                <p className="text-gray-900 leading-relaxed">{activity.translatedDetails || activity.details}</p>
+                              ) : (
+                                /* Für Rückfragen/Informationen/Entscheidungsbegründung: Original + Übersetzung */
+                                <div className="space-y-2">
+                                  <p className="text-gray-900 leading-relaxed">{activity.details}</p>
+                                  {currentLanguage !== 'de' && (
+                                    <>
+                                      {translatingActivities.has(activity.id) ? (
+                                        <div className="bg-blue-50 p-3 rounded-md">
+                                          <p className="text-blue-600 text-sm">Übersetzung wird geladen...</p>
+                                        </div>
+                                      ) : activityTranslations[activity.id] ? (
+                                        <div className="bg-blue-50 p-3 rounded-md">
+                                          <p className="text-blue-800 leading-relaxed">{activityTranslations[activity.id]}</p>
+                                        </div>
+                                      ) : null}
+                                    </>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           ))}
                         </div>
@@ -717,25 +874,47 @@ const MyServices = () => {
               })()}
 
               {/* Entscheidung und Begründung (nur bei abgeschlossenen Anträgen) */}
-              {selectedService.decision && selectedService.status === 'COMPLETED' && (
-                <div>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-3 border-b border-gray-200 pb-2">
-                    {t('pages.myServices.decision')}
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <span className="text-sm font-medium text-gray-600">{t('pages.myServices.decision')}:</span>
-                      <p className="text-gray-900 mt-1">{getDecisionText(selectedService.decision)}</p>
-                    </div>
-                    {selectedService.decisionReason && (
+              {selectedService.decision && selectedService.status === 'COMPLETED' && (() => {
+                // Entscheidungsbegründung aus Activities extrahieren
+                const decisionActivity = selectedService.activities?.find(activity => 
+                  activity.action === 'decision_made'
+                )
+                
+                return (
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-3 border-b border-gray-200 pb-2">
+                      {t('pages.myServices.decision')}
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <span className="text-sm font-medium text-gray-600">{t('pages.myServices.reason')}:</span>
-                        <p className="text-gray-900 mt-1">{selectedService.decisionReason}</p>
+                        <span className="text-sm font-medium text-gray-600">{t('pages.myServices.decision')}:</span>
+                        <p className="text-gray-900 mt-1">{getDecisionText(selectedService.decision)}</p>
                       </div>
-                    )}
+                      {decisionActivity && (
+                        <div className="space-y-2">
+                          <div>
+                            <span className="text-sm font-medium text-gray-600">{t('pages.myServices.reason')}:</span>
+                            <p className="text-gray-900 mt-1">{decisionActivity.details}</p>
+                          </div>
+                          {currentLanguage !== 'de' && (
+                            <>
+                              {translatingActivities.has(decisionActivity.id) ? (
+                                <div className="bg-blue-50 p-3 rounded-md">
+                                  <p className="text-blue-600 text-sm">Übersetzung wird geladen...</p>
+                                </div>
+                              ) : activityTranslations[decisionActivity.id] ? (
+                                <div className="bg-blue-50 p-3 rounded-md">
+                                  <p className="text-blue-800 leading-relaxed">{activityTranslations[decisionActivity.id]}</p>
+                                </div>
+                              ) : null}
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )
+              })()}
             </div>
             
             <div className="flex justify-end mt-6">
@@ -743,6 +922,7 @@ const MyServices = () => {
                 onClick={() => {
                   setShowServiceModal(false)
                   setSelectedService(null)
+                  resetServiceModalStates()
                 }}
                 className="btn btn-secondary"
               >
@@ -969,6 +1149,108 @@ const MyServices = () => {
                   {t('pages.myServices.hide')}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Information-Modal */}
+      {showInformationModal && selectedInformation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+              <FileText className="h-5 w-5 text-green-500" />
+              <span>{t('pages.myServices.information')}</span>
+            </h3>
+            
+            <div className="space-y-6">
+              {/* Antragsinformationen */}
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900 mb-3 border-b border-gray-200 pb-2">
+                  {t('pages.myServices.requestDetails')}
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-sm font-medium text-gray-600">{t('pages.myServices.status')}:</span>
+                    <p className="text-gray-900 mt-1">{getStatusText(selectedInformation.status)}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-600">{t('pages.myServices.requestDate')}:</span>
+                    <p className="text-gray-900 mt-1">
+                      {new Date(selectedInformation.createdAt).toLocaleDateString(t('pages.myServices.dateFormat'))}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-600">{t('pages.myServices.fieldTitle')}:</span>
+                    <p className="text-gray-900 mt-1">{selectedInformation.titleInmate || selectedInformation.title}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-600">{t('pages.myServices.description')}:</span>
+                    <p className="text-gray-900 mt-1 leading-relaxed">{selectedInformation.descriptionInmate || selectedInformation.description}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Information Details */}
+              {selectedInformation.activities && selectedInformation.activities.length > 0 && (
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3 border-b border-gray-200 pb-2">
+                    {t('pages.myServices.additionalInfo')}
+                  </h4>
+                  {selectedInformation.activities.map((activity, index) => (
+                    <div key={index} className="space-y-2">
+                      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <p className="text-gray-800 leading-relaxed">{activity.details}</p>
+                            
+                            {/* Übersetzung anzeigen (nur bei Fremdsprachen) */}
+                            {currentLanguage !== 'de' && (
+                              <>
+                                {translatingInformation.has(activity.id) ? (
+                                  <div className="bg-blue-50 p-3 rounded-md mt-2">
+                                    <p className="text-blue-600 text-sm">Übersetzung wird geladen...</p>
+                                  </div>
+                                ) : informationTranslations[activity.id] ? (
+                                  <div className="bg-blue-50 p-3 rounded-md mt-2">
+                                    <p className="text-blue-800 leading-relaxed">{informationTranslations[activity.id]}</p>
+                                  </div>
+                                ) : null}
+                              </>
+                            )}
+                            
+                            <p className="text-xs text-gray-600 mt-2">
+                              {t('pages.myServices.informationReceived')} {new Date(activity.when).toLocaleDateString(t('pages.myServices.dateFormat'))} {t('pages.myServices.at')} {new Date(activity.when).toLocaleTimeString(t('pages.myServices.timeFormat'))}
+                            </p>
+                            <p className="text-xs text-gray-600">
+                              {t('pages.myServices.from')} {activity.who}
+                            </p>
+                          </div>
+                          <FileText className="h-5 w-5 text-gray-500 flex-shrink-0 ml-3" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            <div className="flex justify-between mt-6">
+              <button
+                onClick={() => {
+                  handleHideInformation(selectedInformation)
+                  handleCloseInformationModal()
+                }}
+                className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline transition-colors"
+              >
+                {t('pages.myServices.hide')}
+              </button>
+              <button
+                onClick={handleCloseInformationModal}
+                className="btn btn-secondary"
+              >
+                {t('pages.myServices.close')}
+              </button>
             </div>
           </div>
         </div>

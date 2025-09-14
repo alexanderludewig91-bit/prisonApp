@@ -290,8 +290,8 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       {t('modals.newService.germanTitle')}:
                     </label>
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                      <p className="text-green-800 font-medium">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <p className="text-blue-800 font-medium">
                         {generatedTitle}
                       </p>
                     </div>
