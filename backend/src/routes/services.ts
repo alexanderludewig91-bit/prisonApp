@@ -4,94 +4,10 @@ import { body, validationResult } from 'express-validator';
 import { authenticateToken, checkPermission, checkGroup, AuthenticatedRequest } from '../middleware/auth';
 import { logAdminActionManually } from '../middleware/adminLogging';
 import { AIProviderFactory } from '../services/ai/AIProviderFactory';
-
-// Workflow-Regeln mit Antragstyp-Unterstützung
-interface WorkflowRule {
-  fromStatus: string;
-  toStatus: string;
-  conditions: string[];
-  serviceType?: string; // Optional: Nur für bestimmte Antragstypen
-}
-
-const workflowRules: WorkflowRule[] = [
-  // Workflow-Regeln werden später gemeinsam definiert
-];
+import { getStatusText, checkRole, checkWorkflowRules } from './common';
 
 const router = express.Router();
 const prisma = new PrismaClient();
-
-// Hilfsfunktion für Status-Text-Übersetzung
-const getStatusText = (status: string) => {
-  switch (status) {
-    case 'PENDING':
-      return 'Ausstehend'
-    case 'IN_PROGRESS':
-      return 'In Bearbeitung'
-    case 'COMPLETED':
-      return 'Abgeschlossen'
-    case 'REJECTED':
-      return 'Abgelehnt'
-    default:
-      return status
-  }
-}
-
-// Middleware für Rollenprüfung (Legacy - wird durch checkPermission ersetzt)
-const checkRole = (allowedRoles: string[]) => {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    // Prüfe ob Benutzer in entsprechenden Gruppen ist
-    const hasRole = req.user?.groups.some(group => 
-      allowedRoles.includes(group) || 
-      (group.includes('PS Designers') && allowedRoles.includes('ADMIN')) ||
-      (group.includes('PS Inmates') && allowedRoles.includes('INMATE')) ||
-      (group.includes('PS General Enforcement Service') && allowedRoles.includes('STAFF'))
-    );
-    
-    if (!hasRole) {
-      return res.status(403).json({ error: 'Keine Berechtigung für diese Aktion' });
-    }
-    next();
-  };
-};
-
-// Workflow-Funktionen mit Antragstyp-Unterstützung
-const checkWorkflowRules = async (serviceId: number, newStatus: string, reason?: string) => {
-  try {
-    const service = await prisma.service.findUnique({
-      where: { id: serviceId },
-      include: { createdByUser: true }
-    });
-
-    if (!service) return null;
-
-    // Workflow-Regel für den neuen Status und Antragstyp finden
-    const rule = workflowRules.find(r => 
-      r.fromStatus === service.status && 
-      r.toStatus === newStatus &&
-      (!r.serviceType || r.serviceType === (service as any).serviceType)
-    );
-    
-    if (!rule) return null;
-
-    // Aktivität für Workflow-Übergang loggen
-    const workflowDetails = `Der Status wurde auf ${getStatusText(newStatus)} gesetzt. ${reason ? `Grund: ${reason}` : ''}`;
-
-    await prisma.activity.create({
-      data: {
-        recordId: serviceId,
-        who: service.createdByUser.username,
-        action: 'workflow_transition',
-        details: workflowDetails,
-        userId: service.createdBy
-      }
-    });
-
-    return rule;
-  } catch (error) {
-    console.error('Workflow rule check error:', error);
-    return null;
-  }
-};
 
 
 
