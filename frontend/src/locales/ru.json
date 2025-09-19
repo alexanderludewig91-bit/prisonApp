@@ -111,6 +111,7 @@
   "modals": {
     "newService": {
       "title": "Новый Запрос",
+      "selectServiceType": "Какой запрос вы хотите сделать",
       "subtitle": "Создать новый запрос",
       "serviceType": "Тип Запроса",
       "freetext": "Другие Вопросы",

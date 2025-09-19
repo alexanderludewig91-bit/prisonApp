@@ -111,6 +111,7 @@
   "modals": {
     "newService": {
       "title": "درخواست جدید",
+      "selectServiceType": "چه درخواستی می‌خواهید ارائه دهید",
       "subtitle": "ایجاد درخواست جدید",
       "serviceType": "نوع درخواست",
       "freetext": "سایر نگرانی‌ها",

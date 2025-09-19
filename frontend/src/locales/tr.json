@@ -111,6 +111,7 @@
   "modals": {
     "newService": {
       "title": "Yeni Talep",
+      "selectServiceType": "Hangi talebi yapmak istiyorsunuz",
       "subtitle": "Yeni bir talep oluştur",
       "serviceType": "Talep Türü",
       "freetext": "Diğer Endişeler",

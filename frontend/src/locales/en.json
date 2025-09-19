@@ -111,6 +111,7 @@
   "modals": {
     "newService": {
       "title": "New Request",
+      "selectServiceType": "What request would you like to make",
       "subtitle": "Create a new request",
       "serviceType": "Request Type",
       "freetext": "Other Concern",

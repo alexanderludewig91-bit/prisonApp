@@ -207,6 +207,7 @@
     },
     "newService": {
       "title": "Nowe Zgłoszenie",
+      "selectServiceType": "Jakie zgłoszenie chcesz złożyć",
       "subtitle": "Utwórz nowe zgłoszenie",
       "serviceType": "Typ Zgłoszenia",
       "freetext": "Inne Zaniepokojenie",

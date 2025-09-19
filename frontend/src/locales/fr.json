@@ -111,6 +111,7 @@
   "modals": {
     "newService": {
       "title": "Nouvelle Demande",
+      "selectServiceType": "Quelle demande souhaitez-vous faire",
       "subtitle": "Créer une nouvelle demande",
       "serviceType": "Type de Demande",
       "freetext": "Autre Préoccupation",

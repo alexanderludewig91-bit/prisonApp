@@ -111,6 +111,7 @@
   "modals": {
     "newService": {
       "title": "Nueva Solicitud",
+      "selectServiceType": "¿Qué solicitud desea hacer",
       "subtitle": "Crear una nueva solicitud",
       "serviceType": "Tipo de Solicitud",
       "freetext": "Otra Consulta",
