@@ -156,6 +156,7 @@
       "originalTitle": "Titel (Original)",
       "germanDescription": "Beschreibung (für Mitarbeiter)",
       "originalDescription": "Beschreibung (Original)",
+      "toRequest": "Zum Antrag",
       "prepareRequest": "Antrag vorbereiten",
       "submitRequest": "Antrag einreichen",
       "back": "Zurück",

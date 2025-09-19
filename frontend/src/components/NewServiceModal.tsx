@@ -14,6 +14,7 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
   const { t, currentLanguage } = useLanguage()
   const [step, setStep] = useState<'select' | 'input' | 'processing' | 'review'>('select')
   const [selectedServiceType, setSelectedServiceType] = useState<string>('')
+  const [expandedCard, setExpandedCard] = useState<string | null>(null)
   const [originalText, setOriginalText] = useState('')
   const [translatedText, setTranslatedText] = useState('')
   const [generatedTitle, setGeneratedTitle] = useState('')
@@ -24,12 +25,35 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
     // Reset state
     setStep('select')
     setSelectedServiceType('')
+    setExpandedCard(null)
     setOriginalText('')
     setTranslatedText('')
     setGeneratedTitle('')
     setOriginalTitle('')
     setError('')
     onClose()
+  }
+
+  const handleCardClick = (serviceType: string) => {
+    if (expandedCard === serviceType) {
+      // Wenn bereits erweitert, zum Antrag navigieren
+      handleServiceTypeSelect(serviceType)
+    } else {
+      // Karte erweitern
+      setExpandedCard(serviceType)
+    }
+  }
+
+  const handleModalClick = (e: React.MouseEvent) => {
+    // Zurücksetzen wenn auf leere Stellen geklickt wird
+    const target = e.target as HTMLElement
+    // Prüfe ob der Klick NICHT auf eine Karte oder deren Inhalte war
+    if (!target.closest('.cursor-pointer') && 
+        !target.closest('button') &&
+        !target.closest('h3') &&
+        !target.closest('h5')) {
+      setExpandedCard(null)
+    }
   }
 
   const handlePrepareRequest = async () => {
@@ -126,8 +150,8 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={handleModalClick}>
+      <div className="bg-gray-50 rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto" onClick={handleModalClick}>
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-semibold text-gray-900">
             {t('modals.newService.selectServiceType')}
@@ -148,18 +172,22 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                 {/* Finanzen */}
                 <div>
                   <div className="mb-4">
-                    <h5 className="text-lg font-semibold text-gray-900 flex items-center">
+                    <h5 className="text-xl font-semibold text-gray-900 flex items-center">
                       <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
                         <DollarSign className="h-4 w-4 text-green-600" />
                       </div>
                       {t('modals.newService.categories.finances')}
                     </h5>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-11">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                     {/* Teilhabegeldantrag */}
                     <div 
-                      onClick={() => handleServiceTypeSelect('PARTICIPATION_MONEY')}
-                      className="p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-green-50 hover:border-green-300 transition-colors duration-200"
+                      onClick={() => handleCardClick('PARTICIPATION_MONEY')}
+                      className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
+                        expandedCard === 'PARTICIPATION_MONEY'
+                          ? 'border-green-300 bg-green-50 shadow-md'
+                          : 'border-gray-300 bg-white hover:bg-green-50 hover:border-green-300'
+                      }`}
                     >
                       <div className="flex items-start space-x-3">
                         <div className="flex-shrink-0">
@@ -168,20 +196,41 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                           </div>
                         </div>
                         <div className="flex-1">
-                          <h5 className="text-sm font-medium text-gray-900">
+                          <h5 className="text-base font-semibold text-gray-900">
                             {t('modals.newService.participationMoney')}
                           </h5>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {t('modals.newService.participationMoneyDescription')}
-                          </p>
+                          <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            expandedCard === 'PARTICIPATION_MONEY' ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                          }`}>
+                            <div className="pt-2">
+                              <p className="text-sm text-gray-900 mt-1">
+                                {t('modals.newService.participationMoneyDescription')}
+                              </p>
+                              <div className="flex justify-end mt-3">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleServiceTypeSelect('PARTICIPATION_MONEY')
+                                  }}
+                                  className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors duration-200"
+                                >
+                                  {t('modals.newService.toRequest')}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
 
                     {/* Buchungen und Finanzen */}
                     <div 
-                      onClick={() => handleServiceTypeSelect('BOOKINGS_FINANCE')}
-                      className="p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-green-50 hover:border-green-300 transition-colors duration-200"
+                      onClick={() => handleCardClick('BOOKINGS_FINANCE')}
+                      className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
+                        expandedCard === 'BOOKINGS_FINANCE'
+                          ? 'border-green-300 bg-green-50 shadow-md'
+                          : 'border-gray-300 bg-white hover:bg-green-50 hover:border-green-300'
+                      }`}
                     >
                       <div className="flex items-start space-x-3">
                         <div className="flex-shrink-0">
@@ -190,12 +239,29 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                           </div>
                         </div>
                         <div className="flex-1">
-                          <h5 className="text-sm font-medium text-gray-900">
+                          <h5 className="text-base font-semibold text-gray-900">
                             {t('modals.newService.bookingsFinance')}
                           </h5>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {t('modals.newService.bookingsFinanceDescription')}
-                          </p>
+                          <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            expandedCard === 'BOOKINGS_FINANCE' ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                          }`}>
+                            <div className="pt-2">
+                              <p className="text-sm text-gray-900 mt-1">
+                                {t('modals.newService.bookingsFinanceDescription')}
+                              </p>
+                              <div className="flex justify-end mt-3">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleServiceTypeSelect('BOOKINGS_FINANCE')
+                                  }}
+                                  className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors duration-200"
+                                >
+                                  {t('modals.newService.toRequest')}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -205,18 +271,22 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                 {/* Soziales & Familie */}
                 <div>
                   <div className="mb-4">
-                    <h5 className="text-lg font-semibold text-gray-900 flex items-center">
+                    <h5 className="text-xl font-semibold text-gray-900 flex items-center">
                       <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
                         <Users className="h-4 w-4 text-blue-600" />
                       </div>
                       {t('modals.newService.categories.socialFamily')}
                     </h5>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-11">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                     {/* Besuch */}
                     <div 
-                      onClick={() => handleServiceTypeSelect('VISIT')}
-                      className="p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-colors duration-200"
+                      onClick={() => handleCardClick('VISIT')}
+                      className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
+                        expandedCard === 'VISIT'
+                          ? 'border-blue-300 bg-blue-50 shadow-md'
+                          : 'border-gray-300 bg-white hover:bg-blue-50 hover:border-blue-300'
+                      }`}
                     >
                       <div className="flex items-start space-x-3">
                         <div className="flex-shrink-0">
@@ -225,20 +295,41 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                           </div>
                         </div>
                         <div className="flex-1">
-                          <h5 className="text-sm font-medium text-gray-900">
+                          <h5 className="text-base font-semibold text-gray-900">
                             {t('modals.newService.visit')}
                           </h5>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {t('modals.newService.visitDescription')}
-                          </p>
+                          <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            expandedCard === 'VISIT' ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                          }`}>
+                            <div className="pt-2">
+                              <p className="text-sm text-gray-900 mt-1">
+                                {t('modals.newService.visitDescription')}
+                              </p>
+                              <div className="flex justify-end mt-3">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleServiceTypeSelect('VISIT')
+                                  }}
+                                  className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                                >
+                                  {t('modals.newService.toRequest')}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
 
                     {/* Gespräch */}
                     <div 
-                      onClick={() => handleServiceTypeSelect('CONVERSATION')}
-                      className="p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-colors duration-200"
+                      onClick={() => handleCardClick('CONVERSATION')}
+                      className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
+                        expandedCard === 'CONVERSATION'
+                          ? 'border-blue-300 bg-blue-50 shadow-md'
+                          : 'border-gray-300 bg-white hover:bg-blue-50 hover:border-blue-300'
+                      }`}
                     >
                       <div className="flex items-start space-x-3">
                         <div className="flex-shrink-0">
@@ -247,20 +338,41 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                           </div>
                         </div>
                         <div className="flex-1">
-                          <h5 className="text-sm font-medium text-gray-900">
+                          <h5 className="text-base font-semibold text-gray-900">
                             {t('modals.newService.conversation')}
                           </h5>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {t('modals.newService.conversationDescription')}
-                          </p>
+                          <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            expandedCard === 'CONVERSATION' ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                          }`}>
+                            <div className="pt-2">
+                              <p className="text-sm text-gray-900 mt-1">
+                                {t('modals.newService.conversationDescription')}
+                              </p>
+                              <div className="flex justify-end mt-3">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleServiceTypeSelect('CONVERSATION')
+                                  }}
+                                  className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                                >
+                                  {t('modals.newService.toRequest')}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
 
                     {/* Freizeit & Bildung */}
                     <div 
-                      onClick={() => handleServiceTypeSelect('LEISURE_EDUCATION')}
-                      className="p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-colors duration-200"
+                      onClick={() => handleCardClick('LEISURE_EDUCATION')}
+                      className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
+                        expandedCard === 'LEISURE_EDUCATION'
+                          ? 'border-blue-300 bg-blue-50 shadow-md'
+                          : 'border-gray-300 bg-white hover:bg-blue-50 hover:border-blue-300'
+                      }`}
                     >
                       <div className="flex items-start space-x-3">
                         <div className="flex-shrink-0">
@@ -269,12 +381,29 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                           </div>
                         </div>
                         <div className="flex-1">
-                          <h5 className="text-sm font-medium text-gray-900">
+                          <h5 className="text-base font-semibold text-gray-900">
                             {t('modals.newService.leisureEducation')}
                           </h5>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {t('modals.newService.leisureEducationDescription')}
-                          </p>
+                          <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            expandedCard === 'LEISURE_EDUCATION' ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                          }`}>
+                            <div className="pt-2">
+                              <p className="text-sm text-gray-900 mt-1">
+                                {t('modals.newService.leisureEducationDescription')}
+                              </p>
+                              <div className="flex justify-end mt-3">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleServiceTypeSelect('LEISURE_EDUCATION')
+                                  }}
+                                  className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                                >
+                                  {t('modals.newService.toRequest')}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -285,18 +414,22 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                 {/* Unterstützung & Beratung */}
                 <div>
                   <div className="mb-4">
-                    <h5 className="text-lg font-semibold text-gray-900 flex items-center">
+                    <h5 className="text-xl font-semibold text-gray-900 flex items-center">
                       <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center mr-3">
                         <Heart className="h-4 w-4 text-red-600" />
                       </div>
                       {t('modals.newService.categories.supportAdvice')}
                     </h5>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-11">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                     {/* Gesundheit */}
                     <div 
-                      onClick={() => handleServiceTypeSelect('HEALTH')}
-                      className="p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-red-50 hover:border-red-300 transition-colors duration-200"
+                      onClick={() => handleCardClick('HEALTH')}
+                      className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
+                        expandedCard === 'HEALTH'
+                          ? 'border-red-300 bg-red-50 shadow-md'
+                          : 'border-gray-300 bg-white hover:bg-red-50 hover:border-red-300'
+                      }`}
                     >
                       <div className="flex items-start space-x-3">
                         <div className="flex-shrink-0">
@@ -305,20 +438,41 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                           </div>
                         </div>
                         <div className="flex-1">
-                          <h5 className="text-sm font-medium text-gray-900">
+                          <h5 className="text-base font-semibold text-gray-900">
                             {t('modals.newService.health')}
                           </h5>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {t('modals.newService.healthDescription')}
-                          </p>
+                          <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            expandedCard === 'HEALTH' ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                          }`}>
+                            <div className="pt-2">
+                              <p className="text-sm text-gray-900 mt-1">
+                                {t('modals.newService.healthDescription')}
+                              </p>
+                              <div className="flex justify-end mt-3">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleServiceTypeSelect('HEALTH')
+                                  }}
+                                  className="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors duration-200"
+                                >
+                                  {t('modals.newService.toRequest')}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
 
                     {/* Beratung & Unterstützung */}
                     <div 
-                      onClick={() => handleServiceTypeSelect('COUNSELING_SUPPORT')}
-                      className="p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-red-50 hover:border-red-300 transition-colors duration-200"
+                      onClick={() => handleCardClick('COUNSELING_SUPPORT')}
+                      className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
+                        expandedCard === 'COUNSELING_SUPPORT'
+                          ? 'border-red-300 bg-red-50 shadow-md'
+                          : 'border-gray-300 bg-white hover:bg-red-50 hover:border-red-300'
+                      }`}
                     >
                       <div className="flex items-start space-x-3">
                         <div className="flex-shrink-0">
@@ -327,12 +481,29 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                           </div>
                         </div>
                         <div className="flex-1">
-                          <h5 className="text-sm font-medium text-gray-900">
+                          <h5 className="text-base font-semibold text-gray-900">
                             {t('modals.newService.counselingSupport')}
                           </h5>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {t('modals.newService.counselingSupportDescription')}
-                          </p>
+                          <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            expandedCard === 'COUNSELING_SUPPORT' ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                          }`}>
+                            <div className="pt-2">
+                              <p className="text-sm text-gray-900 mt-1">
+                                {t('modals.newService.counselingSupportDescription')}
+                              </p>
+                              <div className="flex justify-end mt-3">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleServiceTypeSelect('COUNSELING_SUPPORT')
+                                  }}
+                                  className="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors duration-200"
+                                >
+                                  {t('modals.newService.toRequest')}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -343,19 +514,23 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                 {/* Organisation & Rechte */}
                 <div>
                   <div className="mb-4">
-                    <h5 className="text-lg font-semibold text-gray-900 flex items-center">
+                    <h5 className="text-xl font-semibold text-gray-900 flex items-center">
                       <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
                         <Scale className="h-4 w-4 text-purple-600" />
                       </div>
                       {t('modals.newService.categories.organizationRights')}
                     </h5>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-11">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
 
                     {/* Mein Eigentum in der Kammer */}
                     <div 
-                      onClick={() => handleServiceTypeSelect('PERSONAL_PROPERTY')}
-                      className="p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-purple-50 hover:border-purple-300 transition-colors duration-200"
+                      onClick={() => handleCardClick('PERSONAL_PROPERTY')}
+                      className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
+                        expandedCard === 'PERSONAL_PROPERTY'
+                          ? 'border-purple-300 bg-purple-50 shadow-md'
+                          : 'border-gray-300 bg-white hover:bg-purple-50 hover:border-purple-300'
+                      }`}
                     >
                       <div className="flex items-start space-x-3">
                         <div className="flex-shrink-0">
@@ -364,64 +539,127 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                           </div>
                         </div>
                         <div className="flex-1">
-                          <h5 className="text-sm font-medium text-gray-900">
+                          <h5 className="text-base font-semibold text-gray-900">
                             {t('modals.newService.personalProperty')}
                           </h5>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {t('modals.newService.personalPropertyDescription')}
-                          </p>
+                          <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            expandedCard === 'PERSONAL_PROPERTY' ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                          }`}>
+                            <div className="pt-2">
+                              <p className="text-sm text-gray-900 mt-1">
+                                {t('modals.newService.personalPropertyDescription')}
+                              </p>
+                              <div className="flex justify-end mt-3">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleServiceTypeSelect('PERSONAL_PROPERTY')
+                                  }}
+                                  className="px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition-colors duration-200"
+                                >
+                                  {t('modals.newService.toRequest')}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
 
                     {/* Arbeit & Schule */}
                     <div 
-                      onClick={() => handleServiceTypeSelect('WORK_SCHOOL')}
-                      className="p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-amber-50 hover:border-amber-300 transition-colors duration-200"
+                      onClick={() => handleCardClick('WORK_SCHOOL')}
+                      className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
+                        expandedCard === 'WORK_SCHOOL'
+                          ? 'border-purple-300 bg-purple-50 shadow-md'
+                          : 'border-gray-300 bg-white hover:bg-purple-50 hover:border-purple-300'
+                      }`}
                     >
                       <div className="flex items-start space-x-3">
                         <div className="flex-shrink-0">
-                          <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-                            <Briefcase className="h-5 w-5 text-amber-600" />
+                          <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <Briefcase className="h-5 w-5 text-purple-600" />
                           </div>
                         </div>
                         <div className="flex-1">
-                          <h5 className="text-sm font-medium text-gray-900">
+                          <h5 className="text-base font-semibold text-gray-900">
                             {t('modals.newService.workSchool')}
                           </h5>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {t('modals.newService.workSchoolDescription')}
-                          </p>
+                          <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            expandedCard === 'WORK_SCHOOL' ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                          }`}>
+                            <div className="pt-2">
+                              <p className="text-sm text-gray-900 mt-1">
+                                {t('modals.newService.workSchoolDescription')}
+                              </p>
+                              <div className="flex justify-end mt-3">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleServiceTypeSelect('WORK_SCHOOL')
+                                  }}
+                                  className="px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition-colors duration-200"
+                                >
+                                  {t('modals.newService.toRequest')}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
 
                     {/* Paketsendung */}
                     <div 
-                      onClick={() => handleServiceTypeSelect('PACKAGE')}
-                      className="p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-orange-50 hover:border-orange-300 transition-colors duration-200"
+                      onClick={() => handleCardClick('PACKAGE')}
+                      className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
+                        expandedCard === 'PACKAGE'
+                          ? 'border-purple-300 bg-purple-50 shadow-md'
+                          : 'border-gray-300 bg-white hover:bg-purple-50 hover:border-purple-300'
+                      }`}
                     >
                       <div className="flex items-start space-x-3">
                         <div className="flex-shrink-0">
-                          <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                            <Package className="h-5 w-5 text-orange-600" />
+                          <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <Package className="h-5 w-5 text-purple-600" />
                           </div>
                         </div>
                         <div className="flex-1">
-                          <h5 className="text-sm font-medium text-gray-900">
+                          <h5 className="text-base font-semibold text-gray-900">
                             {t('modals.newService.package')}
                           </h5>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {t('modals.newService.packageDescription')}
-                          </p>
+                          <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            expandedCard === 'PACKAGE' ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                          }`}>
+                            <div className="pt-2">
+                              <p className="text-sm text-gray-900 mt-1">
+                                {t('modals.newService.packageDescription')}
+                              </p>
+                              <div className="flex justify-end mt-3">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleServiceTypeSelect('PACKAGE')
+                                  }}
+                                  className="px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition-colors duration-200"
+                                >
+                                  {t('modals.newService.toRequest')}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
 
                     {/* Vollzugslockerung */}
                     <div 
-                      onClick={() => handleServiceTypeSelect('PRISON_RELAXATION')}
-                      className="p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-purple-50 hover:border-purple-300 transition-colors duration-200"
+                      onClick={() => handleCardClick('PRISON_RELAXATION')}
+                      className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
+                        expandedCard === 'PRISON_RELAXATION'
+                          ? 'border-purple-300 bg-purple-50 shadow-md'
+                          : 'border-gray-300 bg-white hover:bg-purple-50 hover:border-purple-300'
+                      }`}
                     >
                       <div className="flex items-start space-x-3">
                         <div className="flex-shrink-0">
@@ -430,12 +668,29 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                           </div>
                         </div>
                         <div className="flex-1">
-                          <h5 className="text-sm font-medium text-gray-900">
+                          <h5 className="text-base font-semibold text-gray-900">
                             {t('modals.newService.prisonRelaxation')}
                           </h5>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {t('modals.newService.prisonRelaxationDescription')}
-                          </p>
+                          <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            expandedCard === 'PRISON_RELAXATION' ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                          }`}>
+                            <div className="pt-2">
+                              <p className="text-sm text-gray-900 mt-1">
+                                {t('modals.newService.prisonRelaxationDescription')}
+                              </p>
+                              <div className="flex justify-end mt-3">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleServiceTypeSelect('PRISON_RELAXATION')
+                                  }}
+                                  className="px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition-colors duration-200"
+                                >
+                                  {t('modals.newService.toRequest')}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -445,18 +700,22 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                 {/* Sonstiges */}
                 <div>
                   <div className="mb-4">
-                    <h5 className="text-lg font-semibold text-gray-900 flex items-center">
+                    <h5 className="text-xl font-semibold text-gray-900 flex items-center">
                       <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
                         <MoreHorizontal className="h-4 w-4 text-gray-600" />
                       </div>
                       {t('modals.newService.categories.miscellaneous')}
                     </h5>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-11">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                     {/* Freitextantrag */}
                     <div 
-                      onClick={() => handleServiceTypeSelect('FREETEXT')}
-                      className="p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 hover:border-gray-300 transition-colors duration-200"
+                      onClick={() => handleCardClick('FREETEXT')}
+                      className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
+                        expandedCard === 'FREETEXT'
+                          ? 'border-gray-400 bg-gray-50 shadow-md'
+                          : 'border-gray-300 bg-white hover:bg-gray-50 hover:border-gray-300'
+                      }`}
                     >
                       <div className="flex items-start space-x-3">
                         <div className="flex-shrink-0">
@@ -465,12 +724,29 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                           </div>
                         </div>
                         <div className="flex-1">
-                          <h5 className="text-sm font-medium text-gray-900">
+                          <h5 className="text-base font-semibold text-gray-900">
                             {t('modals.newService.freetext')}
                           </h5>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {t('modals.newService.freetextDescription')}
-                          </p>
+                          <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            expandedCard === 'FREETEXT' ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                          }`}>
+                            <div className="pt-2">
+                              <p className="text-sm text-gray-900 mt-1">
+                                {t('modals.newService.freetextDescription')}
+                              </p>
+                              <div className="flex justify-end mt-3">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleServiceTypeSelect('FREETEXT')
+                                  }}
+                                  className="px-4 py-2 bg-gray-600 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors duration-200"
+                                >
+                                  {t('modals.newService.toRequest')}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -971,7 +1247,7 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
               </div>
             ) : (
               /* Zwei-Spalten Layout für andere Sprachen */
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
                 {/* Linke Spalte - Insassen-Sprache */}
                 <div className="space-y-4">
                   <h4 className="font-medium text-gray-900">{t('modals.newService.originalText')}:</h4>
