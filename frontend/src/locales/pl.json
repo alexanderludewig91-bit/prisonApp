@@ -149,6 +149,10 @@
         "organizationRights": "Organizacja i Prawa",
         "miscellaneous": "Różne"
       },
+      "participationMoneyInfo": "Proszę wybrać miesiąc, za który chcesz złożyć wniosek o świadczenie.",
+      "participationMoneyMonthLabel": "Miesiąc dla wniosku o świadczenie",
+      "participationMoneyMonthHelp": "Wybierz miesiąc, za który chcesz złożyć wniosek o świadczenie.",
+      "selectMonth": "Proszę wybrać miesiąc",
       "prepareRequest": "Przygotuj Wniosek",
       "submitRequest": "Wyślij Wniosek",
       "back": "Wstecz",

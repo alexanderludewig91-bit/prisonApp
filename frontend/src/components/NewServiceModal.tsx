@@ -874,7 +874,8 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                     </div>
                     <div className="ml-3">
                       <p className="text-sm text-blue-800">
-                        Bitte wählen Sie den Monat aus, für den Sie Teilhabegeld beantragen möchten.
+                        
+                        {t('modals.newService.participationMoneyInfo')}
                       </p>
                     </div>
                   </div>
@@ -882,23 +883,23 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Monat für Teilhabegeldantrag *
+                    {t('modals.newService.participationMoneyMonthLabel')}
                   </label>
                   <select
                     value={selectedMonth}
                     onChange={(e) => setSelectedMonth(e.target.value)}
                     className="w-full input"
                   >
-                    <option value="">Bitte Monat auswählen</option>
+                    <option value="">{t('modals.newService.selectMonth')}</option>
                     {getAvailableMonths().map((month) => (
                       <option key={month.value} value={month.value}>
                         {month.label}
                       </option>
                     ))}
                   </select>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Wählen Sie den Monat, für den Sie den Teilhabegeldantrag stellen möchten.
-                  </p>
+                   <p className="text-sm text-gray-500 mt-1">
+                     {t('modals.newService.participationMoneyMonthHelp')}
+                   </p>
                 </div>
               </div>
             )}

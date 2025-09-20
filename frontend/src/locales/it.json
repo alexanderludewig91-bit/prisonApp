@@ -150,6 +150,10 @@
         "organizationRights": "Organizzazione e Diritti",
         "miscellaneous": "Varie"
       },
+      "participationMoneyInfo": "Si prega di selezionare il mese per il quale si desidera richiedere l'indennità.",
+      "participationMoneyMonthLabel": "Mese per la richiesta di indennità",
+      "participationMoneyMonthHelp": "Selezionare il mese per il quale si desidera inviare la richiesta di indennità.",
+      "selectMonth": "Si prega di selezionare un mese",
       "prepareRequest": "Prepara Richiesta",
       "submitRequest": "Invia Richiesta",
       "back": "Indietro",

@@ -150,6 +150,10 @@
         "organizationRights": "سازمان و حقوق",
         "miscellaneous": "متفرقه"
       },
+      "participationMoneyInfo": "لطفاً ماهی را انتخاب کنید که می‌خواهید برای آن کمک هزینه درخواست کنید.",
+      "participationMoneyMonthLabel": "ماه برای درخواست کمک هزینه",
+      "participationMoneyMonthHelp": "ماهی را انتخاب کنید که می‌خواهید درخواست کمک هزینه را برای آن ارسال کنید.",
+      "selectMonth": "لطفاً یک ماه انتخاب کنید",
       "prepareRequest": "آماده‌سازی درخواست",
       "submitRequest": "ارسال درخواست",
       "back": "بازگشت",

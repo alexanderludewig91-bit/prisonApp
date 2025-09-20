@@ -150,6 +150,10 @@
         "organizationRights": "Organisation et Droits",
         "miscellaneous": "Divers"
       },
+      "participationMoneyInfo": "Veuillez sélectionner le mois pour lequel vous souhaitez demander une allocation.",
+      "participationMoneyMonthLabel": "Mois pour la demande d'allocation",
+      "participationMoneyMonthHelp": "Sélectionnez le mois pour lequel vous souhaitez soumettre la demande d'allocation.",
+      "selectMonth": "Veuillez sélectionner un mois",
       "prepareRequest": "Préparer Demande",
       "submitRequest": "Soumettre Demande",
       "back": "Retour",

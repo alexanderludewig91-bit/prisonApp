@@ -150,6 +150,10 @@
         "organizationRights": "Organizasyon ve Haklar",
         "miscellaneous": "Çeşitli"
       },
+      "participationMoneyInfo": "Lütfen ödenek için başvurmak istediğiniz ayı seçin.",
+      "participationMoneyMonthLabel": "Ödenek talebi için ay",
+      "participationMoneyMonthHelp": "Ödenek talebini göndermek istediğiniz ayı seçin.",
+      "selectMonth": "Lütfen bir ay seçin",
       "prepareRequest": "Talebi Hazırla",
       "submitRequest": "Talebi Gönder",
       "back": "Geri",

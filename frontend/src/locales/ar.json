@@ -150,6 +150,10 @@
         "organizationRights": "التنظيم والحقوق",
         "miscellaneous": "متنوع"
       },
+      "participationMoneyInfo": "يرجى اختيار الشهر الذي تريد التقدم بطلب للحصول على البدل فيه.",
+      "participationMoneyMonthLabel": "الشهر لطلب البدل",
+      "participationMoneyMonthHelp": "اختر الشهر الذي تريد إرسال طلب البدل فيه.",
+      "selectMonth": "يرجى اختيار شهر",
       "prepareRequest": "تحضير الطلب",
       "submitRequest": "إرسال الطلب",
       "back": "رجوع",

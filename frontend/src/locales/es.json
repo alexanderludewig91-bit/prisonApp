@@ -150,6 +150,10 @@
         "organizationRights": "Organización y Derechos",
         "miscellaneous": "Misceláneo"
       },
+      "participationMoneyInfo": "Por favor seleccione el mes para el cual desea solicitar el subsidio.",
+      "participationMoneyMonthLabel": "Mes para la solicitud de subsidio",
+      "participationMoneyMonthHelp": "Seleccione el mes para el cual desea enviar la solicitud de subsidio.",
+      "selectMonth": "Por favor seleccione un mes",
       "prepareRequest": "Preparar Solicitud",
       "submitRequest": "Enviar Solicitud",
       "back": "Atrás",

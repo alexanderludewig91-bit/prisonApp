@@ -150,6 +150,10 @@
         "organizationRights": "Организация и Права",
         "miscellaneous": "Разное"
       },
+      "participationMoneyInfo": "Пожалуйста, выберите месяц, за который вы хотите подать заявление на пособие.",
+      "participationMoneyMonthLabel": "Месяц для заявления на пособие",
+      "participationMoneyMonthHelp": "Выберите месяц, за который вы хотите подать заявление на пособие.",
+      "selectMonth": "Пожалуйста, выберите месяц",
       "prepareRequest": "Подготовить Запрос",
       "submitRequest": "Отправить Запрос",
       "back": "Назад",
