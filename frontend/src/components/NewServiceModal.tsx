@@ -853,7 +853,7 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                   <textarea
                     value={originalText}
                     onChange={(e) => setOriginalText(e.target.value)}
-                    placeholder="Beschreiben Sie, wofür Sie Teilhabegeld benötigen..."
+                    placeholder={t('modals.newService.descriptionPlaceholder')}
                     className="w-full input resize-none"
                     rows={4}
                     maxLength={500}
@@ -1125,7 +1125,7 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
             )}
 
             {/* Weitere Anträge als Platzhalter */}
-            {['VISIT', 'HEALTH', 'WORK_SCHOOL', 'PACKAGE'].includes(selectedServiceType) && (
+            {['HEALTH', 'WORK_SCHOOL', 'PACKAGE'].includes(selectedServiceType) && (
               <div className="space-y-4">
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                   <div className="flex items-center">
@@ -1134,8 +1134,7 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                     </div>
                     <div className="ml-3">
                       <h3 className="text-sm font-medium text-yellow-800">
-                        {selectedServiceType === 'VISIT' ? 'Besuch' : 
-                         selectedServiceType === 'HEALTH' ? 'Gesundheit' : 
+                        {selectedServiceType === 'HEALTH' ? 'Gesundheit' : 
                          selectedServiceType === 'WORK_SCHOOL' ? 'Arbeit & Schule' : 
                          selectedServiceType === 'PACKAGE' ? 'Paketsendung' : 'Antrag'}
                       </h3>
