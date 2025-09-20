@@ -1066,7 +1066,7 @@ const MyServices = () => {
           setShowNewServiceModal(false)
           setNewServiceType('FREETEXT')
         }}
-        onSubmit={async (title, description, titleInmate, descriptionInmate) => {
+        onSubmit={async (title, description, titleInmate, descriptionInmate, serviceType) => {
           setSubmittingNewService(true)
           
           try {
@@ -1075,7 +1075,7 @@ const MyServices = () => {
               titleInmate: titleInmate?.trim() || null,
               description: description.trim(),
               descriptionInmate: descriptionInmate?.trim() || null,
-              serviceType: newServiceType
+              serviceType: serviceType || newServiceType
             }
 
             console.log('Sende neuen Antrag:', serviceData)

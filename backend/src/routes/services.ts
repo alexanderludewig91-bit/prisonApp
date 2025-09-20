@@ -1786,7 +1786,7 @@ router.post('/my/services', checkRole(['INMATE']), [
       return res.status(404).json({ error: 'Benutzer nicht gefunden' });
     }
 
-    // Workflow-Regel: Freitextanträge von Insassen automatisch PS General Enforcement Service zuweisen
+    // Workflow-Regel: Anträge von Insassen automatisch entsprechenden Gruppen zuweisen
     let assignedToGroup = null;
     try {
       // Prüfen ob der Benutzer ein Insasse ist (PS Inmates Gruppe)
@@ -1800,13 +1800,26 @@ router.post('/my/services', checkRole(['INMATE']), [
       const isInmate = userGroups.some((ug: any) => ug.group.name === 'PS Inmates');
       
       if (isInmate) {
-        // Gruppe "PS General Enforcement Service" finden
-        const enforcementGroup = await prisma.group.findFirst({
-          where: { name: 'PS General Enforcement Service' }
-        });
+        const serviceType = req.body.serviceType || 'FREETEXT';
         
-        if (enforcementGroup) {
-          assignedToGroup = enforcementGroup.id;
+        if (serviceType === 'PARTICIPATION_MONEY') {
+          // Taschengeldanträge an Vollzugsabteilungsleitung (VAL)
+          const valGroup = await prisma.group.findFirst({
+            where: { name: 'PS Vollzugsabteilungsleitung' }
+          });
+          
+          if (valGroup) {
+            assignedToGroup = valGroup.id;
+          }
+        } else {
+          // Freitextanträge und andere an General Enforcement Service (AVDs)
+          const enforcementGroup = await prisma.group.findFirst({
+            where: { name: 'PS General Enforcement Service' }
+          });
+          
+          if (enforcementGroup) {
+            assignedToGroup = enforcementGroup.id;
+          }
         }
       }
     } catch (error) {
@@ -1820,6 +1833,7 @@ router.post('/my/services', checkRole(['INMATE']), [
         description,
         descriptionInmate: descriptionInmate || null,
         priority,
+        serviceType: req.body.serviceType || 'FREETEXT',
         createdBy: userId,
         assignedToGroup: assignedToGroup as any
       },
@@ -1848,8 +1862,9 @@ router.post('/my/services', checkRole(['INMATE']), [
 
     // Aktivität für automatische Gruppenzuweisung loggen (falls vorhanden)
     if (assignedToGroup) {
-      const enforcementGroup = await prisma.group.findFirst({
-        where: { name: 'PS General Enforcement Service' }
+      // Die tatsächlich zugewiesene Gruppe abrufen
+      const assignedGroup = await prisma.group.findFirst({
+        where: { id: assignedToGroup }
       });
       
       await prisma.activity.create({
@@ -1857,7 +1872,7 @@ router.post('/my/services', checkRole(['INMATE']), [
           recordId: service.id,
           who: 'System',
           action: 'forward',
-          details: `Automatisch zugewiesen an ${enforcementGroup?.description || enforcementGroup?.name}`,
+          details: `Automatisch zugewiesen an ${assignedGroup?.description}`,
           userId: userId,
           groupId: assignedToGroup as any
         } as any

@@ -6,7 +6,7 @@ import api from '../services/api'
 interface NewServiceModalProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (title: string, description: string, titleInmate?: string, descriptionInmate?: string) => Promise<void>
+  onSubmit: (title: string, description: string, titleInmate?: string, descriptionInmate?: string, serviceType?: string) => Promise<void>
   isSubmitting: boolean
 }
 
@@ -19,7 +19,33 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
   const [translatedText, setTranslatedText] = useState('')
   const [generatedTitle, setGeneratedTitle] = useState('')
   const [originalTitle, setOriginalTitle] = useState('')
+  const [selectedMonth, setSelectedMonth] = useState('')
   const [error, setError] = useState('')
+
+  // Funktion zur Generierung der verfügbaren Monate (aktueller Monat + 2 vergangene Monate)
+  const getAvailableMonths = () => {
+    const now = new Date()
+    const months = []
+    
+    for (let i = 0; i < 3; i++) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      const monthNames = [
+        'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+        'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
+      ]
+      
+      const monthName = monthNames[date.getMonth()]
+      const year = date.getFullYear()
+      const value = `${year}-${String(date.getMonth() + 1).padStart(2, '0')}`
+      
+      months.push({
+        value: value,
+        label: `${monthName} ${year}`
+      })
+    }
+    
+    return months
+  }
 
   const handleClose = () => {
     // Reset state
@@ -30,6 +56,7 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
     setTranslatedText('')
     setGeneratedTitle('')
     setOriginalTitle('')
+    setSelectedMonth('')
     setError('')
     onClose()
   }
@@ -98,18 +125,26 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
   }
 
   const handleSubmit = async () => {
-    // Deutscher Titel (KI-generiert)
-    const germanTitle = generatedTitle
-    
-    // Original-Titel (KI-generiert)
-    const originalTitleGenerated = originalTitle
-    
-    // Getrennte Beschreibungen
-    const germanDescription = translatedText
-    const originalDescription = originalText
-    
-    await onSubmit(germanTitle, germanDescription, originalTitleGenerated, originalDescription)
-    handleClose()
+    if (selectedServiceType === 'PARTICIPATION_MONEY') {
+      // Für Taschengeldantrag: Direkte Übermittlung ohne KI
+      const selectedMonthData = getAvailableMonths().find(m => m.value === selectedMonth)
+      const germanTitle = `Teilhabegeldantrag - ${selectedMonthData?.label || selectedMonth}`
+      const germanDescription = `Antrag auf Teilhabegeld für den Monat ${selectedMonthData?.label || selectedMonth}`
+      const originalTitleGenerated = germanTitle
+      const originalDescription = germanDescription
+      
+      await onSubmit(germanTitle, germanDescription, originalTitleGenerated, originalDescription, selectedServiceType)
+      handleClose()
+    } else {
+      // Für andere Anträge: KI-Verarbeitung
+      const germanTitle = generatedTitle
+      const originalTitleGenerated = originalTitle
+      const germanDescription = translatedText
+      const originalDescription = originalText
+      
+      await onSubmit(germanTitle, germanDescription, originalTitleGenerated, originalDescription, selectedServiceType)
+      handleClose()
+    }
   }
 
   const handleServiceTypeSelect = (serviceType: string) => {
@@ -830,17 +865,16 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
 
             {selectedServiceType === 'PARTICIPATION_MONEY' && (
               <div className="space-y-4">
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <div className="flex items-center">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-start">
                     <div className="flex-shrink-0">
-                      <FileText className="h-5 w-5 text-yellow-600" />
+                      <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center">
+                        <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                      </div>
                     </div>
                     <div className="ml-3">
-                      <h3 className="text-sm font-medium text-yellow-800">
-                        Teilhabegeldantrag
-                      </h3>
-                      <p className="text-sm text-yellow-700 mt-1">
-                        Diese Funktion ist noch in Entwicklung. Bitte verwenden Sie vorerst den "Sonstiges Anliegen" Antrag.
+                      <p className="text-sm text-blue-800">
+                        Bitte wählen Sie den Monat aus, für den Sie Teilhabegeld beantragen möchten.
                       </p>
                     </div>
                   </div>
@@ -848,18 +882,22 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Beschreibung Ihres Teilhabegeldantrags *
+                    Monat für Teilhabegeldantrag *
                   </label>
-                  <textarea
-                    value={originalText}
-                    onChange={(e) => setOriginalText(e.target.value)}
-                    placeholder={t('modals.newService.descriptionPlaceholder')}
-                    className="w-full input resize-none"
-                    rows={4}
-                    maxLength={500}
-                  />
+                  <select
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(e.target.value)}
+                    className="w-full input"
+                  >
+                    <option value="">Bitte Monat auswählen</option>
+                    {getAvailableMonths().map((month) => (
+                      <option key={month.value} value={month.value}>
+                        {month.label}
+                      </option>
+                    ))}
+                  </select>
                   <p className="text-sm text-gray-500 mt-1">
-                    Beschreiben Sie detailliert, wofür Sie das Teilhabegeld verwenden möchten.
+                    Wählen Sie den Monat, für den Sie den Teilhabegeldantrag stellen möchten.
                   </p>
                 </div>
               </div>
@@ -1179,17 +1217,37 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
               >
                 {t('buttons.back')}
               </button>
-              <button
-                onClick={() => {
-                  debugTitleGeneration()
-                  handlePrepareRequest()
-                }}
-                disabled={!originalText.trim()}
-                className="btn btn-primary flex-1 flex items-center justify-center"
-              >
-                <Languages className="h-4 w-4 mr-2" />
-                {t('modals.newService.prepareRequest')}
-              </button>
+              {selectedServiceType === 'PARTICIPATION_MONEY' ? (
+                <button
+                  onClick={handleSubmit}
+                  disabled={!selectedMonth || isSubmitting}
+                  className="btn btn-primary flex-1 flex items-center justify-center"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      {t('modals.newService.submitting')}
+                    </>
+                  ) : (
+                    <>
+                      <Check className="h-4 w-4 mr-2" />
+                      {t('modals.newService.submitRequest')}
+                    </>
+                  )}
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    debugTitleGeneration()
+                    handlePrepareRequest()
+                  }}
+                  disabled={!originalText.trim()}
+                  className="btn btn-primary flex-1 flex items-center justify-center"
+                >
+                  <Languages className="h-4 w-4 mr-2" />
+                  {t('modals.newService.prepareRequest')}
+                </button>
+              )}
             </div>
           </div>
         )}
