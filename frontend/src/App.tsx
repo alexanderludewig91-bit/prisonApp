@@ -1,10 +1,13 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import Navbar from './components/Navbar'
 import Login from './pages/Login'
 import { useAuth } from './contexts/AuthContext'
+import api from './services/api'
 
 
 import ServiceDetail from './pages/ServiceDetail'
+import ServiceDetailParticipationMoney from './pages/ServiceDetailParticipationMoney'
 import MyServices from './pages/MyServices'
 import AllMyServices from './pages/AllMyServices'
 import NewService from './pages/NewService'
@@ -17,6 +20,46 @@ import UserOverview from './pages/UserOverview'
 import { AuthProvider } from './contexts/AuthContext'
 import { LanguageProvider } from './contexts/LanguageContext'
 import './App.css'
+
+// Komponente für Service-Detail-Routing basierend auf Service-Type
+const ServiceDetailRouter = () => {
+  const { id } = useParams<{ id: string }>()
+  const [serviceType, setServiceType] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  
+  useEffect(() => {
+    const fetchServiceType = async () => {
+      try {
+        const response = await api.get(`/services/${id}`)
+        setServiceType(response.data.serviceType)
+      } catch (error) {
+        console.error('Fehler beim Laden des Service-Types:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    if (id) {
+      fetchServiceType()
+    }
+  }, [id])
+  
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    )
+  }
+  
+  // Routing basierend auf Service-Type
+  if (serviceType === 'PARTICIPATION_MONEY') {
+    return <ServiceDetailParticipationMoney />
+  }
+  
+  // Fallback für alle anderen Service-Types (Freitextanträge, etc.)
+  return <ServiceDetail />
+}
 
 // Komponente für Dashboard-Weiterleitung basierend auf Benutzerrolle
 const DashboardRedirect = () => {
@@ -110,7 +153,7 @@ function AppContent() {
           } />
 
           <Route path="/services/:id" element={
-            isAuthenticated ? <ServiceDetail /> : <Navigate to="/login" replace />
+            isAuthenticated ? <ServiceDetailRouter /> : <Navigate to="/login" replace />
           } />
           <Route path="/my-services" element={
             isAuthenticated ? <MyServices /> : <Navigate to="/login" replace />

@@ -6,7 +6,8 @@ import {
   Filter,
   Calendar,
   User,
-  X
+  X,
+  FileText
 } from 'lucide-react'
 import api from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
@@ -116,6 +117,7 @@ const StaffDashboard = () => {
   const getServiceTypeText = (serviceType: string) => {
     switch (serviceType) {
       case 'FREETEXT': return 'Freitextantrag'
+      case 'PARTICIPATION_MONEY': return 'Teilhabegeldantrag'
       default: return 'Antrag'
     }
   }
@@ -202,10 +204,10 @@ const StaffDashboard = () => {
             bValue = b.assignedToGroupRef?.description || b.assignedToGroupRef?.name || 'Nicht zugewiesen'
             break
           case 'lastAction':
-            const aLastAction = a.activities && a.activities.length > 0 ? a.activities[0]?.action || '' : ''
-            const bLastAction = b.activities && b.activities.length > 0 ? b.activities[0]?.action || '' : ''
-            aValue = getActionText(aLastAction).toLowerCase()
-            bValue = getActionText(bLastAction).toLowerCase()
+            const aLastActivity = a.activities && a.activities.length > 0 ? a.activities[0] : null
+            const bLastActivity = b.activities && b.activities.length > 0 ? b.activities[0] : null
+            aValue = aLastActivity ? new Date(aLastActivity.when) : new Date(0)
+            bValue = bLastActivity ? new Date(bLastActivity.when) : new Date(0)
             break
           case 'status':
             aValue = a.status || ''
@@ -517,12 +519,18 @@ const StaffDashboard = () => {
                       {service.priority === 'HIGH' ? 'Hohe Priorität' : 'Höchste Priorität'}
                     </span>
                   )}
-                  {getServiceTypeText(service.serviceType)}: {service.title}
+                  #{service.id}: {service.title}
                 </div>
                 <div className="mt-1 text-sm text-muted-foreground tabular-nums truncate">
                   <span className="inline-flex items-center gap-1 shrink-0">
                     <Calendar className="h-4 w-4" />
                     <span className="tabular-nums">{formatDate(service.createdAt)}</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1 min-w-0 ml-2">
+                    <FileText className="h-4 w-4 text-black" />
+                    <span className="truncate">
+                      {getServiceTypeText(service.serviceType)}
+                    </span>
                   </span>
                   <span className="inline-flex items-center gap-1 min-w-0 ml-2">
                     <User className="h-4 w-4" />

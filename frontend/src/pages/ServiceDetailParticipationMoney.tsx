@@ -1,3 +1,6 @@
+// ============================================================================
+// IMPORTS & DEPENDENCIES
+// ============================================================================
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { 
@@ -11,13 +14,20 @@ import { useAuth } from '../contexts/AuthContext'
 import api from '../services/api'
 import jsPDF from 'jspdf'
 
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+/**
+ * Service Interface - Definiert die Struktur eines Antrags
+ * Enthält alle relevanten Daten für die Antragsbearbeitung
+ */
 interface Service {
   id: number
   title: string
   description: string
-  status: string
-  priority: string
-  decision?: string | null
+  status: string // PENDING, IN_PROGRESS, COMPLETED
+  priority: string // HIGH, URGENT
+  decision?: string | null // APPROVED, REJECTED, RETURNED
   serviceType: string
   createdAt: string
   updatedAt: string
@@ -74,19 +84,39 @@ interface Service {
 
 
 
-const ServiceDetail = () => {
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+/**
+ * ServiceDetailParticipationMoney - Spezielle Komponente für Teilhabegeldanträge
+ * Basiert auf der ursprünglichen ServiceDetail.tsx, aber angepasst für spezifische
+ * Teilhabegeld-Workflows und UI-Elemente
+ */
+const ServiceDetailParticipationMoney = () => {
+  // ============================================================================
+  // HOOKS & BASIC STATE
+  // ============================================================================
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { user } = useAuth()
+  
+  // Core Service Data
   const [service, setService] = useState<Service | null>(null)
   const [loading, setLoading] = useState(true)
+  
+  // ============================================================================
+  // STATUS & DECISION MANAGEMENT
+  // ============================================================================
   const [newStatus, setNewStatus] = useState('')
   const [statusReason, setStatusReason] = useState('')
   const [newDecision, setNewDecision] = useState('')
   const [manualDecisionReason, setManualDecisionReason] = useState('')
   const [showStatusModal, setShowStatusModal] = useState(false)
   
-  // Neue States für Bearbeiter-Aktionen
+  // ============================================================================
+  // WORKFLOW ACTION STATES
+  // ============================================================================
+  // Bearbeiter-Aktionen (Hauptfunktionalität der Komponente)
   const [selectedAction, setSelectedAction] = useState<'insassen-kontaktieren' | 'weiterleiten' | 'entscheiden' | 'kommentieren' | 'personal-notification' | null>(null)
   const [selectedContactType, setSelectedContactType] = useState<'rückfrage' | 'information' | null>(null)
   const [rückfrageText, setRückfrageText] = useState('')
@@ -98,6 +128,10 @@ const ServiceDetail = () => {
   const [staffGroups, setStaffGroups] = useState<Array<{id: number, name: string, description?: string}>>([])
   const [loadingStaffGroups, setLoadingStaffGroups] = useState(false)
   const [forwardingService, setForwardingService] = useState(false)
+  
+  // ============================================================================
+  // DECISION WORKFLOW STATES
+  // ============================================================================
   const [showStatusChangeDialog, setShowStatusChangeDialog] = useState(false)
   const [pendingComment, setPendingComment] = useState('')
   const [selectedDecision, setSelectedDecision] = useState<'APPROVED' | 'REJECTED' | 'RETURNED' | null>(null)
@@ -111,7 +145,78 @@ const ServiceDetail = () => {
   const [showFurtherProcessing, setShowFurtherProcessing] = useState(false)
   const [selectedFurtherProcessingGroup, setSelectedFurtherProcessingGroup] = useState('')
   const [furtherProcessingNotes, setFurtherProcessingNotes] = useState('')
+  
+  // ============================================================================
+  // TEILHABEGELD CALCULATION STATES
+  // ============================================================================
+  const [showCalculationModal, setShowCalculationModal] = useState(false)
+  const [eckverguetung, setEckverguetung] = useState('')
+  const [hausgeld, setHausgeld] = useState('')
+  const [eigengeld, setEigengeld] = useState('')
+  const [arbeitstage, setArbeitstage] = useState('')
+  const [anspruchstage, setAnspruchstage] = useState('')
+  const [calculatedResult, setCalculatedResult] = useState<string | null>(null)
 
+  // ============================================================================
+  // CALCULATION FUNCTIONS
+  // ============================================================================
+  /**
+   * Berechnet das Teilhabegeld basierend auf der Formel:
+   * ((0,14 x Eckvergütung - Hausgeld - Eigengeld) / Arbeitstage im Monat) x Anspruchstage
+   */
+  const calculateTeilhabegeld = () => {
+    const eckverguetungNum = parseFloat(eckverguetung) || 0
+    const hausgeldNum = parseFloat(hausgeld) || 0
+    const eigengeldNum = parseFloat(eigengeld) || 0
+    const arbeitstageNum = parseFloat(arbeitstage) || 0
+    const anspruchstageNum = parseFloat(anspruchstage) || 0
+
+    // Validierungsprüfungen
+    if (arbeitstageNum === 0) {
+      setCalculatedResult('Fehler: Arbeitstage dürfen nicht 0 sein')
+      return
+    }
+
+    if (eckverguetungNum < 0 || hausgeldNum < 0 || eigengeldNum < 0 || arbeitstageNum < 0 || anspruchstageNum < 0) {
+      setCalculatedResult('Fehler: Die Eingaben enthalten negative Werte')
+      return
+    }
+
+    const teilhabegeld = ((0.14 * eckverguetungNum - hausgeldNum - eigengeldNum) / arbeitstageNum) * anspruchstageNum
+
+    if (teilhabegeld < 0) {
+      setCalculatedResult(`Fehler: Das Ergebnis ist negativ: ${teilhabegeld.toFixed(2)}€`)
+      return
+    }
+
+    setCalculatedResult(teilhabegeld.toFixed(2))
+  }
+
+  /**
+   * Übernimmt das Berechnungsergebnis in das Begründungsfeld und schließt das Modal
+   */
+  const applyCalculation = () => {
+    if (calculatedResult) {
+      const calculationText = `Ihr Antrag wurde genehmigt. Sie erhalten Teilhabegeld in Höhe von ${calculatedResult}€\n\nBerechnung:\nEckvergütung: ${eckverguetung}€\nHausgeld: ${hausgeld}€\nEigengeld: ${eigengeld}€\nArbeitstage: ${arbeitstage}\nAnspruchstage: ${anspruchstage}\n\nHinweis zur Berechnung:\n((0,14 x Eckvergützung) - Hausgeld - Eigengeld) / Arbeitstage) x Anspruchstage = Teilhabegeld \n\nRechtsbehelfsbelehrung:
+Gegen diesen Bescheid können Sie gemäß §§ 109 ff. StVollzG i.V.m. § 130 Nr. 2 HmbStVollzG binnen zwei Wochen nach schriftlicher Bekanntgabe einen Antrag auf gerichtliche Entscheidung beim Landgericht Hamburg einreichen. Der Antrag kann schriftlich gestellt und muss dann innerhalb von zwei Wochen bei Gericht eingegangen sein (Postanschrift: Landgericht Hamburg, Strafvollstreckungskammern, Sievekingplatz 3, 20355 Hamburg). Der Antrag kann innerhalb der Frist auch zur Niederschrift einer Geschäftsstelle des Landgerichts Hamburg oder des Amtsgerichts, in dessen Bezirk die JVA Fuhlsbüttel liegt, gestellt werden.`
+      
+      setDecisionReason(calculationText)
+      setShowCalculationModal(false)
+      
+      // Modal zurücksetzen
+      setEckverguetung('')
+      setHausgeld('')
+      setEigengeld('')
+      setArbeitstage('')
+      setAnspruchstage('')
+      setCalculatedResult(null)
+    }
+  }
+
+  // ============================================================================
+  // EFFECT HOOKS
+  // ============================================================================
+  // Service-Details laden bei Komponenten-Mount oder ID-Änderung
   useEffect(() => {
     if (id) {
       fetchServiceDetails()
@@ -125,6 +230,13 @@ const ServiceDetail = () => {
     }
   }, [selectedAction, showFurtherProcessing])
 
+  // ============================================================================
+  // DATA FETCHING FUNCTIONS
+  // ============================================================================
+  /**
+   * Lädt die Service-Details vom Backend
+   * Wird beim Komponenten-Mount und nach Aktionen aufgerufen
+   */
   const fetchServiceDetails = async () => {
     try {
       const response = await api.get(`/services/${id}`)
@@ -141,6 +253,13 @@ const ServiceDetail = () => {
 
 
 
+  // ============================================================================
+  // CORE BUSINESS LOGIC HANDLERS
+  // ============================================================================
+  /**
+   * Behandelt Status- und Entscheidungsänderungen
+   * Kann sowohl Status als auch Entscheidung in einem Aufruf ändern
+   */
   const handleStatusChange = async () => {
     if ((!newStatus && !newDecision) || (!statusReason.trim() && !manualDecisionReason.trim())) return
 
@@ -732,7 +851,7 @@ const ServiceDetail = () => {
     })
     
     // PDF speichern
-    const fileName = `Antrag_${service.id}_${new Date().toISOString().split('T')[0]}.pdf`
+    const fileName = `Teilhabegeldantrag_${service.id}_${new Date().toISOString().split('T')[0]}.pdf`
     doc.save(fileName)
   }
 
@@ -848,7 +967,7 @@ const ServiceDetail = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">{truncateTitle(service.title)}</h1>
-          <p className="text-gray-600 mt-1">Freitextantrag #{service.id} vom {formatDate(service.createdAt)}</p>
+          <p className="text-gray-600 mt-1">Teilhabegeldantrag #{service.id} vom {formatDate(service.createdAt)}</p>
         </div>
         <div className="flex space-x-3">
           <button
@@ -1253,13 +1372,23 @@ const ServiceDetail = () => {
                                      {/* Begründungsfeld */}
                   {selectedDecision && (
                     <div className="space-y-3">
-                      <textarea
-                        value={decisionReason}
-                        onChange={(e) => setDecisionReason(e.target.value)}
-                        placeholder="Bitte Begründung angeben"
-                        className="w-full input resize-none"
-                        rows={4}
-                      />
+                      <div className="flex space-x-3">
+                        <textarea
+                          value={decisionReason}
+                          onChange={(e) => setDecisionReason(e.target.value)}
+                          placeholder="Bitte Begründung angeben"
+                          className="flex-1 input resize-none"
+                          rows={4}
+                        />
+                        {selectedDecision === 'APPROVED' && (
+                          <button
+                            onClick={() => setShowCalculationModal(true)}
+                            className="btn btn-primary self-start"
+                          >
+                            Teilhabegeld berechnen
+                          </button>
+                        )}
+                      </div>
                     </div>
                   )}
 
@@ -1695,9 +1824,192 @@ const ServiceDetail = () => {
           </div>
         </div>
       )}
+
+      {/* Teilhabegeld Berechnung Modal */}
+      {showCalculationModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Teilhabegeld Berechnung
+            </h3>
+            
+            <div className="space-y-4">
+              {/* Formel-Darstellung */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="text-center">
+                  {/* Titel */}
+                  <div className="text-xl font-bold text-blue-800 mb-4">
+                    Teilhabegeld =
+                  </div>
+                  
+                  {/* Hauptformel */}
+                  <div className="flex items-center justify-center gap-3">
+                    {/* Linke Klammer */}
+                    <div className="text-2xl text-blue-600 font-bold">[</div>
+                    
+                    {/* Bruch */}
+                    <div className="flex flex-col items-center">
+                      {/* Zähler */}
+                      <div className="flex items-center gap-1 mb-1">
+                        <span className="text-blue-600">(</span>
+                        <span className="inline-block bg-white px-3 py-2 rounded border text-sm font-medium text-blue-800">
+                          0,14 × Eckvergütung – Hausgeld – Eigengeld
+                        </span>
+                        <span className="text-blue-600">)</span>
+                      </div>
+                      
+                      {/* Bruchstrich */}
+                      <div className="w-full h-0.5 bg-blue-600 my-2"></div>
+                      
+                      {/* Nenner */}
+                      <div className="flex items-center">
+                        <span className="inline-block bg-white px-3 py-2 rounded border text-sm font-medium text-blue-800">
+                          Arbeitstage im Monat
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Rechte Klammer */}
+                    <div className="text-2xl text-blue-600 font-bold">]</div>
+                    
+                    {/* Multiplikation */}
+                    <div className="text-2xl text-blue-600 font-bold mx-2">×</div>
+                    
+                    {/* Anspruchstage */}
+                    <div className="inline-block bg-white px-3 py-2 rounded border text-sm font-medium text-blue-800">
+                      Anspruchstage
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Eingabefelder für die Berechnung */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Eckvergütung (€)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={eckverguetung}
+                    onChange={(e) => setEckverguetung(e.target.value)}
+                    className="input w-full"
+                    placeholder="0.00"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Hausgeld (€)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={hausgeld}
+                    onChange={(e) => setHausgeld(e.target.value)}
+                    className="input w-full"
+                    placeholder="0.00"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Eigengeld (€)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={eigengeld}
+                    onChange={(e) => setEigengeld(e.target.value)}
+                    className="input w-full"
+                    placeholder="0.00"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Arbeitstage im Monat
+                  </label>
+                  <input
+                    type="number"
+                    value={arbeitstage}
+                    onChange={(e) => setArbeitstage(e.target.value)}
+                    className="input w-full"
+                    placeholder="0"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Anspruchstage
+                  </label>
+                  <input
+                    type="number"
+                    value={anspruchstage}
+                    onChange={(e) => setAnspruchstage(e.target.value)}
+                    className="input w-full"
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+              
+              {/* Berechnung-Button und Ergebnis */}
+              <div className="border-t pt-4">
+                <button
+                  onClick={calculateTeilhabegeld}
+                  className="btn btn-primary mb-3"
+                  disabled={!eckverguetung || !hausgeld || !eigengeld || !arbeitstage || !anspruchstage}
+                >
+                  Berechnung durchführen
+                </button>
+                
+                {calculatedResult && (
+                  <div className={`rounded-lg p-3 ${
+                    calculatedResult.startsWith('Fehler:') 
+                      ? 'bg-red-50 border border-red-200' 
+                      : 'bg-green-50 border border-green-200'
+                  }`}>
+                    <p className={`text-sm font-medium mb-1 ${
+                      calculatedResult.startsWith('Fehler:') 
+                        ? 'text-red-800' 
+                        : 'text-green-800'
+                    }`}>
+                      {calculatedResult.startsWith('Fehler:') ? 'Validierungsfehler:' : 'Berechnungsergebnis:'}
+                    </p>
+                    <p className={`text-lg font-bold ${
+                      calculatedResult.startsWith('Fehler:') 
+                        ? 'text-red-900' 
+                        : 'text-green-900'
+                    }`}>
+                      {calculatedResult.startsWith('Fehler:') ? calculatedResult : `${calculatedResult}€`}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="flex space-x-3 mt-6">
+              <button
+                onClick={() => setShowCalculationModal(false)}
+                className="btn btn-secondary flex-1"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={applyCalculation}
+                className="btn btn-primary flex-1"
+                disabled={!calculatedResult}
+              >
+                Berechnung übernehmen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
-export default ServiceDetail
+export default ServiceDetailParticipationMoney
 
