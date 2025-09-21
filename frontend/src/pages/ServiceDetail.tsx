@@ -596,7 +596,8 @@ const ServiceDetail = () => {
     // Titel
     doc.setFontSize(20)
     doc.setFont('helvetica', 'bold')
-    doc.text('Antragsdetails', 20, 30)
+    const title = `Freitextantrag #${service.id} vom ${formatDate(service.createdAt)}`
+    doc.text(title, 20, 30)
     
     // Antragsinformationen
     doc.setFontSize(12)
@@ -725,7 +726,20 @@ const ServiceDetail = () => {
         yPosition = 20
       }
       
-      const activityText = `${formatDate(activity.when)} - ${getActionText(activity.action)}: ${activity.details}`
+      // Für Entscheidungsaktivitäten nur eine kurze Zusammenfassung anzeigen
+      let activityText = `${formatDate(activity.when)} - ${getActionText(activity.action)}`
+      
+      if (activity.action === 'decision_made') {
+        // Bei Entscheidungen nur den ersten Teil der Begründung anzeigen
+        const shortDetails = activity.details.length > 100 
+          ? activity.details.substring(0, 100) + '...' 
+          : activity.details
+        activityText += `: ${shortDetails}`
+      } else {
+        // Bei anderen Aktivitäten den kompletten Text anzeigen
+        activityText += `: ${activity.details}`
+      }
+      
       const activityLines = doc.splitTextToSize(activityText, 170)
       doc.text(activityLines, 20, yPosition)
       yPosition += activityLines.length * 7 + 5

@@ -715,7 +715,8 @@ Gegen diesen Bescheid können Sie gemäß §§ 109 ff. StVollzG i.V.m. § 130 Nr
     // Titel
     doc.setFontSize(20)
     doc.setFont('helvetica', 'bold')
-    doc.text('Antragsdetails', 20, 30)
+    const title = `Teilhabegeldantrag #${service.id} vom ${formatDate(service.createdAt)}`
+    doc.text(title, 20, 30)
     
     // Antragsinformationen
     doc.setFontSize(12)
@@ -815,6 +816,12 @@ Gegen diesen Bescheid können Sie gemäß §§ 109 ff. StVollzG i.V.m. § 130 Nr
     doc.text(descriptionLines, 20, yPosition)
     yPosition += descriptionLines.length * 7 + 10
     
+    // Prüfen ob neue Seite nötig ist
+    if (yPosition > 250) {
+      doc.addPage()
+      yPosition = 20
+    }
+    
     // Entscheidungsdetails (falls vorhanden)
     if (service.decisionDetails) {
       doc.setFont('helvetica', 'bold')
@@ -822,12 +829,43 @@ Gegen diesen Bescheid können Sie gemäß §§ 109 ff. StVollzG i.V.m. § 130 Nr
       yPosition += 10
       
       doc.setFont('helvetica', 'normal')
+      
+      // Entscheidung
+      if (yPosition > 250) {
+        doc.addPage()
+        yPosition = 20
+      }
       doc.text(`Entscheidung: ${getDecisionText(service.decisionDetails.decision)}`, 30, yPosition)
       yPosition += 7
-      doc.text(`Begründung: ${service.decisionDetails.reason}`, 30, yPosition)
-      yPosition += 7
+      
+      // Begründung mit automatischem Zeilenumbruch
+      if (yPosition > 250) {
+        doc.addPage()
+        yPosition = 20
+      }
+      const reasonLines = doc.splitTextToSize(`Begründung: ${service.decisionDetails.reason}`, 160)
+      reasonLines.forEach((line: string) => {
+        if (yPosition > 250) {
+          doc.addPage()
+          yPosition = 20
+        }
+        doc.text(line, 30, yPosition)
+        yPosition += 7
+      })
+      
+      // Entschieden von
+      if (yPosition > 250) {
+        doc.addPage()
+        yPosition = 20
+      }
       doc.text(`Entschieden von: ${service.decisionDetails.who}`, 30, yPosition)
       yPosition += 7
+      
+      // Entschieden am
+      if (yPosition > 250) {
+        doc.addPage()
+        yPosition = 20
+      }
       doc.text(`Entschieden am: ${service.decisionDetails.when}`, 30, yPosition)
       yPosition += 10
     }
@@ -839,15 +877,37 @@ Gegen diesen Bescheid können Sie gemäß §§ 109 ff. StVollzG i.V.m. § 130 Nr
     
     doc.setFont('helvetica', 'normal')
     service.activities.forEach((activity) => {
-      if (yPosition > 270) {
+      // Prüfen ob neue Seite nötig ist (mit mehr Platz für Aktivität)
+      if (yPosition > 240) {
         doc.addPage()
         yPosition = 20
       }
       
-      const activityText = `${formatDate(activity.when)} - ${getActionText(activity.action)}: ${activity.details}`
+      // Für Entscheidungsaktivitäten nur eine kurze Zusammenfassung anzeigen
+      let activityText = `${formatDate(activity.when)} - ${getActionText(activity.action)}`
+      
+      if (activity.action === 'decision_made') {
+        // Bei Entscheidungen nur den ersten Teil der Begründung anzeigen
+        const shortDetails = activity.details.length > 100 
+          ? activity.details.substring(0, 100) + '...' 
+          : activity.details
+        activityText += `: ${shortDetails}`
+      } else {
+        // Bei anderen Aktivitäten den kompletten Text anzeigen
+        activityText += `: ${activity.details}`
+      }
+      
       const activityLines = doc.splitTextToSize(activityText, 170)
+      
+      // Prüfen ob Aktivität auf aktuelle Seite passt
+      const requiredSpace = activityLines.length * 7 + 5
+      if (yPosition + requiredSpace > 270) {
+        doc.addPage()
+        yPosition = 20
+      }
+      
       doc.text(activityLines, 20, yPosition)
-      yPosition += activityLines.length * 7 + 5
+      yPosition += requiredSpace
     })
     
     // PDF speichern
