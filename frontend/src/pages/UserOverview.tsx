@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { getStaffUsers } from '../services/api'
 import { User, Search, Filter, Users } from 'lucide-react'
 
@@ -28,10 +28,32 @@ const UserOverview = () => {
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterActive, setFilterActive] = useState<boolean | null>(null)
+  
+  // Resizable columns state
+  const [columnWidths, setColumnWidths] = useState({
+    user: 300,
+    groups: 250,
+    status: 120
+  })
+  const [isResizing, setIsResizing] = useState(false)
+  const [resizingColumn, setResizingColumn] = useState<string | null>(null)
+  const tableRef = useRef<HTMLTableElement>(null)
+  const startXRef = useRef<number>(0)
+  const startWidthRef = useRef<number>(0)
 
   useEffect(() => {
     fetchUsers()
+    // Load saved column widths from localStorage
+    const savedWidths = localStorage.getItem('userOverview-columnWidths')
+    if (savedWidths) {
+      setColumnWidths(JSON.parse(savedWidths))
+    }
   }, [])
+
+  // Save column widths to localStorage
+  useEffect(() => {
+    localStorage.setItem('userOverview-columnWidths', JSON.stringify(columnWidths))
+  }, [columnWidths])
 
   const fetchUsers = async () => {
     try {
@@ -65,6 +87,50 @@ const UserOverview = () => {
       year: 'numeric'
     })
   }
+
+  // Mouse event handlers for resizable columns
+  const handleMouseDown = useCallback((e: React.MouseEvent, column: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsResizing(true)
+    setResizingColumn(column)
+    startXRef.current = e.clientX
+    startWidthRef.current = columnWidths[column as keyof typeof columnWidths]
+    
+    // Add event listeners with proper cleanup
+    const handleMouseMoveEvent = (moveEvent: MouseEvent) => {
+      moveEvent.preventDefault()
+      const deltaX = moveEvent.clientX - startXRef.current
+      const newWidth = Math.max(100, startWidthRef.current + deltaX)
+      
+      setColumnWidths(prev => ({
+        ...prev,
+        [column]: newWidth
+      }))
+    }
+    
+    const handleMouseUpEvent = () => {
+      setIsResizing(false)
+      setResizingColumn(null)
+      document.removeEventListener('mousemove', handleMouseMoveEvent)
+      document.removeEventListener('mouseup', handleMouseUpEvent)
+    }
+    
+    document.addEventListener('mousemove', handleMouseMoveEvent)
+    document.addEventListener('mouseup', handleMouseUpEvent)
+    
+    // Store references for cleanup
+    startXRef.current = e.clientX
+  }, [columnWidths])
+
+  // Cleanup event listeners on unmount
+  useEffect(() => {
+    return () => {
+      // Remove any remaining event listeners
+      document.removeEventListener('mousemove', () => {})
+      document.removeEventListener('mouseup', () => {})
+    }
+  }, [])
 
   if (loading) {
     return (
@@ -173,11 +239,6 @@ const UserOverview = () => {
 
       {/* Benutzerliste */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">
-            STAFF-Benutzer ({filteredUsers.length})
-          </h2>
-        </div>
 
         {filteredUsers.length === 0 ? (
           <div className="px-6 py-12 text-center">
@@ -191,20 +252,47 @@ const UserOverview = () => {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
+            <table ref={tableRef} className="min-w-full divide-y divide-gray-200" style={{ tableLayout: 'fixed' }}>
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th 
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative select-none"
+                    style={{ width: columnWidths.user }}
+                  >
                     Benutzer
+                    <div 
+                      className={`absolute top-0 right-0 w-2 h-full cursor-col-resize hover:bg-blue-400 bg-transparent hover:opacity-100 transition-opacity ${
+                        isResizing && resizingColumn === 'user' ? 'bg-blue-500 opacity-100' : 'opacity-0'
+                      }`}
+                      onMouseDown={(e) => handleMouseDown(e, 'user')}
+                      style={{ zIndex: 10 }}
+                    />
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th 
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative select-none"
+                    style={{ width: columnWidths.groups }}
+                  >
                     Gruppen
+                    <div 
+                      className={`absolute top-0 right-0 w-2 h-full cursor-col-resize hover:bg-blue-400 bg-transparent hover:opacity-100 transition-opacity ${
+                        isResizing && resizingColumn === 'groups' ? 'bg-blue-500 opacity-100' : 'opacity-0'
+                      }`}
+                      onMouseDown={(e) => handleMouseDown(e, 'groups')}
+                      style={{ zIndex: 10 }}
+                    />
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th 
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative select-none"
+                    style={{ width: columnWidths.status }}
+                  >
                     Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Erstellt
+                    <div 
+                      className={`absolute top-0 right-0 w-2 h-full cursor-col-resize hover:bg-blue-400 bg-transparent hover:opacity-100 transition-opacity ${
+                        isResizing && resizingColumn === 'status' ? 'bg-blue-500 opacity-100' : 'opacity-0'
+                      }`}
+                      onMouseDown={(e) => handleMouseDown(e, 'status')}
+                      style={{ zIndex: 10 }}
+                    />
                   </th>
                 </tr>
               </thead>
@@ -231,14 +319,16 @@ const UserOverview = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex flex-wrap gap-1">
-                        {user.groups.map((userGroup) => (
-                          <span
-                            key={userGroup.group.id}
-                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                          >
-                            {userGroup.group.name}
-                          </span>
-                        ))}
+                        {user.groups
+                          .filter((userGroup) => userGroup.group.description !== "Alle Benutzer")
+                          .map((userGroup) => (
+                            <span
+                              key={userGroup.group.id}
+                              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                            >
+                              {userGroup.group.description || userGroup.group.name}
+                            </span>
+                          ))}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -251,9 +341,6 @@ const UserOverview = () => {
                       >
                         {user.isActive ? 'Aktiv' : 'Inaktiv'}
                       </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatDate(user.createdAt)}
                     </td>
                   </tr>
                 ))}

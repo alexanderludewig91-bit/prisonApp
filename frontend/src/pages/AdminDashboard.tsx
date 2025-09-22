@@ -434,7 +434,7 @@ const AdminDashboard: React.FC = () => {
 
   const fetchServices = async () => {
     try {
-      const response = await api.get('/services')
+      const response = await api.get('/services/staff/all')
       setServices(response.data.services || [])
     } catch (error) {
       console.error('Fehler beim Laden der Anträge:', error)
