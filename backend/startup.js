@@ -1,10 +1,16 @@
 const { execSync } = require('child_process');
 
-async function seedDatabase() {
+async function setupDatabase() {
   try {
-    console.log('🌱 Checking if database needs seeding...');
+    console.log('🏗️ Setting up database schema...');
     
-    // Prüfe ob DB leer ist und seede Haupt-Daten
+    // Prisma Schema anwenden
+    execSync('npx prisma db push', { stdio: 'inherit' });
+    console.log('✅ Database schema applied successfully');
+    
+    console.log('🌱 Seeding database...');
+    
+    // Seede Haupt-Daten
     execSync('npm run db:seed', { stdio: 'inherit' });
     console.log('✅ Main data seeded successfully');
     
@@ -13,9 +19,9 @@ async function seedDatabase() {
     console.log('✅ Houses data seeded successfully');
     
   } catch (error) {
-    console.log('⚠️ Seeding failed or already done:', error.message);
+    console.log('⚠️ Setup failed:', error.message);
   }
 }
 
-// Führe Seeding aus
-seedDatabase();
+// Führe Setup aus
+setupDatabase();
