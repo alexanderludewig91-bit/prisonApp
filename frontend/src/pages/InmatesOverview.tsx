@@ -98,14 +98,9 @@ const InmatesOverview: React.FC = () => {
   useEffect(() => {
     const fetchInmates = async () => {
       try {
-        const response = await fetch('/api/users?group=PS Inmates');
-        if (response.ok) {
-          const data = await response.json();
-          setInmates(data.users);
-          setFilteredInmates(data.users);
-        } else {
-          console.error('Fehler beim Laden der Insassen');
-        }
+        const response = await api.get('/users?group=PS Inmates');
+        setInmates(response.data.users);
+        setFilteredInmates(response.data.users);
       } catch (error) {
         console.error('Fehler beim Laden der Insassen:', error);
       } finally {
@@ -130,20 +125,20 @@ const InmatesOverview: React.FC = () => {
   const loadInmateDetails = async (inmateId: number) => {
     try {
       // Aktuelle Zuweisung laden
-      const assignmentResponse = await fetch(`/api/houses/assignments/current/${inmateId}`);
-      const assignmentData = assignmentResponse.ok ? await assignmentResponse.json() : null;
+      const assignmentResponse = await api.get(`/houses/assignments/current/${inmateId}`);
+      const assignmentData = assignmentResponse.data;
 
       // Anträge laden
-      const servicesResponse = await fetch(`/api/services?userId=${inmateId}`);
-      const servicesData = servicesResponse.ok ? await servicesResponse.json() : { services: [] };
+      const servicesResponse = await api.get(`/services?userId=${inmateId}`);
+      const servicesData = servicesResponse.data;
 
       // Zuweisungshistorie laden
-      const historyResponse = await fetch(`/api/houses/assignments/history/${inmateId}`);
-      const historyData = historyResponse.ok ? await historyResponse.json() : { history: [] };
+      const historyResponse = await api.get(`/houses/assignments/history/${inmateId}`);
+      const historyData = historyResponse.data;
 
       // Persönliche Eröffnungen laden
-      const personalNotificationsResponse = await fetch(`/api/services/personal-notifications/${inmateId}`);
-      const personalNotificationsData = personalNotificationsResponse.ok ? await personalNotificationsResponse.json() : { notifications: [] };
+      const personalNotificationsResponse = await api.get(`/services/personal-notifications/${inmateId}`);
+      const personalNotificationsData = personalNotificationsResponse.data;
 
       // Verhaltensdokumentation laden
       const behaviorResponse = await api.get(`/inmates/${inmateId}/behavior`);
