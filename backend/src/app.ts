@@ -23,7 +23,11 @@ const PORT = process.env.PORT || 3001;
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: [
+    'http://localhost:3000',
+    'https://frontend-production-3082.up.railway.app',
+    'frontend.railway.internal'
+  ],
   credentials: true
 }));
 app.use(morgan('combined'));
