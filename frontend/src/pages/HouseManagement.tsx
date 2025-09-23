@@ -8,6 +8,7 @@ import TransferModal from '../components/TransferModal';
 import CellCard from '../components/CellCard';
 import DropZone from '../components/DropZone';
 import UnassignedInmateAssignmentModal from '../components/UnassignedInmateAssignmentModal';
+import api from '../services/api';
 
 interface House {
   id: number;
@@ -110,14 +111,8 @@ const HouseManagement: React.FC = () => {
   const fetchHouses = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/houses');
-      
-      if (!response.ok) {
-        throw new Error('Fehler beim Laden der Häuser');
-      }
-
-      const data = await response.json();
-      setHouses(data.houses);
+      const response = await api.get('/houses');
+      setHouses(response.data.houses);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unbekannter Fehler');
     } finally {
@@ -129,14 +124,8 @@ const HouseManagement: React.FC = () => {
   const fetchUnassignedInmates = async () => {
     try {
       setLoadingUnassigned(true);
-      const response = await fetch('/api/users/inmates-unassigned');
-      
-      if (!response.ok) {
-        throw new Error('Fehler beim Laden der unzugewiesenen Insassen');
-      }
-
-      const data = await response.json();
-      setUnassignedInmates(data.users);
+      const response = await api.get('/users/inmates-unassigned');
+      setUnassignedInmates(response.data.users);
     } catch (err) {
       console.error('Fehler beim Laden der unzugewiesenen Insassen:', err);
     } finally {
@@ -159,25 +148,11 @@ const HouseManagement: React.FC = () => {
         notes
       });
 
-      const response = await fetch(`/api/houses/cells/${selectedCell.id}/assignments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId, notes }),
+      const response = await api.post(`/houses/cells/${selectedCell.id}/assignments`, {
+        userId, notes
       });
 
-      console.log('Response Status:', response.status);
-      console.log('Response Headers:', response.headers);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('API Fehler:', errorData);
-        throw new Error(errorData.error || errorData.details || 'Fehler beim Zuweisen');
-      }
-
-      const result = await response.json();
-      console.log('Zuweisung erfolgreich:', result);
+      console.log('Zuweisung erfolgreich:', response.data);
 
       // Daten neu laden
       await fetchHouses();
@@ -192,21 +167,9 @@ const HouseManagement: React.FC = () => {
     try {
       console.log('Entfernung versuchen:', { assignmentId });
 
-      const response = await fetch(`/api/houses/assignments/${assignmentId}`, {
-        method: 'DELETE',
-      });
+      const response = await api.delete(`/houses/assignments/${assignmentId}`);
 
-      console.log('Response Status:', response.status);
-      console.log('Response Headers:', response.headers);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('API Fehler:', errorData);
-        throw new Error(errorData.error || errorData.details || 'Fehler beim Entfernen');
-      }
-
-      const result = await response.json();
-      console.log('Entfernung erfolgreich:', result);
+      console.log('Entfernung erfolgreich:', response.data);
 
       // Daten neu laden
       await fetchHouses();
@@ -270,22 +233,10 @@ const HouseManagement: React.FC = () => {
     try {
       console.log('Unassigned assignment:', { inmateId, cellId, notes });
 
-      const response = await fetch(`/api/houses/cells/${cellId}/assignments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId: inmateId, notes }),
+      const response = await api.post(`/houses/cells/${cellId}/assignments`, {
+        userId: inmateId, notes
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('API Fehler:', errorData);
-        throw new Error(errorData.error || errorData.details || 'Fehler beim Zuweisen');
-      }
-
-      const result = await response.json();
-      console.log('Zuweisung erfolgreich:', result);
+      console.log('Zuweisung erfolgreich:', response.data);
 
       // Daten neu laden
       await fetchHouses();
@@ -302,12 +253,8 @@ const HouseManagement: React.FC = () => {
       console.log('Automatische Zuweisung gestartet für', unassignedInmates.length, 'Insassen');
 
       // Alle verfügbaren Zellen laden
-      const response = await fetch('/api/houses');
-      if (!response.ok) {
-        throw new Error('Fehler beim Laden der Häuser');
-      }
-
-      const data = await response.json();
+      const response = await api.get('/houses');
+      const data = response.data;
       
       // Alle verfügbaren Zellen extrahieren (nicht voll belegt)
       const availableCells: any[] = [];
@@ -352,25 +299,14 @@ const HouseManagement: React.FC = () => {
 
         if (suitableCell) {
           try {
-            const assignmentResponse = await fetch(`/api/houses/cells/${suitableCell.id}/assignments`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ 
-                userId: inmate.id, 
-                notes: 'Automatische Zuweisung' 
-              }),
+            await api.post(`/houses/cells/${suitableCell.id}/assignments`, {
+              userId: inmate.id, 
+              notes: 'Automatische Zuweisung'
             });
 
-            if (assignmentResponse.ok) {
-              successCount++;
-              // Zelle als belegt markieren
-              suitableCell.assignments.push({ id: Date.now() });
-            } else {
-              errorCount++;
-              console.error(`Fehler bei Zuweisung von ${inmate.firstName} ${inmate.lastName}`);
-            }
+            successCount++;
+            // Zelle als belegt markieren
+            suitableCell.assignments.push({ id: Date.now() });
           } catch (err) {
             errorCount++;
             console.error(`Fehler bei Zuweisung von ${inmate.firstName} ${inmate.lastName}:`, err);
@@ -462,24 +398,10 @@ const HouseManagement: React.FC = () => {
       // Direkt die neue Zuweisung erstellen, ohne selectedCell zu verwenden
       console.log('Creating new assignment for user:', userId, 'in cell:', targetCell.id);
       
-      const response = await fetch(`/api/houses/cells/${targetCell.id}/assignments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId, notes }),
+      const response = await api.post(`/houses/cells/${targetCell.id}/assignments`, {
+        userId, notes
       });
-
-      console.log('Response Status:', response.status);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('API Fehler:', errorData);
-        throw new Error(errorData.error || errorData.details || 'Fehler beim Zuweisen');
-      }
-
-      const result = await response.json();
-      console.log('Zuweisung erfolgreich:', result);
+      console.log('Zuweisung erfolgreich:', response.data);
       
       // Daten neu laden
       await fetchHouses();
