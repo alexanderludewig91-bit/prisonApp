@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { body, validationResult } from 'express-validator';
 import { logAdminActionManually } from '../middleware/adminLogging';
-import { AuthenticatedRequest } from '../middleware/auth';
+import { AuthenticatedRequest, authenticateToken, checkPermission } from '../middleware/auth';
 import bcrypt from 'bcryptjs';
 
 const router = express.Router();
@@ -925,6 +925,68 @@ router.delete('/:id/groups/:groupId', async (req: Request, res: Response) => {
     console.error('Fehler beim Entfernen des Benutzers aus der Gruppe:', error);
     res.status(500).json({ 
       error: 'Fehler beim Entfernen des Benutzers aus der Gruppe',
+      details: error instanceof Error ? error.message : 'Unbekannter Fehler'
+    });
+  }
+});
+
+// Passwort ändern
+router.put('/:id/password', [
+  authenticateToken,
+  checkPermission(['all_permissions']),
+  body('newPassword').isLength({ min: 6 }).withMessage('Passwort muss mindestens 6 Zeichen lang sein'),
+  body('confirmPassword').custom((value, { req }) => {
+    if (value !== req.body.newPassword) {
+      throw new Error('Passwörter stimmen nicht überein');
+    }
+    return true;
+  })
+], async (req: Request, res: Response) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ 
+        error: 'Validierungsfehler', 
+        details: errors.array() 
+      });
+    }
+
+    const { id } = req.params;
+    const { newPassword } = req.body;
+
+    // Benutzer finden
+    const user = await prisma.user.findUnique({
+      where: { id: Number(id) }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Benutzer nicht gefunden' });
+    }
+
+    // Passwort hashen
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Passwort aktualisieren
+    await prisma.user.update({
+      where: { id: Number(id) },
+      data: { password: hashedPassword }
+    });
+
+    // Admin-Log erstellen
+    await logAdminActionManually(
+      req as AuthenticatedRequest,
+      'CHANGE_PASSWORD',
+      'users',
+      `Passwort für Benutzer ${user.firstName} ${user.lastName} (${user.username}) geändert`
+    );
+
+    res.json({ 
+      message: 'Passwort erfolgreich geändert'
+    });
+  } catch (error) {
+    console.error('Fehler beim Ändern des Passworts:', error);
+    res.status(500).json({ 
+      error: 'Fehler beim Ändern des Passworts',
       details: error instanceof Error ? error.message : 'Unbekannter Fehler'
     });
   }
