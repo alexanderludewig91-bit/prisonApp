@@ -98,11 +98,12 @@ const Login = () => {
             </button>
           </div>
 
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              Demo-Anmeldedaten: admin / admin123
+          <div className="text-center mt-6 pt-4 border-t border-gray-200">
+            <p className="text-xs text-gray-500">
+              © 2025 Dr. Alexander Hayward - Prisoner Services System. Alle Rechte vorbehalten.
             </p>
           </div>
+
         </form>
       </div>
     </div>

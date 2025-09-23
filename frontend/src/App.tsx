@@ -184,6 +184,17 @@ function AppContent() {
           } />
         </Routes>
       </main>
+      
+      {/* Footer mit Copyright */}
+      <footer className="bg-gray-100 border-t border-gray-200 mt-auto">
+        <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <p className="text-xs text-gray-500">
+              © 2025 Dr. Alexander Hayward - Prisoner Services System. Alle Rechte vorbehalten.
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }
