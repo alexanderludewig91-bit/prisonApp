@@ -13,7 +13,7 @@ const Navbar = () => {
 
   // Gruppenbasierte Navigation
   const getNavigation = () => {
-    const baseNavigation = []
+    const baseNavigation: any[] = []
 
     // Prüfe Gruppen-Mitgliedschaften
     const userGroups = user?.groups?.map(g => g.name) || []

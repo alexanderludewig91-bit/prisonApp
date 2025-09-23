@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Plus } from 'lucide-react';
+import { User } from 'lucide-react';
 
 interface Cell {
   id: number;
@@ -27,7 +27,7 @@ interface DropZoneProps {
 const DropZone: React.FC<DropZoneProps> = ({
   cell,
   onDrop,
-  onAssign,
+  // onAssign,
   children
 }) => {
   const [isDragOver, setIsDragOver] = useState(false);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, User, ArrowRight, AlertCircle } from 'lucide-react';
+import { X, ArrowRight, AlertCircle } from 'lucide-react';
 
 interface Cell {
   id: number;

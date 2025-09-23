@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Building, MapPin, User, AlertCircle, Search } from 'lucide-react';
+import { X, Building, MapPin, User, AlertCircle } from 'lucide-react';
 
 interface Inmate {
   id: number;

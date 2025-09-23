@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Plus, X, ArrowRight } from 'lucide-react';
+import { User, Plus } from 'lucide-react';
 import DraggableInmate from './DraggableInmate';
 
 interface Cell {

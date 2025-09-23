@@ -80,13 +80,13 @@ const UserOverview = () => {
     return matchesSearch && matchesFilter
   })
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('de-DE', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    })
-  }
+  // const formatDate = (dateString: string) => {
+  //   return new Date(dateString).toLocaleDateString('de-DE', {
+  //     day: '2-digit',
+  //     month: '2-digit',
+  //     year: 'numeric'
+  //   })
+  // }
 
   // Mouse event handlers for resizable columns
   const handleMouseDown = useCallback((e: React.MouseEvent, column: string) => {
