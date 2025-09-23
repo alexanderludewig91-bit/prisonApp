@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://backend.railway.internal/api'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://backend-production-77ff.up.railway.app/api'
 
 // Axios Instance mit Interceptor für Token
 const api = axios.create({
