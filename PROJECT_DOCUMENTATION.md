@@ -326,11 +326,125 @@ Das System wird mit folgenden Testdaten initialisiert:
 - **E2E Tests:** Vollständige Workflow-Tests
 
 ### Deployment
-- **Docker:** Containerisierte Bereitstellung
-- **CI/CD:** Automatische Builds und Tests
-- **Monitoring:** Application Performance Monitoring
+
+#### Lokale Entwicklung
+- **Backend:** Node.js + Express auf Port 3001
+- **Frontend:** Vite Development Server auf Port 3000
+- **Datenbank:** SQLite (lokal)
+- **API-Proxy:** Vite Proxy für Frontend-Backend-Kommunikation
+
+#### Railway Production Deployment
+- **Platform:** Railway.app (Hobby Plan - 5€/Monat)
+- **Services:** 3 separate Services (Frontend, Backend, PostgreSQL)
+- **Domain:** Automatische Railway-Subdomains + Custom Domain Support
+- **SSL:** Automatisches HTTPS-Zertifikat
+- **Database:** PostgreSQL (Railway-managed)
+- **Environment:** Production-ready mit Environment Variables
+
+#### Railway-Konfiguration
+**Frontend Service:**
+- **Root Directory:** `/frontend`
+- **Build Command:** `npm run build`
+- **Start Command:** Caddy (automatisch)
+- **Port:** 8080 (Railway-managed)
+- **Environment Variables:**
+  - `VITE_API_URL` (optional, Fallback auf Backend-URL)
+
+**Backend Service:**
+- **Root Directory:** `/backend`
+- **Build Command:** `npm run build`
+- **Start Command:** `npm run start` (mit automatischem Database Seeding)
+- **Port:** 8080 (Railway-managed)
+- **Environment Variables:**
+  - `DATABASE_URL` (Railway PostgreSQL)
+  - `JWT_SECRET`
+  - `OPENAI_API_KEY`
+  - `NODE_ENV=production`
+  - `FRONTEND_URL` (Railway Frontend URL)
+
+**PostgreSQL Database:**
+- **Managed Service:** Railway PostgreSQL
+- **Automatisches Seeding:** Startup-Script lädt Testdaten
+- **Backup:** Automatische Railway-Backups
+
+#### Database Migration (SQLite → PostgreSQL)
+- **Lokale Entwicklung:** PostgreSQL (konsistent mit Production)
+- **Prisma Schema:** `provider = "postgresql"`
+- **Migration:** `npx prisma db push`
+- **Seeding:** `npm run db:seed` + `npm run db:seed-houses`
+
+#### Environment Setup
+**Lokal (.env):**
+```bash
+DATABASE_URL="postgresql://username:password@localhost:5432/prisoner_services"
+JWT_SECRET=mein-geheimer-schluessel-123
+OPENAI_API_KEY=sk-proj-...
+FRONTEND_URL=http://localhost:3000
+PORT=3001
+NODE_ENV=development
+```
+
+**Production (Railway):**
+```bash
+DATABASE_URL=postgresql://... (Railway-managed)
+JWT_SECRET=production-secret-key
+OPENAI_API_KEY=sk-proj-...
+NODE_ENV=production
+FRONTEND_URL=https://frontend-production-xxxx.up.railway.app
+```
+
+#### Deployment-Prozess
+1. **Code Changes:** Git commit + push
+2. **Automatisches Deployment:** Railway erkennt GitHub-Push
+3. **Build Process:** 
+   - Frontend: Vite Build → Caddy Static Files
+   - Backend: TypeScript Compile → Node.js Start
+4. **Database Setup:** Automatisches Schema + Seeding
+5. **Health Check:** Automatische Verfügbarkeitsprüfung
+
+#### CORS-Konfiguration
+**Backend CORS-Settings:**
+```typescript
+origin: [
+  'http://localhost:3000',                    // Lokale Entwicklung
+  'https://frontend-production-xxxx.up.railway.app', // Railway Frontend
+  'frontend.railway.internal'                 // Interne Railway-Kommunikation
+]
+```
+
+#### API-Konfiguration
+**Frontend API-Setup:**
+```typescript
+// Lokal: Vite Proxy zu /api → http://localhost:3001/api
+// Production: Direkte API-Calls zu Railway Backend
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://backend-production-xxxx.up.railway.app/api'
+```
+
+#### Monitoring & Logs
+- **Railway Dashboard:** Real-time Logs und Metrics
+- **Health Endpoints:** `/health` für Service-Status
+- **Error Tracking:** Console-Logs in Railway Dashboard
+- **Performance:** Railway Metrics für CPU/Memory
+
+#### Custom Domain (Optional)
+1. **Domain kaufen** (z.B. bei Strato)
+2. **Railway Custom Domain** konfigurieren
+3. **DNS-Records** bei Domain-Provider eintragen
+4. **Automatisches SSL** von Railway
 
 ## 📝 Changelog
+
+### Version 2.1 (September 2025) - Production Deployment
+- ✅ **Railway Deployment:** Vollständige Production-Bereitstellung auf Railway.app
+- ✅ **PostgreSQL Migration:** Migration von SQLite zu PostgreSQL für Production
+- ✅ **Automatisches Database Seeding:** Startup-Script für automatisches Laden der Testdaten
+- ✅ **Environment Configuration:** Vollständige Environment-Variable-Konfiguration
+- ✅ **CORS-Konfiguration:** Korrekte CORS-Einstellungen für lokale und Production-Umgebungen
+- ✅ **API-Konfiguration:** Einheitliche API-URL-Konfiguration für alle Umgebungen
+- ✅ **Frontend-Backend Integration:** Korrektur aller fetch() Calls zu api.get() für konsistente API-Kommunikation
+- ✅ **Passwort-Update-Endpoint:** Implementierung des fehlenden PUT /users/:id/password Endpoints
+- ✅ **Copyright-Schutz:** Hinzufügung von Copyright-Vermerk für geistiges Eigentum
+- ✅ **Production-Ready:** Vollständig deploybare Anwendung mit automatischem Deployment
 
 ### Version 2.0 (Januar 2025)
 - ✅ **Neue Status/Entscheidungs-Architektur:** Trennung von Workflow-Phase und Ergebnis

@@ -149,29 +149,47 @@ prisonApp/
 
 - Node.js (Version 18 oder höher)
 - npm oder yarn
+- PostgreSQL (für lokale Entwicklung)
 
-### Installation
+### Lokale Entwicklung
 
-1. **Backend einrichten:**
+1. **PostgreSQL installieren:**
+   ```bash
+   # Windows (mit Chocolatey)
+   choco install postgresql
+   
+   # Oder direkt von: https://www.postgresql.org/download/
+   ```
+
+2. **Backend einrichten:**
    ```bash
    cd backend
    npm install
+   
+   # Environment-Variable setzen (.env Datei erstellen):
+   DATABASE_URL="postgresql://username:password@localhost:5432/prisoner_services"
+   JWT_SECRET=mein-geheimer-schluessel-123
+   OPENAI_API_KEY=sk-proj-...
+   FRONTEND_URL=http://localhost:3000
+   PORT=3001
+   NODE_ENV=development
+   
    npx prisma generate
    npx prisma db push
-   npm run db:seed  # Testdaten erstellen (Benutzer, Gruppen, Services)
-   npx db:seed      # Alternative für Windows (falls npx prisma db seed nicht funktioniert)
-   npx ts-node prisma/seed-houses.ts  # Hausverwaltung-Testdaten erstellen
+   npm run db:seed  # Testdaten erstellen
+   npm run db:seed-houses  # Hausverwaltung-Testdaten erstellen
    ```
 
-2. **Frontend einrichten:**
+3. **Frontend einrichten:**
    ```bash
    cd frontend
    npm install
-   # Für Multi-Language Support (i18n):
-   npm install i18next react-i18next i18next-browser-languagedetector
+   
+   # Environment-Variable setzen (.env Datei erstellen):
+   VITE_API_URL=http://localhost:3001/api
    ```
 
-3. **Anwendung starten:**
+4. **Anwendung starten:**
 
    **Backend (Terminal 1):**
    ```bash
@@ -186,6 +204,48 @@ prisonApp/
    npm run dev
    ```
    Frontend läuft auf: http://localhost:3000
+
+## 🚀 Production Deployment (Railway)
+
+### Railway Setup
+
+1. **Railway Account erstellen:**
+   - Gehe zu [railway.app](https://railway.app)
+   - Erstelle Account und verbinde GitHub
+
+2. **Services erstellen:**
+   - **Frontend Service:** Root Directory: `/frontend`
+   - **Backend Service:** Root Directory: `/backend`
+   - **PostgreSQL Database:** Railway-managed Database
+
+3. **Environment Variables konfigurieren:**
+
+   **Frontend Service:**
+   ```bash
+   VITE_API_URL=https://backend-production-xxxx.up.railway.app/api
+   ```
+
+   **Backend Service:**
+   ```bash
+   DATABASE_URL=postgresql://... (Railway PostgreSQL URL)
+   JWT_SECRET=production-secret-key
+   OPENAI_API_KEY=sk-proj-...
+   NODE_ENV=production
+   FRONTEND_URL=https://frontend-production-xxxx.up.railway.app
+   ```
+
+4. **Automatisches Deployment:**
+   - Railway erkennt GitHub-Push automatisch
+   - Build und Deploy erfolgen automatisch
+   - Database Seeding erfolgt beim ersten Start
+
+### Deployment-Features
+
+- ✅ **Automatisches HTTPS:** SSL-Zertifikate von Railway
+- ✅ **Database Seeding:** Automatisches Laden der Testdaten
+- ✅ **Health Checks:** Automatische Verfügbarkeitsprüfung
+- ✅ **Logs:** Real-time Logs im Railway Dashboard
+- ✅ **Custom Domain:** Optional mit eigener Domain
 
 ## 🔐 Authentifizierung
 
@@ -301,7 +361,19 @@ Das System wird mit folgenden Testdaten initialisiert:
 
 ## 📝 Changelog
 
-### Version 2.0
+### Version 2.1 (September 2025) - Production Deployment
+- ✅ **Railway Deployment:** Vollständige Production-Bereitstellung auf Railway.app
+- ✅ **PostgreSQL Migration:** Migration von SQLite zu PostgreSQL für Production
+- ✅ **Automatisches Database Seeding:** Startup-Script für automatisches Laden der Testdaten
+- ✅ **Environment Configuration:** Vollständige Environment-Variable-Konfiguration
+- ✅ **CORS-Konfiguration:** Korrekte CORS-Einstellungen für lokale und Production-Umgebungen
+- ✅ **API-Konfiguration:** Einheitliche API-URL-Konfiguration für alle Umgebungen
+- ✅ **Frontend-Backend Integration:** Korrektur aller fetch() Calls zu api.get() für konsistente API-Kommunikation
+- ✅ **Passwort-Update-Endpoint:** Implementierung des fehlenden PUT /users/:id/password Endpoints
+- ✅ **Copyright-Schutz:** Hinzufügung von Copyright-Vermerk für geistiges Eigentum
+- ✅ **Production-Ready:** Vollständig deploybare Anwendung mit automatischem Deployment
+
+### Version 2.0 (Januar 2025)
 - ✅ **Neue Status/Entscheidungs-Architektur:** Trennung von Workflow-Phase und Ergebnis
 - ✅ **Vereinfachte Prioritäten:** Nur noch HIGH und URGENT, null als Standard
 - ✅ **Neue Bearbeiter-Aktionen:** Insassen kontaktieren, weiterleiten, entscheiden, persönliche Eröffnung
@@ -368,4 +440,5 @@ Dieses Projekt ist für interne Zwecke entwickelt und nicht zur öffentlichen Ve
 ---
 
 **Entwickelt für:** Prisoner Services System  
-**Version:** 2.0
+**Version:** 2.1  
+**© 2025 Dr. Alexander Hayward - Prisoner Services System. Alle Rechte vorbehalten.**
