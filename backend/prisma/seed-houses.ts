@@ -5,6 +5,25 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌆 Erstelle Beispieldaten für Hausverwaltung...');
 
+  // Zuerst alle bestehenden Daten löschen (in der richtigen Reihenfolge)
+  console.log('🗑️ Lösche alle bestehenden Hausverwaltungsdaten...');
+  
+  // Zuerst Zuweisungen löschen (hat Foreign Keys zu Zellen)
+  await prisma.cellAssignment.deleteMany({});
+  console.log('🗑️ Zuweisungen gelöscht');
+  
+  // Dann Zellen löschen (hat Foreign Keys zu Stationen)
+  await prisma.cell.deleteMany({});
+  console.log('🗑️ Zellen gelöscht');
+  
+  // Dann Stationen löschen (hat Foreign Keys zu Häusern)
+  await prisma.station.deleteMany({});
+  console.log('🗑️ Stationen gelöscht');
+  
+  // Zum Schluss Häuser löschen
+  await prisma.house.deleteMany({});
+  console.log('🗑️ Häuser gelöscht');
+
   // Haus A erstellen
   const houseA = await prisma.house.create({
     data: {
