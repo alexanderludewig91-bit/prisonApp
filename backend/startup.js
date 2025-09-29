@@ -26,10 +26,10 @@ async function setupDatabase() {
     
     console.log('🚀 Starting application...');
     
-    // Prüfe ob app.js existiert
-    const appPath = path.join(__dirname, 'dist', 'app.js');
+    // Prüfe ob app.js existiert (tsc kompiliert nach dist/src/)
+    const appPath = path.join(__dirname, 'dist', 'src', 'app.js');
     if (!fs.existsSync(appPath)) {
-      console.log('❌ ERROR: /app/dist/app.js not found!');
+      console.log('❌ ERROR: /app/dist/src/app.js not found!');
       console.log('❌ TypeScript compilation may have failed.');
       console.log('❌ Available files in dist/:');
       try {
