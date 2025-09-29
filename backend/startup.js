@@ -38,7 +38,15 @@ async function setupDatabase() {
       } catch (e) {
         console.log('❌ dist/ directory does not exist!');
       }
-      process.exit(1);
+      
+      console.log('🔧 Attempting to rebuild...');
+      try {
+        execSync('npm run build', { stdio: 'inherit' });
+        console.log('✅ Rebuild successful');
+      } catch (error) {
+        console.log('❌ Rebuild failed:', error.message);
+        process.exit(1);
+      }
     }
     
     console.log('✅ app.js found, starting server...');
