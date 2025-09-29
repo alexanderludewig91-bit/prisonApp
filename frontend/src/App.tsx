@@ -17,6 +17,7 @@ import AdminLogs from './pages/AdminLogs'
 import HouseManagement from './pages/HouseManagement'
 import InmatesOverview from './pages/InmatesOverview'
 import UserOverview from './pages/UserOverview'
+import Profile from './pages/Profile'
 import { AuthProvider } from './contexts/AuthContext'
 import { LanguageProvider } from './contexts/LanguageContext'
 import './App.css'
@@ -181,6 +182,9 @@ function AppContent() {
           } />
           <Route path="/user-overview" element={
             isAuthenticated ? <StaffOnlyRoute><UserOverview /></StaffOnlyRoute> : <Navigate to="/login" replace />
+          } />
+          <Route path="/profile" element={
+            isAuthenticated ? <Profile /> : <Navigate to="/login" replace />
           } />
         </Routes>
       </main>

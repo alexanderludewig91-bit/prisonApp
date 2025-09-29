@@ -913,30 +913,28 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                     </div>
                     <div className="ml-3">
                       <h3 className="text-sm font-medium text-yellow-800">
-                        Buchungen und Finanzen
+                        Hinweis
                       </h3>
                       <p className="text-sm text-yellow-700 mt-1">
-                        Diese Funktion ist noch in Entwicklung. Bitte verwenden Sie vorerst den "Sonstiges Anliegen" Antrag.
-                      </p>
+                      Dieser Antrag ist noch in Entwicklung und wird aktuell als Freitextantrag (Sonstiges Anliegen) übermittelt.                      </p>
                     </div>
                   </div>
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Beschreibung Ihres Anliegens *
+                  {t('modals.newService.description')} *
                   </label>
                   <textarea
                     value={originalText}
                     onChange={(e) => setOriginalText(e.target.value)}
-                    placeholder="Beschreiben Sie Ihr Anliegen bezüglich Buchungen und Finanzen..."
+                    placeholder={t('modals.newService.descriptionPlaceholder')}
                     className="w-full input resize-none"
                     rows={4}
                     maxLength={500}
                   />
                   <p className="text-sm text-gray-500 mt-1">
-                    Beschreiben Sie detailliert, was Sie bezüglich Buchungen und Finanzen benötigen.
-                  </p>
+                  {t('modals.newService.descriptionHelp')}                  </p>
                 </div>
               </div>
             )}
@@ -950,30 +948,27 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                     </div>
                     <div className="ml-3">
                       <h3 className="text-sm font-medium text-yellow-800">
-                        Besuch
+                      Hinweis
                       </h3>
                       <p className="text-sm text-yellow-700 mt-1">
-                        Diese Funktion ist noch in Entwicklung. Bitte verwenden Sie vorerst den "Sonstiges Anliegen" Antrag.
-                      </p>
+                      Dieser Antrag ist noch in Entwicklung und wird aktuell als Freitextantrag (Sonstiges Anliegen) übermittelt.                      </p>
                     </div>
                   </div>
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Beschreibung Ihres Anliegens *
-                  </label>
+                  {t('modals.newService.description')} *                  </label>
                   <textarea
                     value={originalText}
                     onChange={(e) => setOriginalText(e.target.value)}
-                    placeholder="Beschreiben Sie Ihr Anliegen bezüglich Besuchen..."
+                    placeholder={t('modals.newService.descriptionPlaceholder')}
                     className="w-full input resize-none"
                     rows={4}
                     maxLength={500}
                   />
                   <p className="text-sm text-gray-500 mt-1">
-                    Beschreiben Sie detailliert, was Sie bezüglich Besuchen benötigen.
-                  </p>
+                  {t('modals.newService.descriptionHelp')}                  </p>
                 </div>
               </div>
             )}
@@ -987,30 +982,28 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                     </div>
                     <div className="ml-3">
                       <h3 className="text-sm font-medium text-yellow-800">
-                        Gespräch
+                      Hinweis
                       </h3>
                       <p className="text-sm text-yellow-700 mt-1">
-                        Diese Funktion ist noch in Entwicklung. Bitte verwenden Sie vorerst den "Sonstiges Anliegen" Antrag.
-                      </p>
+                      Dieser Antrag ist noch in Entwicklung und wird aktuell als Freitextantrag (Sonstiges Anliegen) übermittelt.
+                       </p>
                     </div>
                   </div>
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Beschreibung Ihres Anliegens *
-                  </label>
+                  {t('modals.newService.description')} *                  </label>
                   <textarea
                     value={originalText}
                     onChange={(e) => setOriginalText(e.target.value)}
-                    placeholder="Beschreiben Sie Ihr Anliegen bezüglich Gesprächen..."
+                    placeholder={t('modals.newService.descriptionPlaceholder')}
                     className="w-full input resize-none"
                     rows={4}
                     maxLength={500}
                   />
                   <p className="text-sm text-gray-500 mt-1">
-                    Beschreiben Sie detailliert, was Sie bezüglich Gesprächen benötigen.
-                  </p>
+                  {t('modals.newService.descriptionHelp')}                  </p>
                 </div>
               </div>
             )}
@@ -1024,30 +1017,26 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                     </div>
                     <div className="ml-3">
                       <h3 className="text-sm font-medium text-yellow-800">
-                        Freizeit & Bildung
-                      </h3>
+                    Hinweis                      </h3>
                       <p className="text-sm text-yellow-700 mt-1">
-                        Diese Funktion ist noch in Entwicklung. Bitte verwenden Sie vorerst den "Sonstiges Anliegen" Antrag.
-                      </p>
+                      Dieser Antrag ist noch in Entwicklung und wird aktuell als Freitextantrag (Sonstiges Anliegen) übermittelt.                       </p>
                     </div>
                   </div>
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Beschreibung Ihres Anliegens *
-                  </label>
+                  {t('modals.newService.description')} *                  </label>
                   <textarea
                     value={originalText}
                     onChange={(e) => setOriginalText(e.target.value)}
-                    placeholder="Beschreiben Sie Ihr Anliegen bezüglich Freizeit & Bildung..."
+                    placeholder={t('modals.newService.descriptionPlaceholder')}
                     className="w-full input resize-none"
                     rows={4}
                     maxLength={500}
                   />
                   <p className="text-sm text-gray-500 mt-1">
-                    Beschreiben Sie detailliert, was Sie bezüglich Freizeit & Bildung benötigen.
-                  </p>
+                  {t('modals.newService.descriptionHelp')}                  </p>
                 </div>
               </div>
             )}
@@ -1061,30 +1050,28 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                     </div>
                     <div className="ml-3">
                       <h3 className="text-sm font-medium text-yellow-800">
-                        Beratung & Unterstützung
+                      Hinweis
                       </h3>
                       <p className="text-sm text-yellow-700 mt-1">
-                        Diese Funktion ist noch in Entwicklung. Bitte verwenden Sie vorerst den "Sonstiges Anliegen" Antrag.
-                      </p>
+                      Dieser Antrag ist noch in Entwicklung und wird aktuell als Freitextantrag (Sonstiges Anliegen) übermittelt.
+                       </p>
                     </div>
                   </div>
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Beschreibung Ihres Anliegens *
-                  </label>
+                  {t('modals.newService.description')} *                  </label>
                   <textarea
                     value={originalText}
                     onChange={(e) => setOriginalText(e.target.value)}
-                    placeholder="Beschreiben Sie Ihr Anliegen bezüglich Beratung & Unterstützung..."
+                    placeholder={t('modals.newService.descriptionPlaceholder')}
                     className="w-full input resize-none"
                     rows={4}
                     maxLength={500}
                   />
                   <p className="text-sm text-gray-500 mt-1">
-                    Beschreiben Sie detailliert, was Sie bezüglich Beratung & Unterstützung benötigen.
-                  </p>
+                  {t('modals.newService.descriptionHelp')}                  </p>
                 </div>
               </div>
             )}
@@ -1098,30 +1085,28 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                     </div>
                     <div className="ml-3">
                       <h3 className="text-sm font-medium text-yellow-800">
-                        Vollzugslockerung
+                      Hinweis
                       </h3>
                       <p className="text-sm text-yellow-700 mt-1">
-                        Diese Funktion ist noch in Entwicklung. Bitte verwenden Sie vorerst den "Sonstiges Anliegen" Antrag.
-                      </p>
+                      Dieser Antrag ist noch in Entwicklung und wird aktuell als Freitextantrag (Sonstiges Anliegen) übermittelt.
+                       </p>
                     </div>
                   </div>
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Beschreibung Ihres Anliegens *
-                  </label>
+                  {t('modals.newService.description')} *                  </label>
                   <textarea
                     value={originalText}
                     onChange={(e) => setOriginalText(e.target.value)}
-                    placeholder="Beschreiben Sie Ihr Anliegen bezüglich Vollzugslockerung..."
+                    placeholder={t('modals.newService.descriptionPlaceholder')}
                     className="w-full input resize-none"
                     rows={4}
                     maxLength={500}
                   />
                   <p className="text-sm text-gray-500 mt-1">
-                    Beschreiben Sie detailliert, was Sie bezüglich Vollzugslockerung benötigen.
-                  </p>
+                  {t('modals.newService.descriptionHelp')}                  </p>
                 </div>
               </div>
             )}
@@ -1135,30 +1120,27 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                     </div>
                     <div className="ml-3">
                       <h3 className="text-sm font-medium text-yellow-800">
-                        Mein Eigentum in der Kammer
+                      Hinweis
                       </h3>
                       <p className="text-sm text-yellow-700 mt-1">
-                        Diese Funktion ist noch in Entwicklung. Bitte verwenden Sie vorerst den "Sonstiges Anliegen" Antrag.
-                      </p>
+                      Dieser Antrag ist noch in Entwicklung und wird aktuell als Freitextantrag (Sonstiges Anliegen) übermittelt.                      </p>
                     </div>
                   </div>
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Beschreibung Ihres Anliegens bezüglich Ihres Eigentums *
-                  </label>
+                  {t('modals.newService.description')} *                  </label>
                   <textarea
                     value={originalText}
                     onChange={(e) => setOriginalText(e.target.value)}
-                    placeholder="Beschreiben Sie Ihr Anliegen bezüglich Ihres Eigentums in der Kammer..."
+                    placeholder={t('modals.newService.descriptionPlaceholder')}
                     className="w-full input resize-none"
                     rows={4}
                     maxLength={500}
                   />
                   <p className="text-sm text-gray-500 mt-1">
-                    Beschreiben Sie detailliert, was Sie bezüglich Ihres Eigentums in der Kammer benötigen.
-                  </p>
+                  {t('modals.newService.descriptionHelp')}                  </p>
                 </div>
               </div>
             )}
@@ -1173,12 +1155,12 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                     </div>
                     <div className="ml-3">
                       <h3 className="text-sm font-medium text-yellow-800">
-                        {selectedServiceType === 'HEALTH' ? 'Gesundheit' : 
-                         selectedServiceType === 'WORK_SCHOOL' ? 'Arbeit & Schule' : 
-                         selectedServiceType === 'PACKAGE' ? 'Paketsendung' : 'Antrag'}
+                        {selectedServiceType === 'HEALTH' ? 'Hinweis' : 
+                         selectedServiceType === 'WORK_SCHOOL' ? 'Hinweis' : 
+                         selectedServiceType === 'PACKAGE' ? 'Hinweis' : 'Antrag'}
                       </h3>
                       <p className="text-sm text-yellow-700 mt-1">
-                        Diese Funktion ist noch in Entwicklung. Bitte verwenden Sie vorerst den "Sonstiges Anliegen" Antrag.
+                      Dieser Antrag ist noch in Entwicklung und wird aktuell als Freitextantrag (Sonstiges Anliegen) übermittelt.
                       </p>
                     </div>
                   </div>
@@ -1186,19 +1168,17 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Beschreibung Ihres Anliegens *
-                  </label>
+                  {t('modals.newService.description')} *                  </label>
                   <textarea
                     value={originalText}
                     onChange={(e) => setOriginalText(e.target.value)}
-                    placeholder="Beschreiben Sie Ihr Anliegen..."
+                    placeholder={t('modals.newService.descriptionPlaceholder')}
                     className="w-full input resize-none"
                     rows={4}
                     maxLength={500}
                   />
                   <p className="text-sm text-gray-500 mt-1">
-                    Beschreiben Sie detailliert, was Sie benötigen.
-                  </p>
+                  {t('modals.newService.descriptionHelp')}                  </p>
                 </div>
               </div>
             )}

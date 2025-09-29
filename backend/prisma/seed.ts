@@ -141,13 +141,15 @@ async function main() {
   
   // Passwort hashen
   const hashedPassword = await bcrypt.hash('test', 10)
-  
+  const hashedPassword2 = await bcrypt.hash('asdf1234', 10)
+  const hashedPassword3 = await bcrypt.hash('HeurekaRocks!', 10)
+
   // Test-Benutzer definieren
   const testUsers = [
     {
       username: 'admin',
       email: 'admin@prison.com',
-      password: hashedPassword,
+      password: hashedPassword3,
       firstName: 'System',
       lastName: 'Administrator',
       groups: ['PS All Users', 'PS Designers']
@@ -163,7 +165,7 @@ async function main() {
     {
       username: 'avd001',
       email: 'avd001@prison.com',
-      password: hashedPassword,
+      password: hashedPassword2,
       firstName: 'Maria',
       lastName: 'Müller',
       groups: ['PS All Users', 'PS General Enforcement Service']
@@ -171,7 +173,7 @@ async function main() {
     {
       username: 'val001',
       email: 'val001@prison.com',
-      password: hashedPassword,
+      password: hashedPassword2,
       firstName: 'Hans',
       lastName: 'Schmidt',
       groups: ['PS All Users', 'PS Vollzugsabteilungsleitung']
@@ -179,7 +181,7 @@ async function main() {
     {
       username: 'vl001',
       email: 'vl001@prison.com',
-      password: hashedPassword,
+      password: hashedPassword2,
       firstName: 'Anna',
       lastName: 'Weber',
       groups: ['PS All Users', 'PS Vollzugsleitung']
@@ -187,7 +189,7 @@ async function main() {
     {
       username: 'al001',
       email: 'al001@prison.com',
-      password: hashedPassword,
+      password: hashedPassword2,
       firstName: 'Peter',
       lastName: 'Fischer',
       groups: ['PS All Users', 'PS Anstaltsleitung']
@@ -195,7 +197,7 @@ async function main() {
     {
       username: 'zahlstelle001',
       email: 'zahlstelle001@prison.com',
-      password: hashedPassword,
+      password: hashedPassword2,
       firstName: 'Lisa',
       lastName: 'Klein',
       groups: ['PS All Users', 'PS Payments Office']
@@ -203,15 +205,30 @@ async function main() {
     {
       username: 'arzt001',
       email: 'arzt001@prison.com',
-      password: hashedPassword,
+      password: hashedPassword2,
       firstName: 'Dr. Thomas',
       lastName: 'Wagner',
       groups: ['PS All Users', 'PS Medical Staff']
+    },
+    {
+      username: 'Heureka',
+      email: 'pd@team.com',
+      password: hashedPassword2,
+      firstName: 'PD',
+      lastName: 'Team',
+      groups: ['PS All Users', 'PS Medical Staff', 'PS Payments Office', 'PS Anstaltsleitung', 'PS Vollzugsleitung', 'PS Vollzugsabteilungsleitung', 'PS General Enforcement Service']
     }
   ]
 
   // 50 zusätzliche Insassen erstellen
-  const additionalInmates = []
+  const additionalInmates: Array<{
+    username: string;
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    groups: string[];
+  }> = []
   const firstNames = ['Lukas', 'Felix', 'Jan', 'Tim', 'Niklas', 'Tom', 'Paul', 'Jonas', 'David', 'Simon', 'Andreas', 'Christian', 'Michael', 'Stefan', 'Martin', 'Daniel', 'Thomas', 'Alexander', 'Markus', 'Sebastian', 'Florian', 'Matthias', 'Patrick', 'Kevin', 'Dennis', 'Benjamin', 'Tobias', 'Dominik', 'Philipp', 'Marcel', 'Sven', 'Björn', 'Thorsten', 'Ralf', 'Uwe', 'Klaus', 'Wolfgang', 'Dieter', 'Günther', 'Heinz', 'Werner', 'Manfred', 'Jürgen', 'Horst', 'Gerhard', 'Karl', 'Ernst', 'Walter', 'Herbert', 'Franz', 'Josef']
   const lastNames = ['Müller', 'Schmidt', 'Schneider', 'Fischer', 'Weber', 'Meyer', 'Wagner', 'Becker', 'Schulz', 'Hoffmann', 'Schäfer', 'Koch', 'Bauer', 'Richter', 'Klein', 'Wolf', 'Schröder', 'Neumann', 'Schwarz', 'Zimmermann', 'Braun', 'Krüger', 'Hofmann', 'Hartmann', 'Lange', 'Schmitt', 'Werner', 'Krause', 'Meier', 'Lehmann', 'Schmid', 'Schulze', 'Maier', 'Köhler', 'Herrmann', 'König', 'Walter', 'Mayer', 'Huber', 'Kaiser', 'Fuchs', 'Peters', 'Lang', 'Scholz', 'Möller', 'Weiß', 'Jung', 'Hahn', 'Schubert', 'Vogel', 'Friedrich']
 

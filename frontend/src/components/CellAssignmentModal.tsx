@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, User, AlertCircle } from 'lucide-react';
+import api from '../services/api';
 
 interface User {
   id: number;
@@ -68,23 +69,18 @@ const CellAssignmentModal: React.FC<CellAssignmentModalProps> = ({
       setLoadingUsers(true);
       setError(null);
       
-      // Spezielle API-Route für Insassen verwenden
-      const response = await fetch('/api/users/inmates');
+      // Nur nicht zugewiesene Insassen laden
+      const response = await api.get('/users/inmates-unassigned');
       
-      if (!response.ok) {
-        throw new Error('Fehler beim Laden der Insassen');
-      }
-
-      const data = await response.json();
-      console.log('Insassen geladen:', data.users.length);
-      console.log('Insassen:', data.users.map((u: User) => ({
+      console.log('Insassen geladen:', response.data.users.length);
+      console.log('Insassen:', response.data.users.map((u: User) => ({
         id: u.id,
         name: `${u.firstName} ${u.lastName}`,
         groups: u.groups.map(g => g.group.name)
       })));
       
-             setUsers(data.users);
-       setFilteredUsers(data.users);
+      setUsers(response.data.users);
+      setFilteredUsers(response.data.users);
     } catch (err) {
       console.error('Fehler beim Laden der Benutzer:', err);
       setError(err instanceof Error ? err.message : 'Unbekannter Fehler');

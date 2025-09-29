@@ -8,6 +8,10 @@ async function setupDatabase() {
     execSync('npx prisma db push', { stdio: 'inherit' });
     console.log('✅ Database schema applied successfully');
     
+    // Prisma Client neu generieren
+    execSync('npx prisma generate', { stdio: 'inherit' });
+    console.log('✅ Prisma Client generated successfully');
+    
     console.log('🌱 Seeding database...');
     
     // Seede Haupt-Daten

@@ -145,8 +145,8 @@
         "miscellaneous": "Sonstiges"
       },
       "description": "Beschreibung Ihres Anliegens:",
-      "descriptionPlaceholder": "Beschreiben Sie Ihr Anliegen in Ihrer gewünschten Sprache...",
-      "descriptionHelp": "Sie können Ihren Text in jeder Sprache eingeben. Die KI wird ihn ins Deutsche übersetzen und einen passenden Titel generieren.",
+      "descriptionPlaceholder": "Beschreiben Sie hier Ihr gewünschtes Anliegen...",
+      "descriptionHelp": "Nach der Beschreibung Ihres Anliegens können Sie durch einen Klick auf 'Antrag vorbereiten' zum nächsten Schritt gehen.",
       "participationMoneyInfo": "Bitte wählen Sie den Monat aus, für den Sie Teilhabegeld beantragen möchten.",
       "participationMoneyMonthLabel": "Monat für Teilhabegeldantrag",
       "participationMoneyMonthHelp": "Wählen Sie den Monat, für den Sie den Teilhabegeldantrag stellen möchten.",
