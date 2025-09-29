@@ -1,4 +1,6 @@
 const { execSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
 
 async function setupDatabase() {
   try {
@@ -21,6 +23,25 @@ async function setupDatabase() {
     } catch (error) {
       console.log('⚠️ Houses seeding failed (may already exist):', error.message);
     }
+    
+    console.log('🚀 Starting application...');
+    
+    // Prüfe ob app.js existiert
+    const appPath = path.join(__dirname, 'dist', 'app.js');
+    if (!fs.existsSync(appPath)) {
+      console.log('❌ ERROR: /app/dist/app.js not found!');
+      console.log('❌ TypeScript compilation may have failed.');
+      console.log('❌ Available files in dist/:');
+      try {
+        const distFiles = fs.readdirSync(path.join(__dirname, 'dist'));
+        console.log('❌', distFiles);
+      } catch (e) {
+        console.log('❌ dist/ directory does not exist!');
+      }
+      process.exit(1);
+    }
+    
+    console.log('✅ app.js found, starting server...');
     
   } catch (error) {
     console.log('⚠️ Setup failed:', error.message);
