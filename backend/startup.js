@@ -14,9 +14,13 @@ async function setupDatabase() {
     execSync('npm run db:seed', { stdio: 'inherit' });
     console.log('✅ Main data seeded successfully');
     
-    // Seede Häuser-Daten
-    execSync('npm run db:seed-houses', { stdio: 'inherit' });
-    console.log('✅ Houses data seeded successfully');
+    // Seede Häuser-Daten (mit Fehlerbehandlung)
+    try {
+      execSync('npm run db:seed-houses', { stdio: 'inherit' });
+      console.log('✅ Houses data seeded successfully');
+    } catch (error) {
+      console.log('⚠️ Houses seeding failed (may already exist):', error.message);
+    }
     
   } catch (error) {
     console.log('⚠️ Setup failed:', error.message);
