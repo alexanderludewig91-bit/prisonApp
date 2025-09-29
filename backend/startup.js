@@ -49,7 +49,26 @@ async function setupDatabase() {
       }
     }
     
+    // Warte kurz und prüfe nochmal
+    console.log('⏳ Waiting for file system...');
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    if (!fs.existsSync(appPath)) {
+      console.log('❌ ERROR: app.js still not found after rebuild!');
+      console.log('❌ Available files in dist/:');
+      try {
+        const distFiles = fs.readdirSync(path.join(__dirname, 'dist'));
+        console.log('❌', distFiles);
+      } catch (e) {
+        console.log('❌ dist/ directory does not exist!');
+      }
+      process.exit(1);
+    }
+    
     console.log('✅ app.js found, starting server...');
+    console.log('📁 App path:', appPath);
+    console.log('📁 File exists:', fs.existsSync(appPath));
+    console.log('📁 File size:', fs.statSync(appPath).size, 'bytes');
     
   } catch (error) {
     console.log('⚠️ Setup failed:', error.message);
