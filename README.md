@@ -4,7 +4,7 @@ Eine moderne Webanwendung für die Verwaltung von Gefängnisdiensten, entwickelt
 
 ## 🎯 Projektübersicht
 
-Diese Anwendung ist ein Nachbau des ursprünglichen Appian-Systems "Prisoner Services" und bietet:
+Diese Anwendung "Prisoner Services" bietet:
 
 - **Insassen-Features:** Antragstellung, Status-Abfragen, persönliche Übersicht, Rückfragen beantworten, KI-Textübersetzung
 - **Mitarbeiter-Features:** Antragsbearbeitung, Workflow-Management, Kommentare, Insassen-Übersicht, neue Bearbeiter-Aktionen
@@ -373,7 +373,7 @@ Das System wird mit folgenden Testdaten initialisiert:
 - ✅ **Copyright-Schutz:** Hinzufügung von Copyright-Vermerk für geistiges Eigentum
 - ✅ **Production-Ready:** Vollständig deploybare Anwendung mit automatischem Deployment
 
-### Version 2.0 (Januar 2025)
+### Version 2.0 (August 2025)
 - ✅ **Neue Status/Entscheidungs-Architektur:** Trennung von Workflow-Phase und Ergebnis
 - ✅ **Vereinfachte Prioritäten:** Nur noch HIGH und URGENT, null als Standard
 - ✅ **Neue Bearbeiter-Aktionen:** Insassen kontaktieren, weiterleiten, entscheiden, persönliche Eröffnung

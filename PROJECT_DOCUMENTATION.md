@@ -2,7 +2,7 @@
 
 ## 🎯 Projektübersicht
 
-Dieses Projekt ist eine moderne Webanwendung, die das ursprüngliche Appian-System "Prisoner Services" nachbaut. Das System besteht aus zwei Hauptapplikationen, die in einer einheitlichen Webanwendung vereint werden:
+Dieses Projekt ist eine moderne Webanwendung. Das System besteht aus zwei Hauptapplikationen, die in einer einheitlichen Webanwendung vereint werden:
 
 1. **SharedTerminal** - Für Insassen (Antragstellung, Status-Abfragen)
 2. **Prisoner Services** - Für Verwaltungsmitarbeiter (Antragsbearbeitung, Workflow)
@@ -446,7 +446,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://backend-production
 - ✅ **Copyright-Schutz:** Hinzufügung von Copyright-Vermerk für geistiges Eigentum
 - ✅ **Production-Ready:** Vollständig deploybare Anwendung mit automatischem Deployment
 
-### Version 2.0 (Januar 2025)
+### Version 2.0 (August 2025)
 - ✅ **Neue Status/Entscheidungs-Architektur:** Trennung von Workflow-Phase und Ergebnis
 - ✅ **Vereinfachte Prioritäten:** Nur noch HIGH und URGENT, null als Standard
 - ✅ **Neue Bearbeiter-Aktionen:** Insassen kontaktieren, weiterleiten, entscheiden, persönliche Eröffnung
