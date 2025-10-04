@@ -145,6 +145,58 @@ router.get('/providers', async (req: Request, res: Response) => {
   }
 })
 
+// KI-gestützte Antrags-Kategorisierung
+router.post('/categorize-service', [
+  authenticateToken,
+  body('description').notEmpty().withMessage('Beschreibung ist erforderlich').isLength({ min: 1, max: 2000 }).withMessage('Beschreibung muss zwischen 1 und 2000 Zeichen lang sein')
+], async (req: Request, res: Response) => {
+  try {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() })
+    }
+
+    const { description } = req.body
+
+    // Nur OpenAI Provider verwenden
+    const aiProvider = AIProviderFactory.createProvider('openai')
+    if (!aiProvider) {
+      return res.status(500).json({ error: 'OpenAI Provider nicht verfügbar' })
+    }
+
+    // Kategorisierung über Provider-Methode
+    const result = await aiProvider.categorizeService(description)
+
+    res.json({
+      success: true,
+      suggestedServiceType: result.suggestedServiceType,
+      confidence: result.confidence,
+      reasoning: result.reasoning,
+      provider: 'openai'
+    })
+
+  } catch (error: any) {
+    console.error('AI Categorization Fehler:', error)
+    
+    if (error instanceof AIProviderError) {
+      return res.status(error.statusCode).json({ 
+        error: error.message,
+        code: error.code,
+        provider: 'openai'
+      })
+    }
+
+    // Fallback bei Fehlern
+    res.json({
+      success: true,
+      suggestedServiceType: 'FREETEXT',
+      confidence: 0.1,
+      reasoning: 'Fehler bei der KI-Analyse, als Freitextantrag behandelt',
+      provider: 'openai'
+    })
+  }
+})
+
 // Activity-Übersetzung
 router.post('/translate-activity', [
   authenticateToken,

@@ -247,6 +247,184 @@ export class OpenAIProvider implements AIProvider {
     }
   }
 
+  async generateResponse(prompt: string): Promise<string> {
+    try {
+      const completion = await this.client.chat.completions.create({
+        model: this.config.model,
+        messages: [
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        max_tokens: this.config.maxTokens,
+        temperature: this.config.temperature
+      })
+
+      const response = completion.choices[0]?.message?.content
+      if (!response) {
+        throw new AIProviderError('Keine Antwort erhalten', 'NO_RESPONSE', 500)
+      }
+
+      return response.trim()
+    } catch (error: any) {
+      console.error('OpenAI generateResponse Fehler:', error)
+      
+      // OpenAI-spezifische Fehlerbehandlung
+      if (error.code === 'insufficient_quota') {
+        throw new AIProviderError(
+          'OpenAI API Limit erreicht. Bitte versuchen Sie es später erneut.',
+          'QUOTA_EXCEEDED',
+          402
+        )
+      } else if (error.code === 'invalid_api_key') {
+        throw new AIProviderError(
+          'Ungültiger OpenAI API-Schlüssel.',
+          'INVALID_API_KEY',
+          401
+        )
+      } else if (error.code === 'rate_limit_exceeded') {
+        throw new AIProviderError(
+          'OpenAI Rate Limit erreicht. Bitte versuchen Sie es später erneut.',
+          'RATE_LIMIT_EXCEEDED',
+          429
+        )
+      } else {
+        throw new AIProviderError(
+          `OpenAI API Fehler: ${error.message}`,
+          'API_ERROR',
+          500
+        )
+      }
+    }
+  }
+
+  async categorizeService(description: string): Promise<{
+    suggestedServiceType: string;
+    confidence: number;
+    reasoning: string;
+  }> {
+    try {
+      const prompt = `
+Analysiere den folgenden Antragstext und bestimme den passenden Antragstyp.
+Wähle aus den verfügbaren Kategorien: VISIT, HEALTH, CONVERSATION, BOOKINGS_FINANCE, LEISURE_EDUCATION, COUNSELING_SUPPORT, PERSONAL_PROPERTY, WORK_SCHOOL, PACKAGE, PRISON_RELAXATION, FREETEXT
+
+Antragstext: "${description}"
+
+Beispiele für Kategorien:
+- VISIT: Besuche im Gefängnis (nicht außerhalb), Familienbesuche im Gefängnis, Besuchswünsche im Gefängnis
+- HEALTH: Krankheit, Arzt, Medizin, Schmerzen, medizinische Probleme
+- CONVERSATION: Gespräch mit Personal, Aussprache, Klärung
+- BOOKINGS_FINANCE: Geld, Überweisung, Kontostand, finanzielle Angelegenheiten
+- LEISURE_EDUCATION: Freizeit, Bildung, Kurse, Sport, Hobby
+- COUNSELING_SUPPORT: Beratung, Hilfe, Unterstützung, Seelsorge
+- PERSONAL_PROPERTY: Gegenstände, Kleidung, Sachen aus der Kammer
+- WORK_SCHOOL: Arbeit, Schule, Ausbildung, Arbeitsplatz
+- PACKAGE: Paket, Sendung, Post, Päckchen
+- PRISON_RELAXATION: Lockerung, Ausgang, Vollzugslockerung, Urlaub, Gefägnis vorübergehend verlassen, Besuche außerhalb des Gefängnisses
+- FREETEXT: Allgemeine Anliegen, die nicht in andere Kategorien passen
+
+Antwort im JSON-Format:
+{
+  "suggestedServiceType": "VISIT",
+  "confidence": 0.85,
+  "reasoning": "Text enthält Besuchswünsche und Familienbezug"
+}
+`
+
+      const completion = await this.client.chat.completions.create({
+        model: this.config.model,
+        messages: [
+          {
+            role: "system",
+            content: "Du bist ein Assistent für die Kategorisierung von Anträgen im Gefängniswesen. Analysiere den gegebenen Text und kategorisiere ihn in eine der verfügbaren Antragskategorien. Antworte ausschließlich im JSON-Format ohne zusätzliche Erklärungen."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        max_tokens: this.config.maxTokens,
+        temperature: 0.3 // Niedrigere Temperatur für konsistentere Kategorisierung
+      })
+
+      const response = completion.choices[0]?.message?.content
+      if (!response) {
+        throw new AIProviderError('Keine Kategorisierung erhalten', 'NO_RESPONSE', 500)
+      }
+
+      // JSON aus der Antwort extrahieren
+      let categorizationResult
+      try {
+        // Versuche JSON zu parsen (manchmal kommt zusätzlicher Text)
+        const jsonMatch = response.match(/\{[\s\S]*\}/)
+        if (jsonMatch) {
+          categorizationResult = JSON.parse(jsonMatch[0])
+        } else {
+          categorizationResult = JSON.parse(response)
+        }
+      } catch (parseError) {
+        console.error('JSON Parse Error:', parseError)
+        console.error('AI Response:', response)
+        
+        // Fallback: Als FREETEXT kategorisieren
+        return {
+          suggestedServiceType: 'FREETEXT',
+          confidence: 0.1,
+          reasoning: 'KI-Analyse fehlgeschlagen, als Freitextantrag behandelt'
+        }
+      }
+
+      // Validierung der Antwort
+      const validServiceTypes = ['VISIT', 'HEALTH', 'CONVERSATION', 'BOOKINGS_FINANCE', 'LEISURE_EDUCATION', 'COUNSELING_SUPPORT', 'PERSONAL_PROPERTY', 'WORK_SCHOOL', 'PACKAGE', 'PRISON_RELAXATION', 'FREETEXT']
+      
+      if (!validServiceTypes.includes(categorizationResult.suggestedServiceType)) {
+        return {
+          suggestedServiceType: 'FREETEXT',
+          confidence: 0.1,
+          reasoning: 'Ungültige Kategorie erkannt, als Freitextantrag behandelt'
+        }
+      }
+
+      return {
+        suggestedServiceType: categorizationResult.suggestedServiceType,
+        confidence: Math.max(0, Math.min(1, categorizationResult.confidence || 0.1)),
+        reasoning: categorizationResult.reasoning || 'Keine Begründung verfügbar'
+      }
+
+    } catch (error: any) {
+      console.error('OpenAI categorizeService Fehler:', error)
+      
+      // OpenAI-spezifische Fehlerbehandlung
+      if (error.code === 'insufficient_quota') {
+        throw new AIProviderError(
+          'OpenAI API Limit erreicht. Bitte versuchen Sie es später erneut.',
+          'QUOTA_EXCEEDED',
+          402
+        )
+      } else if (error.code === 'invalid_api_key') {
+        throw new AIProviderError(
+          'Ungültiger OpenAI API-Schlüssel.',
+          'INVALID_API_KEY',
+          401
+        )
+      } else if (error.code === 'rate_limit_exceeded') {
+        throw new AIProviderError(
+          'OpenAI Rate Limit erreicht. Bitte versuchen Sie es später erneut.',
+          'RATE_LIMIT_EXCEEDED',
+          429
+        )
+      } else {
+        // Bei anderen Fehlern: Fallback zurückgeben statt Error werfen
+        return {
+          suggestedServiceType: 'FREETEXT',
+          confidence: 0.1,
+          reasoning: 'Fehler bei der KI-Analyse, als Freitextantrag behandelt'
+        }
+      }
+    }
+  }
+
   async healthCheck(): Promise<boolean> {
     try {
       await this.client.chat.completions.create({

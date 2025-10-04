@@ -35,6 +35,24 @@ export interface AIProvider {
   translateToLanguage(text: string, targetLanguage: string): Promise<string>
 
   /**
+   * Generiert eine allgemeine Antwort basierend auf einem Prompt
+   * @param prompt - Der Prompt für die KI
+   * @returns Promise mit der generierten Antwort
+   */
+  generateResponse(prompt: string): Promise<string>
+
+  /**
+   * Kategorisiert einen Antragstext und schlägt den passenden ServiceType vor
+   * @param description - Der Antragstext zur Analyse
+   * @returns Promise mit Kategorisierungs-Ergebnis
+   */
+  categorizeService(description: string): Promise<{
+    suggestedServiceType: string;
+    confidence: number;
+    reasoning: string;
+  }>
+
+  /**
    * Überprüft die Verfügbarkeit des AI-Services
    * @returns Promise mit dem Gesundheitsstatus
    */

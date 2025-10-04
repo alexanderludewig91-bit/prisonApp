@@ -118,6 +118,16 @@ const StaffDashboard = () => {
     switch (serviceType) {
       case 'FREETEXT': return 'Freitextantrag'
       case 'PARTICIPATION_MONEY': return 'Teilhabegeldantrag'
+      case 'VISIT': return 'Besuchsantrag'
+      case 'CONVERSATION': return 'Gesprächsanfrage'
+      case 'HEALTH': return 'Gesundheit'
+      case 'BOOKINGS_FINANCE': return 'Geldtransfer'
+      case 'LEISURE_EDUCATION': return 'Freizeit & Bildung'
+      case 'COUNSELING_SUPPORT': return 'Beratungsanfrage'
+      case 'PERSONAL_PROPERTY': return 'Gegenstände aus der Kammer'
+      case 'WORK_SCHOOL': return 'Arbeit & Schule'
+      case 'PACKAGE': return 'Paketsendung'
+      case 'PRISON_RELAXATION': return 'Vollzugslockerung'
       default: return 'Antrag'
     }
   }

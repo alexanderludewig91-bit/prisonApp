@@ -21,6 +21,10 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
   const [originalTitle, setOriginalTitle] = useState('')
   const [selectedMonth, setSelectedMonth] = useState('')
   const [error, setError] = useState('')
+  const [suggestedServiceType, setSuggestedServiceType] = useState<string>('')
+  const [categorizationConfidence, setCategorizationConfidence] = useState<number>(0)
+  const [categorizationReasoning, setCategorizationReasoning] = useState<string>('')
+  const [showCategorizationConfirmation, setShowCategorizationConfirmation] = useState(false)
 
   // Funktion zur Generierung der verfügbaren Monate (aktueller Monat + 2 vergangene Monate)
   const getAvailableMonths = () => {
@@ -58,7 +62,75 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
     setOriginalTitle('')
     setSelectedMonth('')
     setError('')
+    setSuggestedServiceType('')
+    setCategorizationConfidence(0)
+    setCategorizationReasoning('')
+    setShowCategorizationConfirmation(false)
     onClose()
+  }
+
+  // KI-Kategorisierung für Freitextanträge
+  const handleFreeTextSubmission = async () => {
+    try {
+      setError('')
+      setStep('processing')
+
+      // 1. Übersetzung (wie bisher)
+      const translateResponse = await api.post('/ai/translate', {
+        text: originalText,
+        language: currentLanguage
+      })
+
+      if (translateResponse.data.success) {
+        setTranslatedText(translateResponse.data.translatedText)
+        setGeneratedTitle(translateResponse.data.generatedTitle)
+        setOriginalTitle(translateResponse.data.originalTitle)
+
+        // 2. KI-Kategorisierung des übersetzten Textes
+        const categorizeResponse = await api.post('/ai/categorize-service', {
+          description: translateResponse.data.translatedText
+        })
+
+        if (categorizeResponse.data.success) {
+          setSuggestedServiceType(categorizeResponse.data.suggestedServiceType)
+          setCategorizationConfidence(categorizeResponse.data.confidence)
+          setCategorizationReasoning(categorizeResponse.data.reasoning)
+          setShowCategorizationConfirmation(true)
+          setStep('review')
+        } else {
+          throw new Error('KI-Kategorisierung fehlgeschlagen')
+        }
+      } else {
+        throw new Error('Übersetzung fehlgeschlagen')
+      }
+    } catch (error: any) {
+      console.error('Freitext-Verarbeitung Fehler:', error)
+      setError('Fehler bei der Verarbeitung. Bitte versuchen Sie es erneut.')
+      setStep('input')
+    }
+  }
+
+  // Bestätigung der KI-Kategorisierung
+  const handleCategorizationAccept = async () => {
+    const finalServiceType = suggestedServiceType
+    await submitWithServiceType(finalServiceType)
+  }
+
+  // Ablehnung der KI-Kategorisierung (als Freitext senden)
+  const handleCategorizationReject = async () => {
+    await submitWithServiceType('FREETEXT')
+  }
+
+  // Finale Übermittlung mit bestimmtem ServiceType
+  const submitWithServiceType = async (serviceType: string) => {
+    await onSubmit(
+      generatedTitle, 
+      translatedText, 
+      originalTitle, 
+      originalText, 
+      serviceType
+    )
+    handleClose()
   }
 
   const handleCardClick = (serviceType: string) => {
@@ -89,6 +161,13 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
       return
     }
 
+    // Für FREETEXT-Anträge: Spezielle Behandlung mit KI-Kategorisierung
+    if (selectedServiceType === 'FREETEXT') {
+      await handleFreeTextSubmission()
+      return
+    }
+
+    // Für andere Anträge: Standard KI-Verarbeitung (nur Übersetzung + Titel)
     setError('')
     setStep('processing')
 
@@ -136,7 +215,7 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
       await onSubmit(germanTitle, germanDescription, originalTitleGenerated, originalDescription, selectedServiceType)
       handleClose()
     } else {
-      // Für andere Anträge: KI-Verarbeitung
+      // Für alle anderen Anträge: Standard Übermittlung
       const germanTitle = generatedTitle
       const originalTitleGenerated = originalTitle
       const germanDescription = translatedText
@@ -150,6 +229,12 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
   const handleServiceTypeSelect = (serviceType: string) => {
     setSelectedServiceType(serviceType)
     setStep('input')
+    
+    // KI-Kategorisierungs-State zurücksetzen beim Wechsel des Antragstyps
+    setSuggestedServiceType('')
+    setCategorizationConfidence(0)
+    setCategorizationReasoning('')
+    setShowCategorizationConfirmation(false)
   }
 
   const handleBackToSelect = () => {
@@ -160,6 +245,12 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
     setGeneratedTitle('')
     setOriginalTitle('')
     setError('')
+    
+    // KI-Kategorisierungs-State zurücksetzen
+    setSuggestedServiceType('')
+    setCategorizationConfidence(0)
+    setCategorizationReasoning('')
+    setShowCategorizationConfirmation(false)
   }
 
   const handleBackToInput = () => {
@@ -168,6 +259,12 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
     setGeneratedTitle('')
     setOriginalTitle('')
     setError('')
+    
+    // KI-Kategorisierungs-State zurücksetzen
+    setSuggestedServiceType('')
+    setCategorizationConfidence(0)
+    setCategorizationReasoning('')
+    setShowCategorizationConfirmation(false)
   }
 
   // Debug: Zeige KI-generierte Titel in der Konsole
@@ -1259,24 +1356,23 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
               <div className="space-y-4">
                 <h4 className="font-medium text-gray-900">{t('modals.newService.originalText')}:</h4>
                 
-                {/* Titel */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t('modals.newService.originalTitle')}:
-                  </label>
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                {/* Gemeinsame Umrandung für Titel und Beschreibung */}
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-4">
+                  {/* Titel */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('modals.newService.originalTitle')}:
+                    </label>
                     <p className="text-gray-800 font-medium">
                       {originalTitle}
                     </p>
                   </div>
-                </div>
 
-                {/* Beschreibung */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t('modals.newService.originalDescription')}:
-                  </label>
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                  {/* Beschreibung */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('modals.newService.originalDescription')}:
+                    </label>
                     <p className="text-gray-800 whitespace-pre-wrap">
                       {originalText}
                     </p>
@@ -1290,24 +1386,23 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                 <div className="space-y-4">
                   <h4 className="font-medium text-gray-900">{t('modals.newService.originalText')}:</h4>
                   
-                  {/* Titel in Insassen-Sprache */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {t('modals.newService.originalTitle')}:
-                    </label>
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                  {/* Gemeinsame Umrandung für Titel und Beschreibung (Insassen-Sprache) */}
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-4">
+                    {/* Titel in Insassen-Sprache */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {t('modals.newService.originalTitle')}:
+                      </label>
                       <p className="text-gray-800 font-medium">
                         {originalTitle}
                       </p>
                     </div>
-                  </div>
 
-                  {/* Beschreibung in Insassen-Sprache */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {t('modals.newService.originalDescription')}:
-                    </label>
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                    {/* Beschreibung in Insassen-Sprache */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {t('modals.newService.originalDescription')}:
+                      </label>
                       <p className="text-gray-800 whitespace-pre-wrap">
                         {originalText}
                       </p>
@@ -1319,27 +1414,83 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
                 <div className="space-y-4">
                   <h4 className="font-medium text-gray-900">{t('modals.newService.forStaff')}:</h4>
                   
-                  {/* Titel für Mitarbeiter */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {t('modals.newService.germanTitle')}:
-                    </label>
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  {/* Gemeinsame Umrandung für Titel und Beschreibung (Mitarbeiter-Sprache) */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-4">
+                    {/* Titel für Mitarbeiter */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {t('modals.newService.germanTitle')}:
+                      </label>
                       <p className="text-blue-800 font-medium">
                         {generatedTitle}
                       </p>
                     </div>
-                  </div>
 
-                  {/* Beschreibung für Mitarbeiter */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {t('modals.newService.germanDescription')}:
-                    </label>
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    {/* Beschreibung für Mitarbeiter */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {t('modals.newService.germanDescription')}:
+                      </label>
                       <p className="text-blue-800 whitespace-pre-wrap">
                         {translatedText}
                       </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* KI-Kategorisierungs-Bestätigung für Freitextanträge */}
+            {showCategorizationConfirmation && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span className="text-blue-600 text-sm font-bold">🤖</span>
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-sm font-medium text-blue-900 mb-2">
+                      KI-Vorschlag für Antragskategorie
+                    </h4>
+                    <div className="space-y-2">
+                      <p className="text-sm text-blue-800">
+                        <strong>Vorgeschlagene Kategorie:</strong> 
+                        <span className="ml-1 px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">
+                          {suggestedServiceType === 'VISIT' && 'Besuchsantrag'}
+                          {suggestedServiceType === 'HEALTH' && 'Gesundheit'}
+                          {suggestedServiceType === 'CONVERSATION' && 'Gesprächsanfrage'}
+                          {suggestedServiceType === 'BOOKINGS_FINANCE' && 'Geldtransfer'}
+                          {suggestedServiceType === 'LEISURE_EDUCATION' && 'Freizeit & Bildung'}
+                          {suggestedServiceType === 'COUNSELING_SUPPORT' && 'Beratungsanfrage'}
+                          {suggestedServiceType === 'PERSONAL_PROPERTY' && 'Gegenstände aus der Kammer'}
+                          {suggestedServiceType === 'WORK_SCHOOL' && 'Arbeit & Schule'}
+                          {suggestedServiceType === 'PACKAGE' && 'Paketsendung'}
+                          {suggestedServiceType === 'PRISON_RELAXATION' && 'Vollzugslockerung'}
+                          {suggestedServiceType === 'FREETEXT' && 'Freitextantrag'}
+                        </span>
+                      </p>
+                      <p className="text-sm text-blue-700">
+                        <strong>Sicherheit:</strong> {Math.round(categorizationConfidence * 100)}%
+                      </p>
+                      <p className="text-sm text-blue-700">
+                        <strong>Begründung:</strong> {categorizationReasoning}
+                      </p>
+                    </div>
+                    <div className="flex space-x-3 mt-4">
+                      <button
+                        onClick={handleCategorizationAccept}
+                        className="btn btn-primary flex items-center space-x-2"
+                      >
+                        <span>🤖</span>
+                        <span>Vorschlag übernehmen & Antrag einreichen</span>
+                      </button>
+                      <button
+                        onClick={handleCategorizationReject}
+                        className="btn btn-primary"
+                      >
+                        Als Sonstiges Anliegen einreichen
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -1354,20 +1505,23 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
               >
                 {t('modals.newService.back')}
               </button>
-              <button
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className="btn btn-primary flex-1 flex items-center justify-center"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    {t('modals.newService.submitting')}
-                  </>
-                ) : (
-                  t('modals.newService.submitRequest')
-                )}
-              </button>
+              {/* Antrag einreichen Button nur anzeigen, wenn KEINE KI-Kategorisierungs-Bestätigung */}
+              {!showCategorizationConfirmation && (
+                <button
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                  className="btn btn-primary flex-1 flex items-center justify-center"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {t('modals.newService.submitting')}
+                    </>
+                  ) : (
+                    t('modals.newService.submitRequest')
+                  )}
+                </button>
+              )}
             </div>
           </div>
         )}
