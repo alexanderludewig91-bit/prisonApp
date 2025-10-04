@@ -253,4 +253,73 @@ export class ClaudeProvider implements AIProvider {
   getProviderName(): string {
     return 'Anthropic Claude'
   }
+
+  async generateResponse(prompt: string): Promise<string> {
+    try {
+      const message = await this.client.messages.create({
+        model: this.config.model,
+        max_tokens: this.config.maxTokens,
+        temperature: this.config.temperature,
+        messages: [
+          {
+            role: "user",
+            content: prompt
+          }
+        ]
+      })
+
+      const generatedText = message.content[0]?.type === 'text' ? message.content[0].text : null
+      
+      if (!generatedText) {
+        throw new AIProviderError('Keine Antwort erhalten', 'NO_RESPONSE', 500)
+      }
+
+      return generatedText.trim()
+    } catch (error: any) {
+      console.error('Claude generateResponse Fehler:', error)
+      
+      if (error.status === 402 || error.message?.includes('quota')) {
+        throw new AIProviderError(
+          'Claude API Limit erreicht. Bitte versuchen Sie es später erneut.',
+          'QUOTA_EXCEEDED',
+          402
+        )
+      }
+      
+      if (error.status === 401 || error.message?.includes('API key')) {
+        throw new AIProviderError(
+          'Claude API Konfigurationsfehler. Bitte kontaktieren Sie den Administrator.',
+          'INVALID_API_KEY',
+          500
+        )
+      }
+
+      if (error.status === 429 || error.message?.includes('rate limit')) {
+        throw new AIProviderError(
+          'Rate Limit erreicht. Bitte versuchen Sie es später erneut.',
+          'RATE_LIMIT',
+          429
+        )
+      }
+
+      throw new AIProviderError(
+        'Fehler bei der Textverarbeitung. Bitte versuchen Sie es erneut.',
+        'UNKNOWN_ERROR',
+        500
+      )
+    }
+  }
+
+  async categorizeService(description: string): Promise<{
+    suggestedServiceType: string;
+    confidence: number;
+    reasoning: string;
+  }> {
+    // Da wir nur OpenAI für Kategorisierung verwenden, geben wir einen Fallback zurück
+    return {
+      suggestedServiceType: 'FREETEXT',
+      confidence: 0.1,
+      reasoning: 'Claude Provider unterstützt keine Service-Kategorisierung. Verwenden Sie OpenAI.'
+    }
+  }
 }

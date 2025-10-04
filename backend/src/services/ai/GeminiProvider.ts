@@ -246,4 +246,71 @@ Generiere einen neuen Titel, der in der gleichen Sprache sein MUSS wie der besch
   getProviderName(): string {
     return 'Google Gemini'
   }
+
+  async generateResponse(prompt: string): Promise<string> {
+    try {
+      const model = this.client.getGenerativeModel({ 
+        model: this.config.model,
+        generationConfig: {
+          maxOutputTokens: this.config.maxTokens,
+          temperature: this.config.temperature,
+        }
+      })
+
+      const result = await model.generateContent(prompt)
+      const response = await result.response
+      const generatedText = response.text()
+
+      if (!generatedText) {
+        throw new AIProviderError('Keine Antwort erhalten', 'NO_RESPONSE', 500)
+      }
+
+      return generatedText.trim()
+    } catch (error: any) {
+      console.error('Gemini generateResponse Fehler:', error)
+      
+      if (error.message?.includes('quota')) {
+        throw new AIProviderError(
+          'Gemini API Limit erreicht. Bitte versuchen Sie es später erneut.',
+          'QUOTA_EXCEEDED',
+          402
+        )
+      }
+      
+      if (error.message?.includes('API key')) {
+        throw new AIProviderError(
+          'Gemini API Konfigurationsfehler. Bitte kontaktieren Sie den Administrator.',
+          'INVALID_API_KEY',
+          500
+        )
+      }
+
+      if (error.message?.includes('rate limit')) {
+        throw new AIProviderError(
+          'Rate Limit erreicht. Bitte versuchen Sie es später erneut.',
+          'RATE_LIMIT',
+          429
+        )
+      }
+
+      throw new AIProviderError(
+        'Fehler bei der Textverarbeitung. Bitte versuchen Sie es erneut.',
+        'UNKNOWN_ERROR',
+        500
+      )
+    }
+  }
+
+  async categorizeService(description: string): Promise<{
+    suggestedServiceType: string;
+    confidence: number;
+    reasoning: string;
+  }> {
+    // Da wir nur OpenAI für Kategorisierung verwenden, geben wir einen Fallback zurück
+    return {
+      suggestedServiceType: 'FREETEXT',
+      confidence: 0.1,
+      reasoning: 'Gemini Provider unterstützt keine Service-Kategorisierung. Verwenden Sie OpenAI.'
+    }
+  }
 }
