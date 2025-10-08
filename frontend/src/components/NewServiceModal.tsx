@@ -1002,281 +1002,155 @@ const NewServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: NewService
             )}
 
             {selectedServiceType === 'BOOKINGS_FINANCE' && (
-              <div className="space-y-4">
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <DollarSign className="h-5 w-5 text-yellow-600" />
-                    </div>
-                    <div className="ml-3">
-                      <h3 className="text-sm font-medium text-yellow-800">
-                        Hinweis
-                      </h3>
-                      <p className="text-sm text-yellow-700 mt-1">
-                      Dieser Antrag ist noch in Entwicklung und wird aktuell als Freitextantrag (Sonstiges Anliegen) übermittelt.                      </p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('modals.newService.description')} *
-                  </label>
-                  <textarea
-                    value={originalText}
-                    onChange={(e) => setOriginalText(e.target.value)}
-                    placeholder={t('modals.newService.descriptionPlaceholder')}
-                    className="w-full input resize-none"
-                    rows={4}
-                    maxLength={500}
-                  />
-                  <p className="text-sm text-gray-500 mt-1">
-                  {t('modals.newService.descriptionHelp')}                  </p>
-                </div>
+                </label>
+                <textarea
+                  value={originalText}
+                  onChange={(e) => setOriginalText(e.target.value)}
+                  placeholder={t('modals.newService.descriptionPlaceholder')}
+                  className="w-full input resize-none"
+                  rows={4}
+                  maxLength={500}
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  {t('modals.newService.descriptionHelp')}
+                </p>
               </div>
             )}
 
             {selectedServiceType === 'VISIT' && (
-              <div className="space-y-4">
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <Users className="h-5 w-5 text-yellow-600" />
-                    </div>
-                    <div className="ml-3">
-                      <h3 className="text-sm font-medium text-yellow-800">
-                      Hinweis
-                      </h3>
-                      <p className="text-sm text-yellow-700 mt-1">
-                      Dieser Antrag ist noch in Entwicklung und wird aktuell als Freitextantrag (Sonstiges Anliegen) übermittelt.                      </p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('modals.newService.description')} *                  </label>
-                  <textarea
-                    value={originalText}
-                    onChange={(e) => setOriginalText(e.target.value)}
-                    placeholder={t('modals.newService.descriptionPlaceholder')}
-                    className="w-full input resize-none"
-                    rows={4}
-                    maxLength={500}
-                  />
-                  <p className="text-sm text-gray-500 mt-1">
-                  {t('modals.newService.descriptionHelp')}                  </p>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('modals.newService.description')} *
+                </label>
+                <textarea
+                  value={originalText}
+                  onChange={(e) => setOriginalText(e.target.value)}
+                  placeholder={t('modals.newService.descriptionPlaceholder')}
+                  className="w-full input resize-none"
+                  rows={4}
+                  maxLength={500}
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  {t('modals.newService.descriptionHelp')}
+                </p>
               </div>
             )}
 
             {selectedServiceType === 'CONVERSATION' && (
-              <div className="space-y-4">
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <MessageCircle className="h-5 w-5 text-yellow-600" />
-                    </div>
-                    <div className="ml-3">
-                      <h3 className="text-sm font-medium text-yellow-800">
-                      Hinweis
-                      </h3>
-                      <p className="text-sm text-yellow-700 mt-1">
-                      Dieser Antrag ist noch in Entwicklung und wird aktuell als Freitextantrag (Sonstiges Anliegen) übermittelt.
-                       </p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('modals.newService.description')} *                  </label>
-                  <textarea
-                    value={originalText}
-                    onChange={(e) => setOriginalText(e.target.value)}
-                    placeholder={t('modals.newService.descriptionPlaceholder')}
-                    className="w-full input resize-none"
-                    rows={4}
-                    maxLength={500}
-                  />
-                  <p className="text-sm text-gray-500 mt-1">
-                  {t('modals.newService.descriptionHelp')}                  </p>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('modals.newService.description')} *
+                </label>
+                <textarea
+                  value={originalText}
+                  onChange={(e) => setOriginalText(e.target.value)}
+                  placeholder={t('modals.newService.descriptionPlaceholder')}
+                  className="w-full input resize-none"
+                  rows={4}
+                  maxLength={500}
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  {t('modals.newService.descriptionHelp')}
+                </p>
               </div>
             )}
 
             {selectedServiceType === 'LEISURE_EDUCATION' && (
-              <div className="space-y-4">
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <BookOpen className="h-5 w-5 text-yellow-600" />
-                    </div>
-                    <div className="ml-3">
-                      <h3 className="text-sm font-medium text-yellow-800">
-                    Hinweis                      </h3>
-                      <p className="text-sm text-yellow-700 mt-1">
-                      Dieser Antrag ist noch in Entwicklung und wird aktuell als Freitextantrag (Sonstiges Anliegen) übermittelt.                       </p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('modals.newService.description')} *                  </label>
-                  <textarea
-                    value={originalText}
-                    onChange={(e) => setOriginalText(e.target.value)}
-                    placeholder={t('modals.newService.descriptionPlaceholder')}
-                    className="w-full input resize-none"
-                    rows={4}
-                    maxLength={500}
-                  />
-                  <p className="text-sm text-gray-500 mt-1">
-                  {t('modals.newService.descriptionHelp')}                  </p>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('modals.newService.description')} *
+                </label>
+                <textarea
+                  value={originalText}
+                  onChange={(e) => setOriginalText(e.target.value)}
+                  placeholder={t('modals.newService.descriptionPlaceholder')}
+                  className="w-full input resize-none"
+                  rows={4}
+                  maxLength={500}
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  {t('modals.newService.descriptionHelp')}
+                </p>
               </div>
             )}
 
             {selectedServiceType === 'COUNSELING_SUPPORT' && (
-              <div className="space-y-4">
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <UserCheck className="h-5 w-5 text-yellow-600" />
-                    </div>
-                    <div className="ml-3">
-                      <h3 className="text-sm font-medium text-yellow-800">
-                      Hinweis
-                      </h3>
-                      <p className="text-sm text-yellow-700 mt-1">
-                      Dieser Antrag ist noch in Entwicklung und wird aktuell als Freitextantrag (Sonstiges Anliegen) übermittelt.
-                       </p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('modals.newService.description')} *                  </label>
-                  <textarea
-                    value={originalText}
-                    onChange={(e) => setOriginalText(e.target.value)}
-                    placeholder={t('modals.newService.descriptionPlaceholder')}
-                    className="w-full input resize-none"
-                    rows={4}
-                    maxLength={500}
-                  />
-                  <p className="text-sm text-gray-500 mt-1">
-                  {t('modals.newService.descriptionHelp')}                  </p>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('modals.newService.description')} *
+                </label>
+                <textarea
+                  value={originalText}
+                  onChange={(e) => setOriginalText(e.target.value)}
+                  placeholder={t('modals.newService.descriptionPlaceholder')}
+                  className="w-full input resize-none"
+                  rows={4}
+                  maxLength={500}
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  {t('modals.newService.descriptionHelp')}
+                </p>
               </div>
             )}
 
             {selectedServiceType === 'PRISON_RELAXATION' && (
-              <div className="space-y-4">
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <Unlock className="h-5 w-5 text-yellow-600" />
-                    </div>
-                    <div className="ml-3">
-                      <h3 className="text-sm font-medium text-yellow-800">
-                      Hinweis
-                      </h3>
-                      <p className="text-sm text-yellow-700 mt-1">
-                      Dieser Antrag ist noch in Entwicklung und wird aktuell als Freitextantrag (Sonstiges Anliegen) übermittelt.
-                       </p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('modals.newService.description')} *                  </label>
-                  <textarea
-                    value={originalText}
-                    onChange={(e) => setOriginalText(e.target.value)}
-                    placeholder={t('modals.newService.descriptionPlaceholder')}
-                    className="w-full input resize-none"
-                    rows={4}
-                    maxLength={500}
-                  />
-                  <p className="text-sm text-gray-500 mt-1">
-                  {t('modals.newService.descriptionHelp')}                  </p>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('modals.newService.description')} *
+                </label>
+                <textarea
+                  value={originalText}
+                  onChange={(e) => setOriginalText(e.target.value)}
+                  placeholder={t('modals.newService.descriptionPlaceholder')}
+                  className="w-full input resize-none"
+                  rows={4}
+                  maxLength={500}
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  {t('modals.newService.descriptionHelp')}
+                </p>
               </div>
             )}
 
             {selectedServiceType === 'PERSONAL_PROPERTY' && (
-              <div className="space-y-4">
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <Home className="h-5 w-5 text-yellow-600" />
-                    </div>
-                    <div className="ml-3">
-                      <h3 className="text-sm font-medium text-yellow-800">
-                      Hinweis
-                      </h3>
-                      <p className="text-sm text-yellow-700 mt-1">
-                      Dieser Antrag ist noch in Entwicklung und wird aktuell als Freitextantrag (Sonstiges Anliegen) übermittelt.                      </p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('modals.newService.description')} *                  </label>
-                  <textarea
-                    value={originalText}
-                    onChange={(e) => setOriginalText(e.target.value)}
-                    placeholder={t('modals.newService.descriptionPlaceholder')}
-                    className="w-full input resize-none"
-                    rows={4}
-                    maxLength={500}
-                  />
-                  <p className="text-sm text-gray-500 mt-1">
-                  {t('modals.newService.descriptionHelp')}                  </p>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('modals.newService.description')} *
+                </label>
+                <textarea
+                  value={originalText}
+                  onChange={(e) => setOriginalText(e.target.value)}
+                  placeholder={t('modals.newService.descriptionPlaceholder')}
+                  className="w-full input resize-none"
+                  rows={4}
+                  maxLength={500}
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  {t('modals.newService.descriptionHelp')}
+                </p>
               </div>
             )}
 
             {/* Weitere Anträge als Platzhalter */}
             {['HEALTH', 'WORK_SCHOOL', 'PACKAGE'].includes(selectedServiceType) && (
-              <div className="space-y-4">
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <FileText className="h-5 w-5 text-yellow-600" />
-                    </div>
-                    <div className="ml-3">
-                      <h3 className="text-sm font-medium text-yellow-800">
-                        {selectedServiceType === 'HEALTH' ? 'Hinweis' : 
-                         selectedServiceType === 'WORK_SCHOOL' ? 'Hinweis' : 
-                         selectedServiceType === 'PACKAGE' ? 'Hinweis' : 'Antrag'}
-                      </h3>
-                      <p className="text-sm text-yellow-700 mt-1">
-                      Dieser Antrag ist noch in Entwicklung und wird aktuell als Freitextantrag (Sonstiges Anliegen) übermittelt.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('modals.newService.description')} *                  </label>
-                  <textarea
-                    value={originalText}
-                    onChange={(e) => setOriginalText(e.target.value)}
-                    placeholder={t('modals.newService.descriptionPlaceholder')}
-                    className="w-full input resize-none"
-                    rows={4}
-                    maxLength={500}
-                  />
-                  <p className="text-sm text-gray-500 mt-1">
-                  {t('modals.newService.descriptionHelp')}                  </p>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('modals.newService.description')} *
+                </label>
+                <textarea
+                  value={originalText}
+                  onChange={(e) => setOriginalText(e.target.value)}
+                  placeholder={t('modals.newService.descriptionPlaceholder')}
+                  className="w-full input resize-none"
+                  rows={4}
+                  maxLength={500}
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  {t('modals.newService.descriptionHelp')}
+                </p>
               </div>
             )}
 
