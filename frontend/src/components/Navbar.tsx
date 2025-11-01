@@ -29,12 +29,7 @@ const Navbar = () => {
     const isAdmin = userGroups.some(group => group === 'PS Designers')
 
     if (isInmate) {
-      return [
-        { name: t('navigation.home'), href: '/my-services' },
-        { name: t('navigation.allMyRequests'), href: '/all-my-services' },
-        { name: t('navigation.newService'), href: '/new-service' },
-        { name: t('navigation.accountInfo'), href: '/profile' }
-      ]
+      return []
     } else if (isStaff || isAdmin) {
              const staffNavigation = [
          { name: 'Antragsbearbeitung', href: '/staff-dashboard' },
@@ -92,9 +87,12 @@ const Navbar = () => {
                 {user?.groups?.some(g => g.name === 'PS Inmates') && (
                   <LanguageSelector />
                 )}
-                <div className="text-sm text-[var(--nav-fg-muted)]">
-                  {user?.firstName} {user?.lastName}
-                </div>
+                {/* Name nur für Staff/Admin anzeigen, nicht für Insassen */}
+                {!user?.groups?.some(g => g.name === 'PS Inmates') && (
+                  <div className="text-sm text-[var(--nav-fg-muted)]">
+                    {user?.firstName} {user?.lastName}
+                  </div>
+                )}
                 <button
                   onClick={logout}
                   className="flex items-center text-[var(--nav-fg-muted)] hover:text-[var(--nav-fg)] transition-colors"
@@ -142,19 +140,22 @@ const Navbar = () => {
             ))}
           </div>
                      <div className="pt-4 pb-3 border-t border-white/20">
-                           <div className="flex items-center px-4">
-                 <div className="flex-shrink-0">
-                   <User className="h-8 w-8 text-white/90" />
-                 </div>
-                 <div className="ml-3">
-                   <div className="text-base font-medium text-[var(--nav-fg)]">
-                     {user?.firstName} {user?.lastName}
-                   </div>
-                   <div className="text-sm font-medium text-[var(--nav-fg-muted)]">
-                     {user?.email}
-                   </div>
-                 </div>
-               </div>
+                           {/* Name und Email nur für Staff/Admin anzeigen, nicht für Insassen */}
+                           {!user?.groups?.some(g => g.name === 'PS Inmates') && (
+                             <div className="flex items-center px-4">
+                               <div className="flex-shrink-0">
+                                 <User className="h-8 w-8 text-white/90" />
+                               </div>
+                               <div className="ml-3">
+                                 <div className="text-base font-medium text-[var(--nav-fg)]">
+                                   {user?.firstName} {user?.lastName}
+                                 </div>
+                                 <div className="text-sm font-medium text-[var(--nav-fg-muted)]">
+                                   {user?.email}
+                                 </div>
+                               </div>
+                             </div>
+                           )}
             <div className="mt-3 space-y-1">
               {/* Language Selector für Mobile nur für Insassen */}
               {user?.groups?.some(g => g.name === 'PS Inmates') && (

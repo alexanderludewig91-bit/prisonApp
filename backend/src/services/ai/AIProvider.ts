@@ -42,6 +42,19 @@ export interface AIProvider {
   generateResponse(prompt: string): Promise<string>
 
   /**
+   * Chat-Service für Konversationen mit Kontext
+   * @param systemPrompt - Der System-Prompt für die KI
+   * @param messages - Array von Chat-Nachrichten (User/Assistant)
+   * @param temperature - Temperatur für die Antwort-Generierung (optional)
+   * @returns Promise mit der generierten Antwort
+   */
+  chatService(
+    systemPrompt: string,
+    messages: Array<{ role: 'user' | 'assistant'; content: string }>,
+    temperature?: number
+  ): Promise<string>
+
+  /**
    * Kategorisiert einen Antragstext und schlägt den passenden ServiceType vor
    * @param description - Der Antragstext zur Analyse
    * @returns Promise mit Kategorisierungs-Ergebnis

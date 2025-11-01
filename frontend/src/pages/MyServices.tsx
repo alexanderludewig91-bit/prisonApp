@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useLanguage } from '../contexts/LanguageContext'
 import api from '../services/api'
 import NewServiceModal from '../components/NewServiceModal'
+import SmartServiceModal from '../components/SmartServiceModal'
 
 interface Service {
   id: number
@@ -94,6 +95,7 @@ const MyServices = () => {
   const [selectedService, setSelectedService] = useState<Service | null>(null)
   const [showServiceModal, setShowServiceModal] = useState(false)
   const [showNewServiceModal, setShowNewServiceModal] = useState(false)
+  const [showSmartServiceModal, setShowSmartServiceModal] = useState(false)
   const [newServiceType, setNewServiceType] = useState('FREETEXT')
   const [submittingNewService, setSubmittingNewService] = useState(false)
   const [showSuccessMessage, setShowSuccessMessage] = useState(false)
@@ -522,6 +524,17 @@ const MyServices = () => {
           </h1>
         </div>
         <div className="flex space-x-3">
+          {/* Smart Button - Prominent und links */}
+          <button
+            onClick={() => setShowSmartServiceModal(true)}
+            className="relative inline-flex items-center px-8 py-4 border border-transparent text-lg font-semibold rounded-xl text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-purple-500/50 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+          >
+            <span className="relative">
+              <span className="block">✨ Assistentin Juna</span>
+              <span className="block text-xs font-normal opacity-90">Ich helfe dir mit neuen Anträgen</span>
+            </span>
+          </button>
+          {/* Normaler Button */}
           <button
             onClick={handleNewServiceClick}
             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-[#060E5D] hover:bg-[#050B4A] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#060E5D]/40 shadow-sm"
@@ -529,6 +542,7 @@ const MyServices = () => {
             <Plus className="h-5 w-5 mr-2" />
             {t('pages.myServices.newRequest')}
           </button>
+          {/* Alle Anträge Button */}
           <button
             onClick={() => window.location.href = '/all-my-services'}
             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-[#060E5D] hover:bg-[#050B4A] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#060E5D]/40 shadow-sm"
@@ -1093,7 +1107,7 @@ const MyServices = () => {
             const openServices = allServices.filter((service: Service) => 
               service.status === 'PENDING' || service.status === 'IN_PROGRESS'
             )
-            const completedServices = allServices.filter((service: Service) => 
+            const completedServices = allServices.filter((service: Service) =>
               service.status === 'COMPLETED'
             )
             
@@ -1104,6 +1118,41 @@ const MyServices = () => {
             setTimeout(() => setShowSuccessMessage(false), 5000)
           } catch (error) {
             console.error('Fehler beim Erstellen des Antrags:', error)
+          } finally {
+            setSubmittingNewService(false)
+          }
+        }}
+        isSubmitting={submittingNewService}
+      />
+
+      {/* Smart Service Modal mit Chatbot */}
+      <SmartServiceModal
+        isOpen={showSmartServiceModal}
+        onClose={() => {
+          setShowSmartServiceModal(false)
+        }}
+        onSubmit={async () => {
+          setSubmittingNewService(true)
+          
+          try {
+            // Anträge neu laden
+            const servicesResponse = await api.get('/services/my/services')
+            const allServices = servicesResponse.data.services || []
+            
+            const openServices = allServices.filter((service: Service) => 
+              service.status === 'PENDING' || service.status === 'IN_PROGRESS'
+            )
+            const completedServices = allServices.filter((service: Service) =>
+              service.status === 'COMPLETED'
+            )
+            
+            setServices(openServices)
+            setCompletedServices(completedServices)
+
+            setShowSuccessMessage(true)
+            setTimeout(() => setShowSuccessMessage(false), 5000)
+          } catch (error) {
+            console.error('Fehler beim Neuladen der Anträge:', error)
           } finally {
             setSubmittingNewService(false)
           }

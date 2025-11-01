@@ -442,4 +442,63 @@ Antwort im JSON-Format:
   getProviderName(): string {
     return 'OpenAI'
   }
+
+  /**
+   * Chat-Service für Konversationen mit Kontext
+   */
+  async chatService(
+    systemPrompt: string,
+    messages: Array<{ role: 'user' | 'assistant'; content: string }>,
+    temperature: number = 0.7
+  ): Promise<string> {
+    try {
+      const completion = await this.client.chat.completions.create({
+        model: this.config.model,
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt
+          },
+          ...messages
+        ],
+        max_tokens: this.config.maxTokens,
+        temperature
+      })
+
+      const response = completion.choices[0]?.message?.content
+      if (!response) {
+        throw new AIProviderError('Keine Antwort erhalten', 'NO_RESPONSE', 500)
+      }
+
+      return response.trim()
+    } catch (error: any) {
+      console.error('OpenAI Chat Service Fehler:', error)
+
+      if (error.code === 'insufficient_quota') {
+        throw new AIProviderError(
+          'OpenAI API Limit erreicht. Bitte versuchen Sie es später erneut.',
+          'QUOTA_EXCEEDED',
+          402
+        )
+      } else if (error.code === 'invalid_api_key') {
+        throw new AIProviderError(
+          'Ungültiger OpenAI API-Schlüssel.',
+          'INVALID_API_KEY',
+          401
+        )
+      } else if (error.code === 'rate_limit_exceeded') {
+        throw new AIProviderError(
+          'OpenAI Rate Limit erreicht. Bitte versuchen Sie es später erneut.',
+          'RATE_LIMIT_EXCEEDED',
+          429
+        )
+      } else {
+        throw new AIProviderError(
+          'Fehler bei der Chat-Verarbeitung. Bitte versuchen Sie es erneut.',
+          'CHAT_ERROR',
+          500
+        )
+      }
+    }
+  }
 }

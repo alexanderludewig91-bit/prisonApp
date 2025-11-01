@@ -194,4 +194,36 @@ export const createAdmin = async (adminData: {
   return response.data
 }
 
+// Smart Service Chat API
+export const startSmartServiceChat = async () => {
+  const response = await api.post('/smart-service/chat/start')
+  return response.data
+}
+
+export const sendChatMessage = async (sessionId: string, message: string) => {
+  const response = await api.post('/smart-service/chat/message', {
+    sessionId,
+    message
+  })
+  return response.data
+}
+
+export const getChatStatus = async (sessionId: string) => {
+  const response = await api.get(`/smart-service/chat/${sessionId}/status`)
+  return response.data
+}
+
+export const finalizeSmartService = async (data: {
+  sessionId: string
+  title: string
+  description: string
+  titleInmate?: string
+  descriptionInmate?: string
+  serviceType: string
+  fields?: Record<string, any>
+}) => {
+  const response = await api.post('/smart-service/finalize', data)
+  return response.data
+}
+
 export default api
