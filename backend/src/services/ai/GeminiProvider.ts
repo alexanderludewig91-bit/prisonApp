@@ -313,4 +313,17 @@ Generiere einen neuen Titel, der in der gleichen Sprache sein MUSS wie der besch
       reasoning: 'Gemini Provider unterstützt keine Service-Kategorisierung. Verwenden Sie OpenAI.'
     }
   }
+
+  async chatService(
+    systemPrompt: string,
+    messages: Array<{ role: 'user' | 'assistant'; content: string }>,
+    temperature: number = 0.7
+  ): Promise<string> {
+    // Da wir nur OpenAI für Chat-Service verwenden, geben wir eine Fehlermeldung zurück
+    throw new AIProviderError(
+      'Gemini Provider unterstützt keinen Chat-Service. Verwenden Sie OpenAI.',
+      'NOT_SUPPORTED',
+      501
+    )
+  }
 }

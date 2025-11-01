@@ -322,4 +322,17 @@ export class ClaudeProvider implements AIProvider {
       reasoning: 'Claude Provider unterstützt keine Service-Kategorisierung. Verwenden Sie OpenAI.'
     }
   }
+
+  async chatService(
+    systemPrompt: string,
+    messages: Array<{ role: 'user' | 'assistant'; content: string }>,
+    temperature: number = 0.7
+  ): Promise<string> {
+    // Da wir nur OpenAI für Chat-Service verwenden, geben wir eine Fehlermeldung zurück
+    throw new AIProviderError(
+      'Claude Provider unterstützt keinen Chat-Service. Verwenden Sie OpenAI.',
+      'NOT_SUPPORTED',
+      501
+    )
+  }
 }
