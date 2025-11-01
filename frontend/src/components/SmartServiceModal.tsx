@@ -3,7 +3,6 @@ import { X, Send, Loader2, Check } from 'lucide-react'
 import { 
   startSmartServiceChat, 
   sendChatMessage, 
-  getChatStatus,
   finalizeSmartService 
 } from '../services/api'
 
@@ -33,7 +32,6 @@ const SmartServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: SmartSer
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputMessage, setInputMessage] = useState('')
   const [sessionId, setSessionId] = useState<string | null>(null)
-  const [isReadyToProceed, setIsReadyToProceed] = useState(false)
   const [showReadyPopup, setShowReadyPopup] = useState(false)
   const [extractedData, setExtractedData] = useState<ExtractedData>({})
   const [isLoading, setIsLoading] = useState(false)
@@ -129,7 +127,6 @@ const SmartServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: SmartSer
       // Prüfe ob Antrag bereit ist
       if (response.isComplete) {
         console.log('[SmartServiceModal] Antrag ist bereit - zeige Popup')
-        setIsReadyToProceed(true)
         
         // Zeige Popup wenn es noch nicht angezeigt wird (also beim ersten Mal oder nach "Nein")
         // Das Popup wird nur nicht angezeigt, wenn es bereits sichtbar ist
@@ -149,7 +146,6 @@ const SmartServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: SmartSer
         })
       } else {
         console.log('[SmartServiceModal] Antrag ist NICHT bereit:', response.missingFields)
-        setIsReadyToProceed(false)
         setShowReadyPopup(false)
       }
     } catch (error: any) {
@@ -164,11 +160,6 @@ const SmartServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: SmartSer
         inputRef.current?.focus()
       }, 0)
     }
-  }
-
-  const handleProceedToReview = () => {
-    setShowReadyPopup(false)
-    setPhase('review')
   }
 
   const handlePopupYes = () => {
@@ -230,7 +221,6 @@ const SmartServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: SmartSer
     setMessages([])
     setInputMessage('')
     setSessionId(null)
-    setIsReadyToProceed(false)
     setShowReadyPopup(false)
     setExtractedData({})
     setError('')
