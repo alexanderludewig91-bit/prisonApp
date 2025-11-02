@@ -197,6 +197,7 @@
       "assistantDescription": "Ich finde mit dir den passenden Antrag und fülle ihn Schritt für Schritt aus.",
       "startChat": "Chat für neuen Antrag starten",
       "newRequest": "Antrag manuell erstellen",
+      "createNewRequest": "Neuen Antrag stellen",
       "allRequests": "Alle meine Anträge",
       "noRequests": "Keine Anträge vorhanden",
       "createFirst": "Erstellen Sie Ihren ersten Antrag",

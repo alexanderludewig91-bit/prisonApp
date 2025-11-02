@@ -196,6 +196,7 @@
       "assistantDescription": "Je trouve la demande qui te convient et je la remplis étape par étape.",
       "startChat": "Démarrer le chat pour nouvelle demande",
       "newRequest": "Créer une demande manuellement",
+      "createNewRequest": "Créer une nouvelle demande",
       "allRequests": "Toutes mes demandes",
       "noRequests": "Aucune demande disponible",
       "createFirst": "Créez votre première demande",

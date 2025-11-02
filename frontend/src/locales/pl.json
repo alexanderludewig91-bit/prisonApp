@@ -195,6 +195,7 @@
       "assistantDescription": "Pomogę ci znaleźć odpowiedni wniosek i wypełnię go krok po kroku.",
       "startChat": "Rozpocznij czat dla nowego wniosku",
       "newRequest": "Utwórz wniosek ręcznie",
+      "createNewRequest": "Utwórz nowy wniosek",
       "allRequests": "Wszystkie moje wnioski",
       "noRequests": "Brak dostępnych wniosków",
       "createFirst": "Utwórz swój pierwszy wniosek",

@@ -543,7 +543,7 @@ const MyServices = () => {
             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-[#060E5D] hover:bg-[#050B4A] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#060E5D]/40 shadow-sm"
           >
             <Plus className="h-5 w-5 mr-2" />
-            {t('pages.myServices.newRequest')}
+            {t('pages.myServices.createNewRequest')}
           </button>
         </div>
       </div>

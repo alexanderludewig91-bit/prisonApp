@@ -196,6 +196,7 @@
       "assistantDescription": "Encuentro la solicitud adecuada para ti y la completo paso a paso.",
       "startChat": "Iniciar chat para nueva solicitud",
       "newRequest": "Crear solicitud manualmente",
+      "createNewRequest": "Crear nueva solicitud",
       "allRequests": "Todas mis solicitudes",
       "noRequests": "No hay solicitudes disponibles",
       "createFirst": "Cree su primera solicitud",

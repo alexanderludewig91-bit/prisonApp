@@ -196,6 +196,7 @@
       "assistantDescription": "I'll help you find the right request and fill it out step by step.",
       "startChat": "Start chat for new request",
       "newRequest": "Create request manually",
+      "createNewRequest": "Create new request",
       "allRequests": "All my requests",
       "noRequests": "No requests available",
       "createFirst": "Create your first request",

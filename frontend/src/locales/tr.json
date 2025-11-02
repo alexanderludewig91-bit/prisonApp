@@ -196,6 +196,7 @@
       "assistantDescription": "Senin için doğru talebi bulur ve adım adım doldururum.",
       "startChat": "Yeni talep için sohbeti başlat",
       "newRequest": "Talebi manuel olarak oluştur",
+      "createNewRequest": "Yeni talep oluştur",
       "allRequests": "Tüm taleplerim",
       "noRequests": "Talep bulunamadı",
       "createFirst": "İlk talebinizi oluşturun",
