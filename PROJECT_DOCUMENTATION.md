@@ -46,6 +46,18 @@ Dieses Projekt ist eine moderne Webanwendung. Das System besteht aus zwei Haupta
 - ✅ **Information-Übersetzung:** Automatische Übersetzung von Staff-Informationen im Modal
 - ✅ **Information-Modal:** Anklickbare Informationsliste mit KI-Übersetzung und Ausblenden-Funktion
 - ✅ **Multi-Language Support:** Vollständige Internationalisierung (i18n) mit 10 Sprachen
+- ✅ **KI-Kategorisierung:** Automatische Kategorisierung von FREETEXT-Anträgen mit Vorschlagsanzeige
+- ✅ **Smart Service Chatbot (Juna):** Intelligenter Chatbot für vereinfachte Antragsstellung
+  - ✅ Multilinguale Kommunikation (automatische Spracherkennung und -anpassung)
+  - ✅ Persönliche Begrüßung mit Namen und Datum
+  - ✅ Intelligente Antragserkennung basierend auf Konversation
+  - ✅ Schrittweise Informationssammlung für alle Antragstypen
+  - ✅ Automatische Übersetzung von Titel und Beschreibung ins Deutsche für Mitarbeiter
+  - ✅ Vorgefülltes Review-Formular nach erfolgreicher Datensammlung
+- ✅ **KI-Modus Toggle:** Ein/Aus-Schalter in der Navbar für KI-Features
+  - ✅ Zeigt/versteckt Juna-Karte und Smart Service Buttons
+  - ✅ Speichert Präferenz in localStorage
+  - ✅ Reset bei Logout
 
 ### ✅ **Mitarbeiter-Features**
   - ✅ Mitarbeiter-Dashboard mit Service-Übersicht
@@ -81,9 +93,12 @@ Dieses Projekt ist eine moderne Webanwendung. Das System besteht aus zwei Haupta
   - ✅ **Benutzerübersicht** - Zentrale Verwaltung aller Mitarbeitenden
 
 ### ✅ **Workflow-Engine (Vereinfacht)**
-- ✅ **Automatische Gruppenzuweisung:** Freitextanträge werden automatisch "PS General Enforcement Service" zugewiesen
+- ✅ **Automatische Gruppenzuweisung:** 
+  - Freitextanträge und andere Anträge → "PS General Enforcement Service"
+  - Teilhabegeldanträge → "PS Vollzugsabteilungsleitung"
 - ✅ **Status-Übergänge:** Manuelle und automatische Status-Änderungen
 - ✅ **Workflow-Statistiken:** Dashboard-Statistiken für Antragsverwaltung
+- ✅ **KI-Kategorisierung:** Automatische Erkennung des richtigen Antragstyps für FREETEXT-Anträge
 
 ### ✅ **Backend API**
   - ✅ Insassen-spezifische Endpunkte (`/api/services/my/services`)
@@ -109,8 +124,14 @@ Dieses Projekt ist eine moderne Webanwendung. Das System besteht aus zwei Haupta
 - ✅ **KI-Integration Endpunkte:**
   - ✅ `POST /api/ai/translate` - Textübersetzung und Titel-Generierung (Multi-Provider)
   - ✅ `POST /api/ai/translate-activity` - Rückfragen-Übersetzung
+  - ✅ `POST /api/ai/categorize-service` - Automatische Antragskategorisierung (OpenAI)
   - ✅ `GET /api/ai/health` - Provider-Status-Überprüfung
   - ✅ `GET /api/ai/providers` - Provider-Informationen
+- ✅ **Smart Service Chat API:**
+  - ✅ `POST /api/smart-service/chat/start` - Neue Chat-Session starten
+  - ✅ `POST /api/smart-service/chat/message` - Chat-Nachricht senden
+  - ✅ `GET /api/smart-service/chat/:sessionId/status` - Session-Status abrufen
+  - ✅ `POST /api/smart-service/finalize` - Antrag aus Chat-Session finalisieren
 
 
 ## 🚀 Installation & Setup
@@ -210,10 +231,20 @@ Das System wird mit folgenden Testdaten initialisiert:
 
 ### KI-Integration (Multi-Provider)
 - **Architektur:** Anbieterunabhängige Provider-Pattern
-- **Provider:** OpenAI GPT, Google Gemini, Anthropic Claude
-- **Funktionen:** Textübersetzung, automatische Titel-Generierung, Live-Übersetzung
+- **Provider:** OpenAI GPT, Google Gemini, Anthropic Claude (OpenAI primär für Smart Features)
+- **Funktionen:** 
+  - Textübersetzung (Multi-Provider)
+  - Automatische Titel-Generierung (Multi-Provider)
+  - Live-Übersetzung in Modals
+  - Automatische Antragskategorisierung (OpenAI)
+  - Smart Service Chatbot (OpenAI)
 - **Rückfragen-Übersetzung:** Automatische Übersetzung von Staff-Rückfragen
 - **Antwort-Übersetzung:** Live-Übersetzung von Insassen-Antworten
+- **Smart Service Chat:**
+  - Chat-Session-Management mit Timeout (30 Minuten)
+  - Dynamische Spracherkennung und -anpassung
+  - Strukturierte JSON-Antworten für Daten-Extraktion
+  - Automatische Übersetzung beim Finalisieren
 - **Fallback:** Automatischer Provider-Wechsel bei Ausfällen
 - **Konfiguration:** Zentrale Umgebungsvariablen
 - **Monitoring:** Provider-Status-Überwachung
@@ -434,6 +465,24 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://backend-production
 
 ## 📝 Changelog
 
+
+### Version 2.2 (November 2025) - Smart Service & KI-Erweiterungen
+- ✅ **KI-Kategorisierung:** Automatische Erkennung des richtigen Antragstyps für FREETEXT-Anträge
+- ✅ **Smart Service Chatbot (Juna):** Intelligenter Chatbot für vereinfachte Antragsstellung
+  - ✅ Multilinguale Kommunikation mit automatischer Spracherkennung
+  - ✅ Persönliche Begrüßung mit Namen und Datum
+  - ✅ Schrittweise Informationssammlung für alle Antragstypen
+  - ✅ Automatische Übersetzung ins Deutsche für Mitarbeiter-Felder
+  - ✅ Strukturierte JSON-Antworten für zuverlässige Daten-Extraktion
+- ✅ **KI-Modus Toggle:** Navbar-Element zum Ein/Aus-Schalten von KI-Features
+- ✅ **UI-Verbesserungen:**
+  - ✅ Moderne Juna-Karte mit Gradient-Design
+  - ✅ Visuell hervorgehobene Listen (grün für Informationen, orange für Rückfragen)
+  - ✅ Konsistente Button-Styles in Listen
+  - ✅ Verbesserte Navbar mit visuellen Trennlinien
+  - ✅ Feinkalibrierte Farben und Typografie
+
+
 ### Version 2.1 (September 2025) - Production Deployment
 - ✅ **Railway Deployment:** Vollständige Production-Bereitstellung auf Railway.app
 - ✅ **PostgreSQL Migration:** Migration von SQLite zu PostgreSQL für Production
@@ -445,6 +494,8 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://backend-production
 - ✅ **Passwort-Update-Endpoint:** Implementierung des fehlenden PUT /users/:id/password Endpoints
 - ✅ **Copyright-Schutz:** Hinzufügung von Copyright-Vermerk für geistiges Eigentum
 - ✅ **Production-Ready:** Vollständig deploybare Anwendung mit automatischem Deployment
+
+
 
 ### Version 2.0 (August 2025)
 - ✅ **Neue Status/Entscheidungs-Architektur:** Trennung von Workflow-Phase und Ergebnis
@@ -470,7 +521,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://backend-production
 - ✅ **Sprache-abhängige KI:** Intelligente KI-Funktionen basierend auf UI-Sprache
 - ✅ **Information-Modal:** Anklickbare Informationsliste mit KI-Übersetzung und Ausblenden-Funktion
 - ✅ **Benutzerübersicht:** Zentrale Verwaltung aller Mitarbeitenden
-- ✅ **Dark Mode:** Unterstützung für dunkles Design
+
 
 ### Version 1.0
 - ✅ Basis-System mit Authentifizierung
