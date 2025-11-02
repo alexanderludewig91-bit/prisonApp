@@ -18,6 +18,7 @@ import HouseManagement from './pages/HouseManagement'
 import InmatesOverview from './pages/InmatesOverview'
 import UserOverview from './pages/UserOverview'
 import Profile from './pages/Profile'
+import Legal from './pages/Legal'
 import { AuthProvider } from './contexts/AuthContext'
 import { LanguageProvider } from './contexts/LanguageContext'
 import { AIModeProvider } from './contexts/AIModeContext'
@@ -138,54 +139,69 @@ function AppContent() {
     )
   }
 
+  // Wenn nicht authentifiziert, zeige nur Login-Seite
+  if (!isAuthenticated) {
+    return (
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/legal" element={<Legal />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    )
+  }
+
+  // Wenn authentifiziert, zeige normalen Layout mit Navbar und Footer
   return (
     <div className="min-h-screen bg-gray-50">
-      {isAuthenticated && <Navbar />}
+      <Navbar />
       <main className="container mx-auto px-4 py-8">
         <Routes>
-          <Route path="/login" element={
-            isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />
-          } />
           {/* Protected Routes */}
+          <Route path="/login" element={
+            <Navigate to="/dashboard" replace />
+          } />
           <Route path="/" element={
-            isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
+            <Navigate to="/dashboard" replace />
           } />
           <Route path="/dashboard" element={
-            isAuthenticated ? <DashboardRedirect /> : <Navigate to="/login" replace />
+            <DashboardRedirect />
           } />
 
           <Route path="/services/:id" element={
-            isAuthenticated ? <ServiceDetailRouter /> : <Navigate to="/login" replace />
+            <ServiceDetailRouter />
           } />
           <Route path="/my-services" element={
-            isAuthenticated ? <MyServices /> : <Navigate to="/login" replace />
+            <MyServices />
           } />
           <Route path="/all-my-services" element={
-            isAuthenticated ? <AllMyServices /> : <Navigate to="/login" replace />
+            <AllMyServices />
           } />
           <Route path="/new-service" element={
-            isAuthenticated ? <NewService /> : <Navigate to="/login" replace />
+            <NewService />
           } />
           <Route path="/staff-dashboard" element={
-            isAuthenticated ? <StaffOnlyRoute><StaffDashboard /></StaffOnlyRoute> : <Navigate to="/login" replace />
+            <StaffOnlyRoute><StaffDashboard /></StaffOnlyRoute>
           } />
           <Route path="/admin-dashboard" element={
-            isAuthenticated ? <StaffOnlyRoute><AdminDashboard /></StaffOnlyRoute> : <Navigate to="/login" replace />
+            <StaffOnlyRoute><AdminDashboard /></StaffOnlyRoute>
           } />
           <Route path="/admin-logs" element={
-            isAuthenticated ? <StaffOnlyRoute><AdminLogs /></StaffOnlyRoute> : <Navigate to="/login" replace />
+            <StaffOnlyRoute><AdminLogs /></StaffOnlyRoute>
           } />
           <Route path="/house-management" element={
-            isAuthenticated ? <StaffOnlyRoute><HouseManagement /></StaffOnlyRoute> : <Navigate to="/login" replace />
+            <StaffOnlyRoute><HouseManagement /></StaffOnlyRoute>
           } />
           <Route path="/inmates-overview" element={
-            isAuthenticated ? <StaffOnlyRoute><InmatesOverview /></StaffOnlyRoute> : <Navigate to="/login" replace />
+            <StaffOnlyRoute><InmatesOverview /></StaffOnlyRoute>
           } />
           <Route path="/user-overview" element={
-            isAuthenticated ? <StaffOnlyRoute><UserOverview /></StaffOnlyRoute> : <Navigate to="/login" replace />
+            <StaffOnlyRoute><UserOverview /></StaffOnlyRoute>
           } />
           <Route path="/profile" element={
-            isAuthenticated ? <Profile /> : <Navigate to="/login" replace />
+            <Profile />
+          } />
+          <Route path="/legal" element={
+            <Legal />
           } />
         </Routes>
       </main>
