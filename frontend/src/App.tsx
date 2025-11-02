@@ -20,6 +20,7 @@ import UserOverview from './pages/UserOverview'
 import Profile from './pages/Profile'
 import { AuthProvider } from './contexts/AuthContext'
 import { LanguageProvider } from './contexts/LanguageContext'
+import { AIModeProvider } from './contexts/AIModeContext'
 import './App.css'
 
 // Komponente für Service-Detail-Routing basierend auf Service-Type
@@ -207,9 +208,11 @@ function App() {
   return (
     <LanguageProvider>
       <AuthProvider>
-        <Router>
-          <AppContent />
-        </Router>
+        <AIModeProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </AIModeProvider>
       </AuthProvider>
     </LanguageProvider>
   )

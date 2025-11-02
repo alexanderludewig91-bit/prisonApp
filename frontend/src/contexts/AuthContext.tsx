@@ -80,6 +80,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setUser(null)
     setToken(null)
     localStorage.removeItem('token')
+    // KI-Modus auf Standard (aus) zurücksetzen
+    localStorage.setItem('aiMode', 'false')
+    // Sprache auf Deutsch zurücksetzen
+    localStorage.setItem('i18nextLng', 'de')
+    // Dispatch custom events to update contexts immediately
+    window.dispatchEvent(new Event('aiModeReset'))
+    window.dispatchEvent(new Event('languageReset'))
   }
 
   const value = {

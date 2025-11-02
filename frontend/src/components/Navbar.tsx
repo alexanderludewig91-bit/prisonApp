@@ -1,13 +1,15 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useLanguage } from '../contexts/LanguageContext'
-import { LogOut, User, Menu, X } from 'lucide-react'
+import { useAIMode } from '../contexts/AIModeContext'
+import { LogOut, User, Menu, X, Clock, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import LanguageSelector from './LanguageSelector'
 
 const Navbar = () => {
   const { user, logout } = useAuth()
   const { t } = useLanguage()
+  const { isAIMode, toggleAIMode } = useAIMode()
   const location = useLocation()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
@@ -55,7 +57,7 @@ const Navbar = () => {
 
   return (
     <nav className="bg-[var(--nav-bg)] text-[var(--nav-fg)] ring-1 ring-white/10 shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto px-6">
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
@@ -82,10 +84,46 @@ const Navbar = () => {
           
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
             <div className="ml-3 relative">
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-6">
                 {/* Language Selector nur für Insassen anzeigen */}
                 {user?.groups?.some(g => g.name === 'PS Inmates') && (
                   <LanguageSelector />
+                )}
+                {/* KI Modus Toggle nur für Insassen */}
+                {user?.groups?.some(g => g.name === 'PS Inmates') && (
+                  <div className="flex items-center space-x-2">
+                    <Sparkles className="h-4 w-4 text-[var(--nav-fg-muted)]" />
+                    <span className="text-sm font-medium text-[var(--nav-fg-muted)]">KI Modus</span>
+                    <button
+                      onClick={toggleAIMode}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                        isAIMode 
+                          ? 'bg-blue-600 focus:ring-blue-500' 
+                          : 'bg-gray-300 focus:ring-gray-500'
+                      }`}
+                      aria-label="KI Modus umschalten"
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          isAIMode ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                )}
+                {/* Alle meine Anträge nur für Insassen */}
+                {user?.groups?.some(g => g.name === 'PS Inmates') && (
+                  <Link
+                    to="/all-my-services"
+                    className={`flex items-center font-medium ${
+                      location.pathname === '/all-my-services'
+                        ? 'text-[var(--nav-fg)]'
+                        : 'text-[var(--nav-fg-muted)] hover:text-[var(--nav-fg)]'
+                    } transition-all hover:scale-105`}
+                  >
+                    <Clock className="h-5 w-5 mr-1" />
+                    {t('pages.myServices.allRequests')}
+                  </Link>
                 )}
                 {/* Name nur für Staff/Admin anzeigen, nicht für Insassen */}
                 {!user?.groups?.some(g => g.name === 'PS Inmates') && (
@@ -95,7 +133,7 @@ const Navbar = () => {
                 )}
                 <button
                   onClick={logout}
-                  className="flex items-center text-[var(--nav-fg-muted)] hover:text-[var(--nav-fg)] transition-colors"
+                  className="flex items-center font-medium text-[var(--nav-fg-muted)] hover:text-[var(--nav-fg)] transition-all hover:scale-105"
                 >
                   <LogOut className="h-5 w-5" />
                   <span className="ml-1">{t('navigation.logout')}</span>
@@ -162,6 +200,45 @@ const Navbar = () => {
                 <div className="px-4 py-2">
                   <LanguageSelector />
                 </div>
+              )}
+              {/* KI Modus Toggle für Mobile nur für Insassen */}
+              {user?.groups?.some(g => g.name === 'PS Inmates') && (
+                <div className="flex items-center justify-between px-4 py-2">
+                  <div className="flex items-center space-x-2">
+                    <Sparkles className="h-4 w-4 text-[var(--nav-fg-muted)]" />
+                    <span className="text-sm font-medium text-[var(--nav-fg-muted)]">KI Modus</span>
+                  </div>
+                  <button
+                    onClick={toggleAIMode}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                      isAIMode 
+                        ? 'bg-blue-600 focus:ring-blue-500' 
+                        : 'bg-gray-300 focus:ring-gray-500'
+                    }`}
+                    aria-label="KI Modus umschalten"
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        isAIMode ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+              )}
+              {/* Alle meine Anträge für Mobile nur für Insassen */}
+              {user?.groups?.some(g => g.name === 'PS Inmates') && (
+                <Link
+                  to="/all-my-services"
+                  className={`flex items-center w-full text-left px-4 py-2 text-base font-medium ${
+                    location.pathname === '/all-my-services'
+                      ? 'text-[var(--nav-fg)]'
+                      : 'text-[var(--nav-fg-muted)] hover:text-[var(--nav-fg)]'
+                  } hover:bg-white/10 transition-colors`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <Clock className="h-5 w-5 mr-2" />
+                  {t('pages.myServices.allRequests')}
+                </Link>
               )}
                              <button
                  onClick={logout}

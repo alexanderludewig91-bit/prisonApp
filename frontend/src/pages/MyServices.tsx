@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from 'react'
-import { FileText, Clock, CheckCircle, XCircle, MessageSquare, Plus } from 'lucide-react'
+import { FileText, Clock, CheckCircle, XCircle, MessageSquare, Plus, Sparkles } from 'lucide-react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useLanguage } from '../contexts/LanguageContext'
+import { useAIMode } from '../contexts/AIModeContext'
 import api from '../services/api'
 import NewServiceModal from '../components/NewServiceModal'
 import SmartServiceModal from '../components/SmartServiceModal'
@@ -77,6 +78,7 @@ interface ServiceWithInformation {
 const MyServices = () => {
   const { user } = useAuth()
   const { t, currentLanguage } = useLanguage()
+  const { isAIMode } = useAIMode()
   const [services, setServices] = useState<Service[]>([])
   const [completedServices, setCompletedServices] = useState<Service[]>([])
   const [servicesWithInquiries, setServicesWithInquiries] = useState<ServiceWithInquiries[]>([])
@@ -519,22 +521,23 @@ const MyServices = () => {
     <div className="space-y-6 p-6">
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          {/* Begrüßung - größer gemacht */}
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
             {t('pages.myServices.title')} {user?.firstName} {user?.lastName}
           </h1>
+          <p className="text-lg text-gray-600">
+            {t('pages.myServices.portalDescription')}
+          </p>
         </div>
-        <div className="flex space-x-3">
-          {/* Smart Button - Prominent und links */}
-          <button
-            onClick={() => setShowSmartServiceModal(true)}
-            className="relative inline-flex items-center px-8 py-4 border border-transparent text-lg font-semibold rounded-xl text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-purple-500/50 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-          >
-            <span className="relative">
-              <span className="block">✨ Assistentin Juna</span>
-              <span className="block text-xs font-normal opacity-90">Ich helfe dir mit neuen Anträgen</span>
-            </span>
-          </button>
-          {/* Normaler Button */}
+        {/* "Neuen Antrag stellen" Button oben rechts - nur wenn KI-Modus aus */}
+        <div 
+          className={`flex space-x-3 transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+            !isAIMode 
+              ? 'opacity-100 translate-x-0 scale-100' 
+              : 'opacity-0 translate-x-4 scale-95 pointer-events-none'
+          }`}
+          style={{ willChange: 'opacity, transform' }}
+        >
           <button
             onClick={handleNewServiceClick}
             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-[#060E5D] hover:bg-[#050B4A] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#060E5D]/40 shadow-sm"
@@ -542,14 +545,48 @@ const MyServices = () => {
             <Plus className="h-5 w-5 mr-2" />
             {t('pages.myServices.newRequest')}
           </button>
-          {/* Alle Anträge Button */}
-          <button
-            onClick={() => window.location.href = '/all-my-services'}
-            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-[#060E5D] hover:bg-[#050B4A] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#060E5D]/40 shadow-sm"
-          >
-            <Clock className="h-5 w-5 mr-2" />
-            {t('pages.myServices.allRequests')}
-          </button>
+        </div>
+      </div>
+
+      {/* Juna Box - Prominent darunter - nur wenn KI-Modus an */}
+      <div 
+        className={`bg-gradient-to-r from-[#060E5D] to-[#1a47a3] rounded-xl shadow-xl overflow-hidden transition-[opacity,transform,margin,max-height,padding] duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+          isAIMode 
+            ? 'opacity-100 translate-y-0 mb-6 max-h-[500px] p-8 scale-100' 
+            : 'opacity-0 -translate-y-4 mb-0 max-h-0 p-0 scale-[0.98] pointer-events-none'
+        }`}
+        style={{ 
+          color: '#f7f9fb',
+          transformOrigin: 'top',
+          willChange: 'opacity, transform, margin, max-height, padding'
+        }}
+      >
+        <div className="flex items-center justify-between gap-6 flex-wrap">
+          <div className="flex-1 min-w-[300px]">
+            <div className="flex items-center mb-4">
+              <Sparkles className="h-6 w-6 mr-3" style={{ color: '#f7f9fb' }} />
+              <h2 className="text-2xl font-bold" style={{ color: '#f7f9fb' }}>{t('pages.myServices.assistantName')}</h2>
+            </div>
+            <p className="text-lg" style={{ color: '#f7f9fb' }}>
+              {t('pages.myServices.assistantDescription')}
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowSmartServiceModal(true)}
+              className="inline-flex items-center px-6 py-3 bg-white text-[#060E5D] font-semibold rounded-lg hover:bg-blue-50 transition-all shadow-xl border-2 border-white/20 hover:shadow-2xl hover:scale-105 whitespace-nowrap"
+            >
+              <MessageSquare className="h-5 w-5 mr-2" />
+              {t('pages.myServices.startChat')}
+            </button>
+            <button
+              onClick={handleNewServiceClick}
+              className="inline-flex items-center px-6 py-3 bg-white text-[#060E5D] font-semibold rounded-lg hover:bg-blue-50 transition-all shadow-xl border-2 border-white/20 hover:shadow-2xl hover:scale-105 whitespace-nowrap"
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              {t('pages.myServices.newRequest')}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -580,14 +617,11 @@ const MyServices = () => {
                     <div className="flex items-center space-x-3">
                       <FileText className="h-5 w-5 text-green-500" />
                       <div>
-                        <h3 className="text-lg font-medium text-gray-900">
+                        <h3 className="text-lg text-gray-900">
                           {t('pages.myServices.informationForRequest')} "#{service.id} {service.titleInmate || service.title}"
                         </h3>
                         <p className="text-sm text-gray-600">
                           {service.activities[0]?.details}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {t('pages.myServices.informationReceived')} {new Date(service.activities[0]?.when || '').toLocaleDateString(t('pages.myServices.dateFormat'))}
                         </p>
                       </div>
                     </div>
@@ -634,14 +668,11 @@ const MyServices = () => {
                     <div className="flex items-center space-x-3">
                       <MessageSquare className="h-5 w-5 text-blue-500" />
                       <div>
-                        <h3 className="text-lg font-medium text-gray-900">
+                        <h3 className="text-lg text-gray-900">
                           {t('pages.myServices.inquiryForRequest')} "#{service.id} {service.titleInmate || service.title}"
                         </h3>
                         <p className="text-sm text-gray-600">
                           {service.activities[0]?.details}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {t('pages.myServices.inquiryReceived')} {new Date(service.activities[0]?.when || '').toLocaleDateString(t('pages.myServices.dateFormat'))}
                         </p>
                       </div>
                     </div>
@@ -669,11 +700,9 @@ const MyServices = () => {
             <div className="p-8 text-center">
               <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {t('pages.myServices.noOpenRequests')}
-              </h3>
-              <p className="text-gray-600 mb-4">
                 {t('pages.myServices.noOpenRequestsDescription')}
-              </p>
+              </h3>
+              
               <button
                 onClick={handleNewServiceClick}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#060E5D] hover:bg-[#050B4A] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#060E5D]/40"
@@ -693,12 +722,9 @@ const MyServices = () => {
                     <div className="flex items-center space-x-3">
                       {getStatusIcon(service.status)}
                       <div>
-                        <h3 className="text-lg font-medium text-gray-900">
+                        <h3 className="text-lg text-gray-900">
                           #{service.id} {service.titleInmate || service.title}
                         </h3>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {t('pages.myServices.submittedOn')} {new Date(service.createdAt).toLocaleDateString(t('pages.myServices.dateFormat'))}
-                        </p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
@@ -725,11 +751,9 @@ const MyServices = () => {
             <div className="p-8 text-center">
               <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {t('pages.myServices.noCompletedRequests')}
-              </h3>
-              <p className="text-gray-600">
                 {t('pages.myServices.noCompletedRequestsDescription')}
-              </p>
+              </h3>
+              
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
@@ -743,12 +767,9 @@ const MyServices = () => {
                     <div className="flex items-center space-x-3">
                       {getStatusIcon(service.status)}
                       <div className="flex-1">
-                        <h3 className="text-lg font-medium text-gray-900">
+                        <h3 className="text-lg text-gray-900">
                           #{service.id} {service.titleInmate || service.title}
                         </h3>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {t('pages.myServices.submittedOn')} {new Date(service.createdAt).toLocaleDateString(t('pages.myServices.dateFormat'))}
-                        </p>
                         {service.decision && (
                           <p className="text-sm text-gray-700 mt-1">
                             <span className="font-medium">{t('pages.myServices.decision')}:</span> {getDecisionText(service.decision)}

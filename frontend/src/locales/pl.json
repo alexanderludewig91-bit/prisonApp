@@ -166,6 +166,16 @@
       "originalDescription": "Opis (oryginalny)",
       "toRequest": "Do Wniosku"
     },
+    "smartService": {
+      "title": "Wyślij nowy wniosek z Juna",
+      "messagePlaceholder": "Napisz swoją wiadomość tutaj...",
+      "readyPopup": {
+        "title": "Wszystkie informacje zebrane!",
+        "message": "Zebrałem wszystkie potrzebne informacje dotyczące Twojego wniosku. Czy chcesz teraz przejść do przeglądu wniosku?",
+        "notYet": "Jeszcze nie",
+        "yesReview": "Tak, do przeglądu"
+      }
+    },
     "aiTranslator": {
       "title": "Tłumaczenie Tekstu AI",
       "description": "Wprowadź swój tekst w dowolnym języku. AI przetłumaczy go na niemiecki i wygeneruje odpowiedni tytuł.",
@@ -180,7 +190,11 @@
     "myServices": {
       "title": "Witamy",
       "subtitle": "Przegląd twoich wysłanych wniosków",
-      "newRequest": "Wyślij nowy wniosek",
+      "portalDescription": "To jest twój portal dla wysłanych i nowych wniosków",
+      "assistantName": "Asystentka Juna",
+      "assistantDescription": "Pomogę ci znaleźć odpowiedni wniosek i wypełnię go krok po kroku.",
+      "startChat": "Rozpocznij czat dla nowego wniosku",
+      "newRequest": "Utwórz wniosek ręcznie",
       "allRequests": "Wszystkie moje wnioski",
       "noRequests": "Brak dostępnych wniosków",
       "createFirst": "Utwórz swój pierwszy wniosek",

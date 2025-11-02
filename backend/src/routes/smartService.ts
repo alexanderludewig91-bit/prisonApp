@@ -27,8 +27,11 @@ router.post(
         return res.status(401).json({ error: 'Nicht authentifiziert' })
       }
 
-      // Erstelle neue Session
-      const session = chatSessionManager.createSession(userId)
+      // Hole Sprache aus Request
+      const language = req.body.language || 'de'
+
+      // Erstelle neue Session mit initialer Sprache
+      const session = chatSessionManager.createSession(userId, language)
 
       // Hole User-Informationen für personalisierte Begrüßung
       const user = await prisma.user.findUnique({
@@ -49,7 +52,7 @@ router.post(
       let greetingMessage = greetingJson
       
       try {
-        const greetingRaw = await createInitialGreeting(userName, currentDate)
+        const greetingRaw = await createInitialGreeting(userName, currentDate, language)
         
         // Versuche JSON zu parsen
         try {
@@ -117,7 +120,7 @@ router.post(
         return res.status(401).json({ error: 'Nicht authentifiziert' })
       }
 
-      const { sessionId, message } = req.body
+      const { sessionId, message, language } = req.body
 
       // Prüfe ob Session existiert und dem User gehört
       const session = chatSessionManager.getSession(sessionId)
@@ -132,6 +135,7 @@ router.post(
       })
       
       const userName = user ? `${user.firstName} ${user.lastName}` : undefined
+      const userLanguage = language || 'de'
       const currentDate = new Date().toLocaleDateString('de-DE', {
         weekday: 'long',
         year: 'numeric',
@@ -140,7 +144,7 @@ router.post(
       })
 
       // Verarbeite Nachricht
-      const result = await processChatMessage(sessionId, message, userName, currentDate)
+      const result = await processChatMessage(sessionId, message, userName, currentDate, userLanguage)
 
       res.json({
         success: true,

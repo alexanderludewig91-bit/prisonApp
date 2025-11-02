@@ -57,13 +57,69 @@ Verfügbare Antragstypen und deren benötigte Informationen:
 `
 
 /**
+ * Sprach-Namen-Mapping für die System-Prompts
+ */
+const LANGUAGE_NAMES: Record<string, string> = {
+  'de': 'Deutsch',
+  'en': 'English',
+  'es': 'Español',
+  'fr': 'Français',
+  'ar': 'العربية',
+  'fa': 'فارسی',
+  'tr': 'Türkçe',
+  'ru': 'Русский',
+  'pl': 'Polski',
+  'it': 'Italiano',
+  'af': 'Afrikaans',
+  'nl': 'Nederlands',
+  'zh': '中文'
+}
+
+/**
  * System-Prompt für den Chatbot
  */
-const getSystemPrompt = (userName?: string, currentDate?: string): string => {
+const getSystemPrompt = (userName?: string, currentDate?: string, isNonGermanInitial: boolean = false, lastUserMessage?: string, recentUserMessages?: string[]): string => {
   const dateInfo = currentDate ? `\nAktuelles Datum: ${currentDate}` : ''
   const userInfo = userName ? `\nDer Nutzer heißt ${userName}. Begrüße ihn persönlich mit seinem Namen.` : ''
   
-  return `Du bist Juna, eine hilfreiche und freundliche Assistentin für Insassen im Gefängnis für die Antragsstellung. Du stellst dich in deinen Nachrichten als "Juna" vor. Ansprache immer mit "du".
+  // Sprachanweisung: IMMER anzeigen, wenn User-Nachricht vorhanden oder initial nicht Deutsch
+  let languageInstruction = ''
+  
+  // Sprachanweisung IMMER anzeigen, wenn User-Nachricht vorhanden ODER initial nicht Deutsch
+  if (lastUserMessage || isNonGermanInitial) {
+    // Erwähne die letzten User-Nachrichten explizit
+    let recentMessagesInfo = ''
+    if (recentUserMessages && recentUserMessages.length > 0) {
+      recentMessagesInfo = `\n\nDie letzten Nachrichten des Nutzers waren:\n${recentUserMessages.map((msg, i) => `${i + 1}. "${msg.substring(0, 100)}"`).join('\n')}\n\nErkenne die Sprache dieser Nachrichten und antworte in derselben Sprache!`
+    }
+    
+    languageInstruction = `=== KRITISCH WICHTIG - SPRACHE ===
+
+DU MUSST IMMER IN DER SPRACHE ANTWORTEN, DIE DER NUTZER GERADE VERWENDET!
+
+Erkenne die Sprache automatisch aus den Nachrichten des Nutzers und antworte in derselben Sprache.${recentMessagesInfo}
+
+Wenn der Nutzer auf Englisch schreibt → antworte auf Englisch
+Wenn der Nutzer auf Deutsch schreibt → antworte auf Deutsch
+Wenn der Nutzer auf Portugiesisch schreibt → antworte auf Portugiesisch
+Wenn der Nutzer auf Spanisch schreibt → antworte auf Spanisch
+usw. für ALLE Sprachen - erkenne die Sprache automatisch
+
+Die "chatMessage" in deiner JSON-Antwort MUSS in der Sprache des Nutzers sein.
+Die "extractedData.title" und "extractedData.description" MÜSSEN in der Sprache des Nutzers sein.
+Nur "extractedData.serviceType" bleibt auf Englisch (VISIT, CONVERSATION, etc.).
+
+BEHALTE die Sprache bei - wenn der Nutzer die Konversation auf Englisch führt, antworte IMMER auf Englisch.
+NIEMALS auf Deutsch antworten, wenn der Nutzer auf Englisch schreibt.
+
+=== ENDE SPRACHREGEL ===
+
+`
+  }
+  
+  return `${languageInstruction}
+
+Du bist Juna, eine hilfreiche und freundliche Assistentin für Insassen im Gefängnis für die Antragsstellung. Du stellst dich in deinen Nachrichten als "Juna" vor. Ansprache immer mit "du".
 
 ${userInfo}${dateInfo}
 
@@ -469,11 +525,86 @@ export async function validateCompleteness(
 /**
  * Verarbeitet eine Chat-Nachricht und gibt eine Antwort zurück
  */
+/**
+ * Erkennt die Sprache einer Nachricht mit KI
+ */
+async function detectLanguage(text: string, aiProvider: any): Promise<string> {
+  try {
+    // Verwende KI zur Spracherkennung
+    const detectionPrompt = `Erkenne die Sprache dieses Textes und antworte NUR mit dem Sprachcode (z.B. "de" für Deutsch, "en" für Englisch, "es" für Spanisch, "af" für Afrikaans, "fr" für Französisch, "tr" für Türkisch, "ru" für Russisch, "ar" für Arabisch, "fa" für Persisch, "pl" für Polnisch, "it" für Italienisch, "zh" für Chinesisch, etc.).
+
+Text: "${text.substring(0, 300)}"
+
+Antworte NUR mit dem 2-stelligen Sprachcode (ISO 639-1 Code), sonst nichts!`
+
+    const response = await aiProvider.chatService(
+      'Du bist ein Assistent zur Spracherkennung. Analysiere den Text und antworte ausschließlich mit dem 2-stelligen ISO 639-1 Sprachcode (z.B. "de", "en", "es", "af" für Afrikaans, etc.), nichts anderes. Keine Erklärungen, nur der Sprachcode!',
+      [{
+        role: 'user',
+        content: detectionPrompt
+      }],
+      0.1 // Sehr niedrige Temperatur für konsistente Ergebnisse
+    )
+
+    // Extrahiere Sprachcode (entferne Whitespace und alles nach dem Code)
+    const languageCode = response.trim().toLowerCase().split(/[\s\n,.\-:;]/)[0].substring(0, 2)
+    
+    // Prüfe ob es ein gültiger Sprachcode ist (2 Zeichen ISO 639-1)
+    if (languageCode && languageCode.length === 2) {
+      // Liste der bekannten Sprachen (inkl. Afrikaans "af")
+      const knownLanguages = ['de', 'en', 'es', 'fr', 'tr', 'ru', 'ar', 'fa', 'pl', 'it', 'zh', 'af', 'nl']
+      if (knownLanguages.includes(languageCode)) {
+        console.log('[SmartService] Sprache erkannt:', languageCode, 'für Text:', text.substring(0, 50))
+        return languageCode
+      }
+    }
+    
+    // Fallback: Heuristik für bekannte Sprachen (inkl. Afrikaans)
+    const textLower = text.toLowerCase()
+    const languageIndicators: Record<string, string[]> = {
+      'de': ['der', 'die', 'das', 'und', 'ist', 'für', 'mit', 'auf', 'ich', 'du', 'wir', 'sein', 'haben', 'kann', 'würde'],
+      'en': ['the', 'is', 'and', 'for', 'with', 'can', 'would', 'have', 'has', 'you', 'i', 'we', 'they', 'this', 'that', 'thank', 'perfect', 'visit', 'next', 'week'],
+      'es': ['el', 'la', 'los', 'las', 'y', 'es', 'para', 'con', 'puedo', 'tengo', 'soy', 'eres', 'esta', 'este'],
+      'fr': ['le', 'la', 'les', 'et', 'est', 'pour', 'avec', 'je', 'tu', 'nous', 'vous', 'peux', 'ai', 'suis'],
+      'tr': ['ve', 'ile', 'için', 'ben', 'sen', 'biz', 'var', 'yok', 'olmak', 'istemek', 'bu', 'şu', 'bir'],
+      'ru': ['и', 'в', 'на', 'с', 'по', 'для', 'это', 'что', 'как', 'где', 'когда', 'я', 'ты', 'мы', 'он', 'она'],
+      'ar': ['و', 'في', 'من', 'إلى', 'على', 'هذا', 'هذه', 'أن', 'أنت', 'أنا', 'نحن', 'كان', 'يكون'],
+      'fa': ['و', 'در', 'از', 'به', 'برای', 'این', 'آن', 'من', 'تو', 'ما', 'شما', 'بود', 'است'],
+      'pl': ['i', 'w', 'na', 'z', 'dla', 'to', 'jest', 'może', 'mam', 'ja', 'ty', 'my', 'on', 'ona'],
+      'it': ['il', 'la', 'lo', 'gli', 'le', 'e', 'è', 'per', 'con', 'io', 'tu', 'noi', 'voi', 'posso', 'ho'],
+      'zh': ['的', '是', '在', '有', '和', '你', '我', '他', '她', '这', '那', '什么', '怎么', '可以'],
+      'af': ['die', 'van', 'en', 'is', 'kan', 'jy', 'ek', 'vir', 'dat', 'nie', 'om', 'met', 'was', 'aan', 'oor', 'se', 'so', 'ons', 'jou', 'hy', 'haar', 'my', 'vir', 'wat', 'watter', 'asseblief', 'geeft', 'aansoek']
+    }
+    
+    const scores: Record<string, number> = {}
+    
+    for (const [lang, indicators] of Object.entries(languageIndicators)) {
+      let score = 0
+      for (const indicator of indicators) {
+        if (textLower.includes(indicator)) {
+          score++
+        }
+      }
+      scores[lang] = score
+    }
+    
+    const detectedLang = Object.entries(scores).reduce((a, b) => scores[a[0]] > scores[b[0]] ? a : b)[0]
+    const finalLang = scores[detectedLang] > 0 ? detectedLang : 'de'
+    console.log('[SmartService] Heuristik-Spracherkennung:', { detectedLang, finalLang, scores })
+    return finalLang
+  } catch (error) {
+    console.error('[SmartService] Fehler bei Spracherkennung:', error)
+    // Fallback auf Deutsch bei Fehler
+    return 'de'
+  }
+}
+
 export async function processChatMessage(
   sessionId: string,
   userMessage: string,
   userName?: string,
-  currentDate?: string
+  currentDate?: string,
+  language: string = 'de'
 ): Promise<{
   response: string
   extractedData: Partial<ServiceData>
@@ -485,6 +616,12 @@ export async function processChatMessage(
     throw new Error('Session nicht gefunden oder abgelaufen')
   }
 
+  // KI-Antwort Provider für Spracherkennung
+  const aiProvider = AIProviderFactory.createProvider('openai')
+  if (!aiProvider) {
+    throw new Error('OpenAI Provider nicht verfügbar')
+  }
+
   // User-Nachricht zur Session hinzufügen
   chatSessionManager.updateSession(sessionId, {
     role: 'user',
@@ -492,38 +629,58 @@ export async function processChatMessage(
   })
 
   // Chat-History für OpenAI vorbereiten
-  // WICHTIG: Füge explizite Anweisung hinzu, dass die Antwort im JSON-Format sein muss
   const messagesForAI: Array<{ role: 'user' | 'assistant'; content: string }> = 
     session.messages.map(msg => ({
       role: msg.role,
       content: msg.content
     }))
   
-  // Füge am Ende der User-Nachricht eine explizite Anweisung hinzu
+  // Analysiere die letzten User-Nachrichten um die Sprache zu erkennen
+  const recentUserMessages = messagesForAI
+    .filter(msg => msg.role === 'user')
+    .slice(-3)
+    .map(msg => msg.content)
+  
+  // Füge am Ende der User-Nachricht explizite Anweisungen hinzu
+  // WICHTIG: Sprachanweisung direkt in die User-Nachricht einfügen
   if (messagesForAI.length > 0 && messagesForAI[messagesForAI.length - 1].role === 'user') {
-    // Die letzte Nachricht ist von User - füge JSON-Anweisung hinzu
+    // Die letzte Nachricht ist von User - füge Sprachanweisung am ANFANG hinzu
     const lastUserMessage = messagesForAI[messagesForAI.length - 1]
+    
+    // Prüfe die Sprache der User-Nachricht
+    const userMessageText = lastUserMessage.content.toLowerCase()
+    const isEnglish = /\b(the|and|is|are|for|to|with|you|can|will|this|that|have|has|was|were|from|been|would|could|should|may|might|must|shall|do|does|did|get|got|make|made|know|think|see|want|need|say|tell|ask|help|please|thank|thanks|hello|hi|hey|good|morning|afternoon|evening|yes|no|ok|okay|sure|well|right|now|then|there|here|where|what|when|why|who|how|about|after|before|during|until|since|while|because|if|unless|though|although|however|therefore|moreover|furthermore|nevertheless|nonetheless|besides|instead|meanwhile|otherwise|moreover|indeed|thus|hence|accordingly|consequently|specifically|generally|usually|often|always|never|sometimes|rarely|seldom|frequently|occasionally|regularly|normally|typically|commonly|probably|possibly|perhaps|maybe|definitely|certainly|absolutely|exactly|precisely|approximately|roughly|about|around|almost|nearly|quite|very|too|so|such|really|actually|indeed|rather|pretty|fairly|quite|rather|extremely|incredibly|absolutely|completely|totally|entirely|fully|partially|mostly|mainly|usually|generally|typically|commonly|normally|often|frequently|sometimes|occasionally|rarely|seldom|hardly|barely|scarcely|never|always|constantly|continuously|regularly|consistently|constantly|frequently|infrequently|rarely|seldom|hardly|barely|scarcely|never|always|constantly|continuously|regularly|consistently|constantly|frequently|infrequently|rarely|seldom|hardly|barely|scarcely|never|always|constantly|continuously|regularly|consistently|constantly|frequently|infrequently|rarely|seldom|hardly|barely|scarcely|never|always|constantly|continuously|regularly|consistently|constantly|frequently|infrequently|rarely|seldom|hardly|barely|scarcely)\b/.test(userMessageText) && !/\b(der|die|das|und|ist|für|mit|auf|ich|du|wir|sein|haben|kann|würde)\b/.test(userMessageText)
+    
+    // Sprachanweisung basierend auf der erkannten Sprache
+    const languageInstruction = isEnglish 
+      ? "\n\nCRITICAL: The user wrote in English. YOU MUST respond in English! Do NOT respond in German!"
+      : "\n\nWICHTIG: Antworte in derselben Sprache wie diese Nachricht!"
+    
     messagesForAI[messagesForAI.length - 1] = {
       role: 'user',
-      content: `${lastUserMessage.content}\n\nWICHTIG: Antworte NUR im JSON-Format mit chatMessage, isReady und extractedData. Niemals als reiner Text!`
+      content: `${lastUserMessage.content}${languageInstruction}\n\nWICHTIG: Antworte NUR im JSON-Format mit chatMessage, isReady und extractedData. Niemals als reiner Text!`
     }
   } else {
     // Falls keine User-Nachricht vorhanden (sollte nicht passieren), füge eine hinzu
+    const userMessageText = userMessage.toLowerCase()
+    const englishWords = /\b(the|and|is|are|for|to|with|you|can|will|this|that|have|has|was|were|from|been|would|could|should|may|might|must|do|does|did|get|got|make|made|know|think|see|want|need|say|tell|ask|help|please|thank|thanks|hello|hi|hey|good|yes|no|ok|okay|sure|well|right|now|then|there|here|where|what|when|why|who|how|about|after|before|during|until|since|while|because|if|unless|though|although|however|therefore|moreover|nevertheless|nonetheless|besides|instead|meanwhile|otherwise|indeed|thus|hence|accordingly|consequently|specifically|generally|usually|often|always|never|sometimes|rarely|seldom|frequently|occasionally|regularly|normally|typically|commonly|probably|possibly|perhaps|maybe|definitely|certainly|absolutely|exactly|precisely|approximately|roughly|about|around|almost|nearly|quite|very|too|so|such|really|actually|indeed|rather|pretty|fairly|extremely|incredibly|completely|totally|entirely|fully|partially|mostly|mainly)\b/
+    const germanWords = /\b(der|die|das|und|ist|für|mit|auf|ich|du|wir|sein|haben|kann|würde|muss|soll|will|werden|können|möchte|sollte|müsste|würde|wäre|hätte|könnte|dürfte|müsste|willst|kannst|machst|tuts|geht|kommt|sieht|findet|weiß|denkt|sagt|gibt|nimmt|macht|tut|geht|steht|liegt|sitzt|bleibt|wird|ist|hat|war|wurde|sind|waren|wurden|haben|hatten|würden|könnten|müssten|sollten|dürften|möchten|würdest|könntest|müsstest|solltest|dürftest|möchtest)\b/
+    const isEnglish = englishWords.test(userMessageText) && !germanWords.test(userMessageText)
+    
+    const languageInstruction = isEnglish 
+      ? "\n\nCRITICAL: The user wrote in English. YOU MUST respond in English! Do NOT respond in German!"
+      : "\n\nWICHTIG: Antworte in derselben Sprache wie diese Nachricht!"
+    
     messagesForAI.push({
       role: 'user',
-      content: `${userMessage}\n\nWICHTIG: Antworte NUR im JSON-Format mit chatMessage, isReady und extractedData. Niemals als reiner Text!`
+      content: `${userMessage}${languageInstruction}\n\nWICHTIG: Antworte NUR im JSON-Format mit chatMessage, isReady und extractedData. Niemals als reiner Text!`
     })
   }
 
-  // KI-Antwort generieren
-  const aiProvider = AIProviderFactory.createProvider('openai')
-  if (!aiProvider) {
-    throw new Error('OpenAI Provider nicht verfügbar')
-  }
-
-  const systemPrompt = getSystemPrompt(userName, currentDate)
+  // System-Prompt - mit expliziter Erwähnung der letzten User-Nachrichten
+  const systemPrompt = getSystemPrompt(userName, currentDate, language !== 'de', userMessage, recentUserMessages)
   
-  // Verwende die normalen Messages (System-Prompt ist bereits im systemPrompt enthalten)
+  // Verwende die normalen Messages - die Sprachanweisung ist bereits im System-Prompt
   const assistantResponseRaw = await aiProvider.chatService(systemPrompt, messagesForAI, 0.3)
   
   // Versuche JSON aus der Response zu extrahieren
@@ -721,7 +878,7 @@ export async function processChatMessage(
  * Erstellt den initialen Begrüßungstext
  * Gibt JSON-Format zurück (wie alle anderen Chat-Nachrichten)
  */
-export async function createInitialGreeting(userName?: string, currentDate?: string): Promise<string> {
+export async function createInitialGreeting(userName?: string, currentDate?: string, language: string = 'de'): Promise<string> {
   const aiProvider = AIProviderFactory.createProvider('openai')
   if (!aiProvider) {
     // Fallback: Gebe auch im JSON-Format zurück
@@ -741,14 +898,23 @@ export async function createInitialGreeting(userName?: string, currentDate?: str
     })
   }
 
-  const systemPrompt = getSystemPrompt(userName, currentDate)
+  const systemPrompt = getSystemPrompt(userName, currentDate, language !== 'de')
+  
+  // Anweisung für die Begrüßung basierend auf der Sprache
+  let greetingInstruction = ''
+  if (language !== 'de') {
+    const languageName = LANGUAGE_NAMES[language] || language.toUpperCase()
+    greetingInstruction = `Begrüße den Nutzer persönlich auf ${languageName} und frage nach seinem Anliegen. Antworte im JSON-Format! Verwende IMMER die Du-Form! Die gesamte Antwort MUSS auf ${languageName} sein!`
+  } else {
+    greetingInstruction = 'Begrüße den Nutzer persönlich und frage nach seinem Anliegen. Antworte im JSON-Format! Verwende IMMER die Du-Form!'
+  }
   
   // Verwende niedrige Temperature für konsistentes JSON
   const greetingRaw = await aiProvider.chatService(
     systemPrompt,
     [{
       role: 'user',
-      content: 'Begrüße den Nutzer persönlich und frage nach seinem Anliegen. Antworte im JSON-Format! Verwende IMMER die Du-Form!'
+      content: greetingInstruction
     }],
     0.3 // Niedrige Temperature für konsistentes JSON
   )

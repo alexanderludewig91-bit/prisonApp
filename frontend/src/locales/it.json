@@ -167,6 +167,16 @@
       "originalDescription": "Descrizione (originale)",
       "toRequest": "Alla Richiesta"
     },
+    "smartService": {
+      "title": "Invia nuova richiesta con Juna",
+      "messagePlaceholder": "Scrivi il tuo messaggio qui...",
+      "readyPopup": {
+        "title": "Tutte le informazioni raccolte!",
+        "message": "Ho raccolto tutte le informazioni necessarie per la tua richiesta. Vuoi ora procedere alla revisione della richiesta?",
+        "notYet": "Non ancora",
+        "yesReview": "Sì, alla revisione"
+      }
+    },
     "aiTranslator": {
       "title": "Traduzione Testo AI",
       "description": "Inserisci il tuo testo in qualsiasi lingua. L'AI lo tradurrà in tedesco e genererà un titolo appropriato.",
@@ -181,7 +191,11 @@
     "myServices": {
       "title": "Benvenuto",
       "subtitle": "Panoramica delle tue richieste inviate",
-      "newRequest": "Invia nuova richiesta",
+      "portalDescription": "Questo è il tuo portale per richieste inviate e nuove",
+      "assistantName": "Assistente Juna",
+      "assistantDescription": "Trovo la richiesta giusta per te e la completo passo dopo passo.",
+      "startChat": "Avvia chat per nuova richiesta",
+      "newRequest": "Crea richiesta manualmente",
       "allRequests": "Tutte le mie richieste",
       "noRequests": "Nessuna richiesta disponibile",
       "createFirst": "Crea la tua prima richiesta",

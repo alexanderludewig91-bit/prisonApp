@@ -50,6 +50,29 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
       i18n.changeLanguage(savedLanguage)
       setCurrentLanguage(savedLanguage)
     }
+
+    // Listen for storage changes (e.g., on logout)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'i18nextLng' && e.newValue) {
+        i18n.changeLanguage(e.newValue)
+        setCurrentLanguage(e.newValue)
+      }
+    }
+
+    // Listen for custom logout event
+    const handleLogout = () => {
+      const defaultLanguage = 'de'
+      i18n.changeLanguage(defaultLanguage)
+      setCurrentLanguage(defaultLanguage)
+    }
+
+    window.addEventListener('storage', handleStorageChange)
+    window.addEventListener('languageReset', handleLogout)
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('languageReset', handleLogout)
+    }
   }, [i18n])
 
   // Update RTL state when language changes

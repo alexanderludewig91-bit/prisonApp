@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { X, Send, Loader2, Check } from 'lucide-react'
+import { useLanguage } from '../contexts/LanguageContext'
 import { 
   startSmartServiceChat, 
   sendChatMessage, 
@@ -28,6 +29,7 @@ interface ExtractedData {
 }
 
 const SmartServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: SmartServiceModalProps) => {
+  const { t, currentLanguage } = useLanguage()
   const [phase, setPhase] = useState<'chat' | 'review' | 'submitting'>('chat')
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputMessage, setInputMessage] = useState('')
@@ -78,7 +80,7 @@ const SmartServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: SmartSer
     try {
       setIsLoading(true)
       setError('')
-      const response = await startSmartServiceChat()
+      const response = await startSmartServiceChat(currentLanguage)
       
       setSessionId(response.sessionId)
       setMessages([{
@@ -107,7 +109,7 @@ const SmartServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: SmartSer
     setIsLoading(true)
 
     try {
-      const response = await sendChatMessage(sessionId, userMessage)
+      const response = await sendChatMessage(sessionId, userMessage, currentLanguage)
 
       // Assistant-Antwort zur UI hinzufügen
       setMessages(prev => [...prev, { role: 'assistant', content: response.response }])
@@ -268,23 +270,23 @@ const SmartServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: SmartSer
               </div>
             </div>
             <h3 className="text-xl font-bold text-center text-gray-900">
-              Alle Informationen gesammelt!
+              {t('modals.smartService.readyPopup.title')}
             </h3>
             <p className="text-gray-600 text-center">
-              Ich habe alle benötigten Informationen für Ihren Antrag gesammelt. Möchten Sie jetzt zur Überprüfung des Antrags gehen?
+              {t('modals.smartService.readyPopup.message')}
             </p>
             <div className="flex gap-3 pt-2">
               <button
                 onClick={handlePopupNo}
                 className="flex-1 btn btn-secondary"
               >
-                Nein, noch nicht
+                {t('modals.smartService.readyPopup.notYet')}
               </button>
               <button
                 onClick={handlePopupYes}
                 className="flex-1 btn btn-primary"
               >
-                Ja, zur Überprüfung
+                {t('modals.smartService.readyPopup.yesReview')}
               </button>
             </div>
           </div>
@@ -294,7 +296,7 @@ const SmartServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: SmartSer
       <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="text-xl font-bold">Neuen Antrag mit Juna stellen</h2>
+          <h2 className="text-xl font-bold">{t('modals.smartService.title')}</h2>
           <button
             onClick={handleClose}
             className="text-gray-500 hover:text-gray-700"
@@ -355,7 +357,7 @@ const SmartServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: SmartSer
                         handleSendMessage()
                       }
                     }}
-                    placeholder="Schreiben Sie hier Ihre Nachricht..."
+                    placeholder={t('modals.smartService.messagePlaceholder')}
                     className="flex-1 input"
                     disabled={isLoading || !sessionId}
                   />

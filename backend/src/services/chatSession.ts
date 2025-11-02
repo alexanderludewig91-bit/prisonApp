@@ -22,6 +22,8 @@ export interface ChatSession {
   userId: number
   messages: ChatMessage[]
   extractedData: Partial<ServiceData>
+  detectedLanguage?: string // Erkannte Sprache basierend auf User-Nachrichten
+  initialLanguage?: string // Initial eingestellte Sprache (für Begrüßung)
   createdAt: Date
   expiresAt: Date
 }
@@ -33,7 +35,7 @@ class ChatSessionManager {
   /**
    * Erstellt eine neue Chat-Session
    */
-  createSession(userId: number): ChatSession {
+  createSession(userId: number, initialLanguage?: string): ChatSession {
     const sessionId = `chat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     const now = new Date()
     const expiresAt = new Date(now.getTime() + this.SESSION_TIMEOUT)
@@ -43,12 +45,26 @@ class ChatSessionManager {
       userId,
       messages: [],
       extractedData: {},
+      initialLanguage: initialLanguage || 'de',
+      detectedLanguage: initialLanguage || 'de',
       createdAt: now,
       expiresAt
     }
 
     this.sessions.set(sessionId, session)
     return session
+  }
+
+  /**
+   * Aktualisiert die erkannte Sprache einer Session
+   */
+  updateDetectedLanguage(sessionId: string, language: string): boolean {
+    const session = this.getSession(sessionId)
+    if (!session) {
+      return false
+    }
+    session.detectedLanguage = language
+    return true
   }
 
   /**

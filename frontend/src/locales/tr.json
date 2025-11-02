@@ -167,6 +167,16 @@
       "originalDescription": "Açıklama (orijinal)",
       "toRequest": "Talep Et"
     },
+    "smartService": {
+      "title": "Juna ile yeni talep gönder",
+      "messagePlaceholder": "Mesajınızı buraya yazın...",
+      "readyPopup": {
+        "title": "Tüm bilgiler toplandı!",
+        "message": "Talebiniz için gerekli tüm bilgileri topladım. Şimdi talebin incelemesine geçmek ister misiniz?",
+        "notYet": "Henüz değil",
+        "yesReview": "Evet, incelemeye"
+      }
+    },
     "aiTranslator": {
       "title": "AI Metin Çevirisi",
       "description": "Metninizi herhangi bir dilde girin. AI onu Almancaya çevirecek ve uygun bir başlık oluşturacak.",
@@ -181,7 +191,11 @@
     "myServices": {
       "title": "Hoş geldiniz",
       "subtitle": "Gönderdiğiniz taleplerin genel bakışı",
-      "newRequest": "Yeni talep gönder",
+      "portalDescription": "Bu, gönderilen ve yeni talepler için portalınızdır",
+      "assistantName": "Asistan Juna",
+      "assistantDescription": "Senin için doğru talebi bulur ve adım adım doldururum.",
+      "startChat": "Yeni talep için sohbeti başlat",
+      "newRequest": "Talebi manuel olarak oluştur",
       "allRequests": "Tüm taleplerim",
       "noRequests": "Talep bulunamadı",
       "createFirst": "İlk talebinizi oluşturun",
