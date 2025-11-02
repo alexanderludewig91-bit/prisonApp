@@ -84,52 +84,64 @@ const Navbar = () => {
           
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
             <div className="ml-3 relative">
-              <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-4">
                 {/* Language Selector nur für Insassen anzeigen */}
                 {user?.groups?.some(g => g.name === 'PS Inmates') && (
-                  <LanguageSelector />
+                  <>
+                    <LanguageSelector />
+                    <div className="h-6 w-px bg-white/20"></div>
+                  </>
                 )}
                 {/* KI Modus Toggle nur für Insassen */}
                 {user?.groups?.some(g => g.name === 'PS Inmates') && (
-                  <div className="flex items-center space-x-2">
-                    <Sparkles className="h-4 w-4 text-[var(--nav-fg-muted)]" />
-                    <span className="text-sm font-medium text-[var(--nav-fg-muted)]">KI Modus</span>
-                    <button
-                      onClick={toggleAIMode}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                        isAIMode 
-                          ? 'bg-blue-600 focus:ring-blue-500' 
-                          : 'bg-gray-300 focus:ring-gray-500'
-                      }`}
-                      aria-label="KI Modus umschalten"
-                    >
-                      <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          isAIMode ? 'translate-x-6' : 'translate-x-1'
+                  <>
+                    <div className="flex items-center space-x-2">
+                      <Sparkles className="h-4 w-4 text-[var(--nav-fg-muted)]" />
+                      <span className="font-medium text-[var(--nav-fg-muted)]">KI-Modus</span>
+                      <button
+                        onClick={toggleAIMode}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                          isAIMode 
+                            ? 'bg-blue-600 focus:ring-blue-500' 
+                            : 'bg-gray-300 focus:ring-gray-500'
                         }`}
-                      />
-                    </button>
-                  </div>
+                        aria-label="KI Modus umschalten"
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            isAIMode ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                    </div>
+                    <div className="h-6 w-px bg-white/20"></div>
+                  </>
                 )}
                 {/* Alle meine Anträge nur für Insassen */}
                 {user?.groups?.some(g => g.name === 'PS Inmates') && (
-                  <Link
-                    to="/all-my-services"
-                    className={`flex items-center font-medium ${
-                      location.pathname === '/all-my-services'
-                        ? 'text-[var(--nav-fg)]'
-                        : 'text-[var(--nav-fg-muted)] hover:text-[var(--nav-fg)]'
-                    } transition-all hover:scale-105`}
-                  >
-                    <Clock className="h-5 w-5 mr-1" />
-                    {t('pages.myServices.allRequests')}
-                  </Link>
+                  <>
+                    <Link
+                      to="/all-my-services"
+                      className={`flex items-center font-medium ${
+                        location.pathname === '/all-my-services'
+                          ? 'text-[var(--nav-fg)]'
+                          : 'text-[var(--nav-fg-muted)] hover:text-[var(--nav-fg)]'
+                      } transition-all hover:scale-105`}
+                    >
+                      <Clock className="h-5 w-5 mr-1" />
+                      {t('pages.myServices.allRequests')}
+                    </Link>
+                    <div className="h-6 w-px bg-white/20"></div>
+                  </>
                 )}
                 {/* Name nur für Staff/Admin anzeigen, nicht für Insassen */}
                 {!user?.groups?.some(g => g.name === 'PS Inmates') && (
-                  <div className="text-sm text-[var(--nav-fg-muted)]">
-                    {user?.firstName} {user?.lastName}
-                  </div>
+                  <>
+                    <div className="text-sm text-[var(--nav-fg-muted)]">
+                      {user?.firstName} {user?.lastName}
+                    </div>
+                    <div className="h-6 w-px bg-white/20"></div>
+                  </>
                 )}
                 <button
                   onClick={logout}
@@ -206,7 +218,7 @@ const Navbar = () => {
                 <div className="flex items-center justify-between px-4 py-2">
                   <div className="flex items-center space-x-2">
                     <Sparkles className="h-4 w-4 text-[var(--nav-fg-muted)]" />
-                    <span className="text-sm font-medium text-[var(--nav-fg-muted)]">KI Modus</span>
+                    <span className="font-medium text-[var(--nav-fg-muted)]">KI Modus</span>
                   </div>
                   <button
                     onClick={toggleAIMode}

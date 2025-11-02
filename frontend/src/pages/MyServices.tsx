@@ -593,10 +593,26 @@ const MyServices = () => {
       {/* Informationen und Rückfragen in zwei Spalten */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Informationen zu Anträgen */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-                    <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-              <FileText className="h-5 w-5 text-green-500" />
+        <div className={`rounded-xl shadow-lg overflow-hidden transition-all ${
+          servicesWithInformation.length > 0
+            ? 'bg-[#E8F6EF] border-2 border-[#D1E8DF]'
+            : 'bg-white shadow'
+        }`}>
+          <div className={`px-6 py-4 border-b ${
+            servicesWithInformation.length > 0 
+              ? 'border-[#D1E8DF] bg-[#E8F6EF]'
+              : 'border-gray-200'
+          }`}>
+            <h2 className={`text-lg font-semibold flex items-center space-x-2 ${
+              servicesWithInformation.length > 0 
+                ? 'text-[#2D5A3D]'
+                : 'text-gray-900'
+            }`}>
+              <FileText className={`h-5 w-5 ${
+                servicesWithInformation.length > 0 
+                  ? 'text-[#4A8F65]'
+                  : 'text-green-500'
+              }`} />
               <span>
                 {servicesWithInformation.length > 0 
                   ? `${t('pages.myServices.newInformation')} (${servicesWithInformation.length})`
@@ -625,13 +641,13 @@ const MyServices = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="text-blue-600">
+                    <div>
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
                           handleHideInformation(service)
                         }}
-                        className="text-sm hover:underline"
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all shadow-sm hover:shadow-md"
                       >
                         {t('pages.myServices.hide')}
                       </button>
@@ -644,10 +660,26 @@ const MyServices = () => {
         </div>
 
         {/* Rückfragen zu Anträgen */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
-              <MessageSquare className="h-5 w-5 text-blue-500" />
+        <div className={`rounded-xl shadow-lg overflow-hidden transition-all ${
+          servicesWithInquiries.length > 0
+            ? 'bg-[#FFF4E5] border-2 border-[#FFE8CC]'
+            : 'bg-white shadow'
+        }`}>
+          <div className={`px-6 py-4 border-b ${
+            servicesWithInquiries.length > 0 
+              ? 'border-[#FFE8CC] bg-[#FFF4E5]'
+              : 'border-gray-200'
+          }`}>
+            <h2 className={`text-lg font-semibold flex items-center space-x-2 ${
+              servicesWithInquiries.length > 0 
+                ? 'text-[#8B5A2B]'
+                : 'text-gray-900'
+            }`}>
+              <MessageSquare className={`h-5 w-5 ${
+                servicesWithInquiries.length > 0 
+                  ? 'text-[#D97706]'
+                  : 'text-blue-500'
+              }`} />
               <span>
                 {servicesWithInquiries.length > 0 
                   ? `${t('pages.myServices.newInquiries')} (${servicesWithInquiries.length})`
@@ -676,8 +708,16 @@ const MyServices = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="text-blue-600">
-                      <span className="text-sm">{t('pages.myServices.reply')}</span>
+                    <div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleInquiryClick(service)
+                        }}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all shadow-sm hover:shadow-md"
+                      >
+                        {t('pages.myServices.reply')}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -1311,7 +1351,7 @@ const MyServices = () => {
                   handleHideInformation(selectedInformation)
                   handleCloseInformationModal()
                 }}
-                className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all shadow-sm hover:shadow-md"
               >
                 {t('pages.myServices.hide')}
               </button>

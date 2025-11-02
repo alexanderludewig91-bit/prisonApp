@@ -293,13 +293,18 @@ const SmartServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: SmartSer
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="text-xl font-bold">{t('modals.smartService.title')}</h2>
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[95vh] flex flex-col overflow-hidden border border-gray-100">
+        {/* Header mit Gradient */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-[#060E5D]/10 to-[#1a47a3]/10">
+          <div className="flex items-center gap-3">
+            <div className="bg-gradient-to-br from-[#060E5D] to-[#1a47a3] rounded-xl p-2">
+              <span className="text-2xl">✨</span>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900">{t('modals.smartService.title')}</h2>
+          </div>
           <button
             onClick={handleClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-400 hover:text-gray-600 hover:bg-white rounded-lg p-2 transition-colors"
             disabled={phase === 'submitting'}
           >
             <X className="h-6 w-6" />
@@ -311,27 +316,40 @@ const SmartServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: SmartSer
           {phase === 'chat' && (
             <>
               {/* Chat Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-gray-50 to-white">
                 {messages.map((message, index) => (
                   <div
                     key={index}
-                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} items-start gap-3`}
                   >
+                    {message.role === 'assistant' && (
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-[#060E5D] to-[#1a47a3] flex items-center justify-center shadow-md">
+                        <span className="text-white text-sm font-bold">J</span>
+                      </div>
+                    )}
                     <div
-                      className={`max-w-[80%] rounded-lg p-3 ${
+                      className={`max-w-[75%] rounded-2xl px-4 py-3 shadow-md ${
                         message.role === 'user'
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-gray-100 text-gray-800'
+                          ? 'bg-gradient-to-br from-[#060E5D] to-[#1a47a3] text-white'
+                          : 'bg-white text-gray-800 border border-gray-200'
                       }`}
                     >
-                      <p className="whitespace-pre-wrap">{message.content}</p>
+                      <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
                     </div>
+                    {message.role === 'user' && (
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center shadow-md">
+                        <span className="text-white text-xs font-bold">U</span>
+                      </div>
+                    )}
                   </div>
                 ))}
                 {isLoading && (
-                  <div className="flex justify-start">
-                    <div className="bg-gray-100 rounded-lg p-3">
-                      <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
+                  <div className="flex justify-start items-start gap-3">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-[#060E5D] to-[#1a47a3] flex items-center justify-center shadow-md">
+                      <span className="text-white text-sm font-bold">J</span>
+                    </div>
+                    <div className="bg-white rounded-2xl px-4 py-3 shadow-md border border-gray-200">
+                      <Loader2 className="h-5 w-5 animate-spin text-[#060E5D]" />
                     </div>
                   </div>
                 )}
@@ -339,13 +357,13 @@ const SmartServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: SmartSer
               </div>
 
               {/* Chat Input */}
-              <div className="border-t p-4">
+              <div className="border-t border-gray-200 bg-white p-6">
                 {error && (
-                  <div className="mb-2 p-2 bg-red-100 text-red-700 rounded text-sm">
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm shadow-sm">
                     {error}
                   </div>
                 )}
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <input
                     ref={inputRef}
                     type="text"
@@ -358,15 +376,16 @@ const SmartServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: SmartSer
                       }
                     }}
                     placeholder={t('modals.smartService.messagePlaceholder')}
-                    className="flex-1 input"
+                    className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#060E5D] focus:border-[#060E5D] transition-all disabled:bg-gray-50 disabled:cursor-not-allowed"
                     disabled={isLoading || !sessionId}
                   />
                   <button
                     onClick={handleSendMessage}
                     disabled={!inputMessage.trim() || isLoading || !sessionId}
-                    className="btn btn-primary"
+                    className="px-6 py-3 bg-gradient-to-r from-[#060E5D] to-[#1a47a3] text-white rounded-xl hover:from-[#050B4A] hover:to-[#163d8f] disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg transform hover:scale-105 disabled:transform-none flex items-center gap-2 font-medium"
                   >
                     <Send className="h-5 w-5" />
+                    <span>Senden</span>
                   </button>
                 </div>
 
@@ -375,78 +394,86 @@ const SmartServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: SmartSer
           )}
 
           {phase === 'review' && (
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              <h3 className="text-lg font-semibold mb-4">Antrag überprüfen</h3>
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-gradient-to-b from-gray-50 to-white">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl p-2">
+                  <Check className="h-5 w-5 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900">Antrag überprüfen</h3>
+              </div>
 
               {error && (
-                <div className="p-2 bg-red-100 text-red-700 rounded text-sm">
+                <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm shadow-sm">
                   {error}
                 </div>
               )}
 
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+              <div className="space-y-6">
+                <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Antragstyp
                   </label>
                   <input
                     type="text"
                     value={getServiceTypeLabel(reviewData.serviceType)}
-                    className="input bg-gray-100"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-700 cursor-not-allowed"
                     disabled
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Titel (Original) *
                   </label>
                   <input
                     type="text"
                     value={reviewData.titleInmate}
                     onChange={(e) => handleReviewChange('titleInmate', e.target.value)}
-                    className="input"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#060E5D] focus:border-[#060E5D] transition-all"
                     required
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Beschreibung (Original) *
                   </label>
                   <textarea
                     value={reviewData.descriptionInmate}
                     onChange={(e) => handleReviewChange('descriptionInmate', e.target.value)}
-                    className="input"
-                    rows={6}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#060E5D] focus:border-[#060E5D] transition-all resize-none"
+                    rows={8}
                     required
                   />
                 </div>
               </div>
 
-              <div className="flex justify-between mt-6">
+              <div className="flex justify-between gap-4 mt-8 pt-6 border-t border-gray-200">
                 <button
                   onClick={() => setPhase('chat')}
-                  className="btn btn-secondary"
+                  className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all font-medium shadow-sm hover:shadow-md"
                 >
                   Zurück zum Chat
                 </button>
                 <button
                   onClick={handleFinalize}
                   disabled={!reviewData.titleInmate || !reviewData.descriptionInmate || isSubmitting}
-                  className="btn btn-primary"
+                  className="px-8 py-3 bg-gradient-to-r from-[#060E5D] to-[#1a47a3] text-white rounded-xl hover:from-[#050B4A] hover:to-[#163d8f] disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg transform hover:scale-105 disabled:transform-none font-medium"
                 >
-                  Antrag einreichen
+                  {isSubmitting ? 'Wird eingereicht...' : 'Antrag einreichen'}
                 </button>
               </div>
             </div>
           )}
 
           {phase === 'submitting' && (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center">
-                <Loader2 className="h-12 w-12 animate-spin text-blue-500 mx-auto mb-4" />
-                <p className="text-gray-700">Antrag wird eingereicht...</p>
+            <div className="flex-1 flex items-center justify-center bg-gradient-to-b from-gray-50 to-white">
+              <div className="text-center space-y-4">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-[#060E5D]/10 to-[#1a47a3]/10 mb-4">
+                  <Loader2 className="h-8 w-8 animate-spin text-[#060E5D]" />
+                </div>
+                <p className="text-xl font-semibold text-gray-700">Antrag wird eingereicht...</p>
+                <p className="text-sm text-gray-500">Bitte warten Sie einen Moment</p>
               </div>
             </div>
           )}

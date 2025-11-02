@@ -9,6 +9,7 @@ import {
   createInitialGreeting
 } from '../services/smartServiceChat'
 import { PrismaClient } from '@prisma/client'
+import { AIProviderFactory } from '../services/ai/AIProviderFactory'
 
 const router = express.Router()
 const prisma = new PrismaClient()
@@ -268,6 +269,31 @@ router.post(
       // Default-Priorität für Insassen-Anträge (null = keine besondere Priorität)
       const priority = null
 
+      // Übersetze Titel und Beschreibung ins Deutsche für Mitarbeiter
+      // Verwende die bestehende translate-Methode wie in /services/my/services
+      const aiProvider = AIProviderFactory.createProvider('openai')
+      let finalTitle = titleInmate || title
+      let finalDescription = descriptionInmate || description
+
+      try {
+        if (aiProvider) {
+          // Übersetze Titel ins Deutsche (nur wenn titleInmate vorhanden)
+          if (titleInmate && titleInmate.trim() !== '') {
+            finalTitle = await aiProvider.translate(titleInmate)
+          }
+          
+          // Übersetze Beschreibung ins Deutsche (nur wenn descriptionInmate vorhanden)
+          if (descriptionInmate && descriptionInmate.trim() !== '') {
+            finalDescription = await aiProvider.translate(descriptionInmate)
+          }
+        }
+      } catch (error) {
+        console.error('Fehler bei Übersetzung:', error)
+        // Bei Fehler: Verwende Original-Text als Fallback
+        finalTitle = titleInmate || title
+        finalDescription = descriptionInmate || description
+      }
+
       // Workflow-Regel: Anträge von Insassen automatisch entsprechenden Gruppen zuweisen
       // EXAKT die gleiche Logik wie in /services/my/services
       let assignedToGroup = null
@@ -312,10 +338,10 @@ router.post(
       // Erstelle Service (exakt wie in /services/my/services)
       const service = await prisma.service.create({
         data: {
-          title,
-          titleInmate: titleInmate || null,
-          description,
-          descriptionInmate: descriptionInmate || null,
+          title: finalTitle, // Deutsche Übersetzung für Mitarbeiter
+          titleInmate: titleInmate || null, // Original für Insassen
+          description: finalDescription, // Deutsche Übersetzung für Mitarbeiter
+          descriptionInmate: descriptionInmate || null, // Original für Insassen
           priority,
           serviceType: serviceType || 'FREETEXT',
           createdBy: userId,
