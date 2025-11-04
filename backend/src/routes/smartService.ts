@@ -86,6 +86,15 @@ router.post(
         content: greetingMessage
       })
 
+      // Logge Begrüßung in Konsole
+      console.log('[SmartService] 🤖 Chatbot-Begrüßung:', {
+        sessionId: session.sessionId,
+        userName: userName || 'Unbekannt',
+        language,
+        greeting: greetingMessage,
+        greetingLength: greetingMessage.length
+      })
+
       res.json({
         success: true,
         sessionId: session.sessionId,

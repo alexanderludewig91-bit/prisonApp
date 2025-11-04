@@ -627,6 +627,14 @@ export async function processChatMessage(
     content: userMessage
   })
 
+  // Logge User-Nachricht in Konsole
+  console.log('[SmartService] 👤 User-Nachricht:', {
+    sessionId,
+    userName: userName || 'Unbekannt',
+    message: userMessage,
+    messageLength: userMessage.length
+  })
+
   // Chat-History für OpenAI vorbereiten
   const messagesForAI: Array<{ role: 'user' | 'assistant'; content: string }> = 
     session.messages.map(msg => ({
@@ -767,6 +775,16 @@ export async function processChatMessage(
   chatSessionManager.updateSession(sessionId, {
     role: 'assistant',
     content: assistantResponse
+  })
+
+  // Logge Chatbot-Antwort in Konsole
+  console.log('[SmartService] 🤖 Chatbot-Antwort:', {
+    sessionId,
+    userName: userName || 'Unbekannt',
+    response: assistantResponse,
+    responseLength: assistantResponse.length,
+    isReady: chatData?.isReady || false,
+    serviceType: chatData?.extractedData?.serviceType || 'kein Typ'
   })
 
   // Verwende extrahierte Daten aus JSON-Response (falls vorhanden) oder Fallback auf alte Extraktion
