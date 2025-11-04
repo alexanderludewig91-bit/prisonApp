@@ -1,4 +1,5 @@
 import OpenAI from 'openai'
+import { toFile } from 'openai'
 import { AIProvider, AIProviderConfig, AIProviderError } from './AIProvider'
 
 /**
@@ -496,6 +497,180 @@ Antwort im JSON-Format:
         throw new AIProviderError(
           'Fehler bei der Chat-Verarbeitung. Bitte versuchen Sie es erneut.',
           'CHAT_ERROR',
+          500
+        )
+      }
+    }
+  }
+
+  /**
+   * Speech-to-Text mit Whisper API
+   * Konvertiert Audio-Datei in Text
+   * @param audioFile - Audio-Datei als Buffer (Node.js) oder File (Browser)
+   * @param language - Optionale Sprache (z.B. 'de', 'en')
+   * @param filename - Dateiname mit Extension (z.B. 'audio.webm')
+   */
+  async speechToText(audioFile: Buffer | File, language?: string, filename: string = 'audio.webm'): Promise<string> {
+    try {
+      // Konvertiere zu Buffer falls nötig
+      let buffer: Buffer
+      let actualFilename: string
+      
+      if (Buffer.isBuffer(audioFile)) {
+        buffer = audioFile
+        actualFilename = filename
+      } else {
+        // Browser File-Objekt: Konvertiere zu Buffer
+        const arrayBuffer = await (audioFile as File).arrayBuffer()
+        buffer = Buffer.from(arrayBuffer)
+        actualFilename = (audioFile as File).name || filename
+      }
+
+      // OpenAI SDK in Node.js: Verwende toFile() Helper-Funktion
+      // Das SDK stellt toFile() bereit, um verschiedene Input-Typen in File zu konvertieren
+      // Buffer ist ein unterstützter Input-Typ für toFile()
+      const file = await toFile(
+        buffer, // Buffer direkt übergeben
+        actualFilename, // Dateiname
+        { type: 'audio/webm' } // MIME-Type
+      )
+
+      // Whisper API aufrufen
+      // OpenAI SDK akzeptiert File-Objekte direkt (von toFile() erstellt)
+      const transcription = await this.client.audio.transcriptions.create({
+        file: file,
+        model: 'whisper-1',
+        language: language || undefined, // Optional: Sprache angeben (z.B. 'de', 'en')
+        response_format: 'text' // Text-Format zurückgeben
+      })
+
+      // Whisper gibt den transkribierten Text zurück
+      // response_format: 'text' gibt direkt einen String zurück
+      const transcript = typeof transcription === 'string' 
+        ? transcription 
+        : (transcription as any).text || ''
+
+      if (!transcript || transcript.trim().length === 0) {
+        throw new AIProviderError('Keine Transkription erhalten', 'NO_TRANSCRIPTION', 500)
+      }
+
+      console.log('[OpenAI] Whisper Transkription erfolgreich:', {
+        length: transcript.length,
+        preview: transcript.substring(0, 100),
+        language: language || 'auto',
+        filename
+      })
+
+      return transcript.trim()
+    } catch (error: any) {
+      console.error('[OpenAI] Whisper Fehler:', error)
+
+      // OpenAI-spezifische Fehlerbehandlung
+      if (error.code === 'insufficient_quota') {
+        throw new AIProviderError(
+          'OpenAI API Limit erreicht. Bitte versuchen Sie es später erneut.',
+          'QUOTA_EXCEEDED',
+          402
+        )
+      } else if (error.code === 'invalid_api_key') {
+        throw new AIProviderError(
+          'Ungültiger OpenAI API-Schlüssel.',
+          'INVALID_API_KEY',
+          401
+        )
+      } else if (error.code === 'rate_limit_exceeded') {
+        throw new AIProviderError(
+          'OpenAI Rate Limit erreicht. Bitte versuchen Sie es später erneut.',
+          'RATE_LIMIT_EXCEEDED',
+          429
+        )
+      } else if (error.message?.includes('file size') || error.message?.includes('too large')) {
+        throw new AIProviderError(
+          'Audio-Datei ist zu groß. Maximale Größe: 25 MB',
+          'FILE_TOO_LARGE',
+          400
+        )
+      } else if (error.message?.includes('format') || error.message?.includes('type') || error.message?.includes('invalid')) {
+        throw new AIProviderError(
+          'Ungültiges Audio-Format. Unterstützt: mp3, wav, m4a, webm',
+          'INVALID_FORMAT',
+          400
+        )
+      } else {
+        throw new AIProviderError(
+          `Fehler bei der Audio-Transkription: ${error.message || 'Unbekannter Fehler'}`,
+          'TRANSCRIPTION_ERROR',
+          500
+        )
+      }
+    }
+  }
+
+  /**
+   * Text-to-Speech: Konvertiert Text in Audio
+   * @param text - Text der gesprochen werden soll
+   * @param language - Optionale Sprache (z.B. 'de', 'en')
+   * @param voice - Optionale Stimme (z.B. 'alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer')
+   * @returns Promise mit Audio-Daten als Buffer
+   */
+  async textToSpeech(text: string, language?: string, voice: string = 'nova'): Promise<Buffer> {
+    try {
+      // OpenAI TTS API aufrufen
+      // Das SDK gibt einen Response mit Audio-Daten zurück
+      const response = await this.client.audio.speech.create({
+        model: 'tts-1', // oder 'tts-1-hd' für höhere Qualität
+        voice: voice as 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer',
+        input: text,
+        // Sprache wird automatisch erkannt, aber wir können sie explizit setzen
+        // (OpenAI TTS unterstützt verschiedene Sprachen basierend auf dem Text)
+      })
+
+      // Konvertiere Response zu Buffer
+      // Das SDK gibt ein Response-Objekt zurück, das ein ArrayBuffer enthält
+      const arrayBuffer = await response.arrayBuffer()
+      const buffer = Buffer.from(arrayBuffer)
+
+      // Berechne Metriken für bessere Lesbarkeit
+      const audioSizeKB = Math.round((buffer.length / 1024) * 100) / 100
+      const estimatedDuration = Math.round((buffer.length / 16000) * 10) / 10
+      
+      console.log('[OpenAI] TTS erfolgreich:', {
+        textLength: text.length,
+        audioSizeBytes: buffer.length,
+        audioSizeKB: `${audioSizeKB} KB`,
+        estimatedDuration: `${estimatedDuration}s`,
+        voice,
+        language: language || 'auto',
+        bytesPerSecond: Math.round(buffer.length / (estimatedDuration || 1))
+      })
+
+      return buffer
+    } catch (error: any) {
+      console.error('[OpenAI] TTS Fehler:', error)
+
+      // OpenAI-spezifische Fehlerbehandlung
+      if (error.code === 'insufficient_quota') {
+        throw new AIProviderError(
+          'OpenAI API Limit erreicht. Bitte versuchen Sie es später erneut.',
+          'QUOTA_EXCEEDED',
+          402
+        )
+      } else if (error.code === 'invalid_api_key') {
+        throw new AIProviderError(
+          'Ungültiger OpenAI API-Schlüssel.',
+          'INVALID_API_KEY',
+          401
+        )
+      } else if (error.code === 'rate_limit_exceeded') {
+        throw new AIProviderError(
+          'OpenAI Rate Limit erreicht. Bitte versuchen Sie es später erneut.',
+          'RATE_LIMIT_EXCEEDED',
+          429
+        )
+      } else {
+        throw new AIProviderError(
+          `Fehler bei der Text-to-Speech Konvertierung: ${error.message || 'Unbekannter Fehler'}`,
+          'TTS_ERROR',
           500
         )
       }

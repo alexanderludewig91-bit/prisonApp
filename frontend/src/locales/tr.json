@@ -175,6 +175,17 @@
         "message": "Talebiniz için gerekli tüm bilgileri topladım. Şimdi talebin incelemesine geçmek ister misiniz?",
         "notYet": "Henüz değil",
         "yesReview": "Evet, incelemeye"
+      },
+      "review": {
+        "title": "Talebi incele",
+        "serviceType": "Talep türü",
+        "titleOriginal": "Başlık (Orijinal)",
+        "descriptionOriginal": "Açıklama (Orijinal)",
+        "backToChat": "Sohbete dön",
+        "submitRequest": "Talebi gönder",
+        "submitting": "Gönderiliyor...",
+        "submittingTitle": "Talep gönderiliyor...",
+        "submittingMessage": "Lütfen bir dakika bekleyin"
       }
     },
     "aiTranslator": {

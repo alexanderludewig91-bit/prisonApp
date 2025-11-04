@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
-import { X, Send, Loader2, Check } from 'lucide-react'
+import { X, Send, Loader2, Check, Mic, Square, Volume2, VolumeX } from 'lucide-react'
 import { useLanguage } from '../contexts/LanguageContext'
 import { 
   startSmartServiceChat, 
   sendChatMessage, 
-  finalizeSmartService 
+  finalizeSmartService,
+  uploadAudioForTranscription,
+  getTextToSpeech
 } from '../services/api'
 
 interface SmartServiceModalProps {
@@ -48,6 +50,18 @@ const SmartServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: SmartSer
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  
+  // Audio-Aufnahme State
+  const [isRecording, setIsRecording] = useState(false)
+  const [isTranscribing, setIsTranscribing] = useState(false)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const audioStreamRef = useRef<MediaStream | null>(null)
+  const audioChunksRef = useRef<Blob[]>([])
+
+  // TTS State
+  const [isGeneratingTTS, setIsGeneratingTTS] = useState(false)
+  const [playingMessageId, setPlayingMessageId] = useState<number | null>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
   // Scrollt automatisch zum Ende der Nachrichten
   const scrollToBottom = () => {
@@ -217,7 +231,326 @@ const SmartServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: SmartSer
     }
   }
 
+  // Audio-Aufnahme Funktionen
+  const startRecording = async () => {
+    try {
+      // Prüfe ob MediaRecorder unterstützt wird
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setError('Audio-Aufnahme wird in diesem Browser nicht unterstützt')
+        return
+      }
+
+      // Hole Mikrofon-Zugriff
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      audioStreamRef.current = stream
+      
+      // Erstelle MediaRecorder mit WebM-Format (gut für Browser)
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'audio/webm'
+      })
+      
+      mediaRecorderRef.current = mediaRecorder
+      audioChunksRef.current = []
+
+      // Sammle Audio-Chunks
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data)
+        }
+      }
+
+      // Wenn Aufnahme beendet wird
+      mediaRecorder.onstop = async () => {
+        // Erstelle Audio-Blob
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
+        
+        // Stoppe alle Tracks (Mikrofon freigeben)
+        if (audioStreamRef.current) {
+          audioStreamRef.current.getTracks().forEach(track => track.stop())
+          audioStreamRef.current = null
+        }
+        
+        // Konvertiere Blob zu File
+        const audioFile = new File([audioBlob], 'recording.webm', { type: 'audio/webm' })
+        
+        // Transkribiere Audio
+        await handleAudioTranscription(audioFile)
+      }
+
+      // Starte Aufnahme
+      mediaRecorder.start()
+      setIsRecording(true)
+      setError('')
+    } catch (error: any) {
+      console.error('Fehler beim Starten der Audio-Aufnahme:', error)
+      setError('Fehler beim Zugriff auf das Mikrofon. Bitte Berechtigungen prüfen.')
+      setIsRecording(false)
+    }
+  }
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop()
+      setIsRecording(false)
+    }
+    // Falls MediaRecorder nicht mehr existiert, stoppe Stream direkt
+    if (audioStreamRef.current && !mediaRecorderRef.current) {
+      audioStreamRef.current.getTracks().forEach(track => track.stop())
+      audioStreamRef.current = null
+    }
+  }
+
+  const handleAudioTranscription = async (audioFile: File) => {
+    if (!sessionId) {
+      setError('Keine aktive Chat-Session')
+      return
+    }
+
+    setIsTranscribing(true)
+    setError('')
+
+    try {
+      // Lade Audio hoch und transkribiere
+      const response = await uploadAudioForTranscription(
+        audioFile,
+        sessionId,
+        currentLanguage
+      )
+
+      if (response.transcript) {
+        // Setze Transkript in Input-Feld
+        setInputMessage(response.transcript)
+        
+        // Fokus auf Input-Feld
+        setTimeout(() => {
+          inputRef.current?.focus()
+        }, 100)
+      } else {
+        setError('Keine Transkription erhalten')
+      }
+    } catch (error: any) {
+      console.error('Audio-Transkription Fehler:', error)
+      setError(error.response?.data?.error || 'Fehler bei der Audio-Transkription. Bitte versuchen Sie es erneut.')
+    } finally {
+      setIsTranscribing(false)
+    }
+  }
+
+  // Cleanup: Stoppe Aufnahme wenn Modal geschlossen wird
+  useEffect(() => {
+    if (!isOpen && isRecording) {
+      stopRecording()
+    }
+    return () => {
+      if (mediaRecorderRef.current && isRecording) {
+        stopRecording()
+      }
+      // Cleanup: Stoppe Audio-Wiedergabe beim Unmount
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current = null
+      }
+    }
+  }, [isOpen])
+
+  // TTS: Text-to-Speech für Assistant-Antworten
+  const handlePlayTTS = async (text: string, messageIndex: number) => {
+    // Stoppe aktuelles Audio falls abgespielt wird
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.src = '' // Wichtig: Leere src, um Event-Listener zu entfernen
+      audioRef.current.load() // Lade leeres Audio, um Event-Listener zu entfernen
+      audioRef.current = null
+    }
+
+    // Wenn bereits diese Nachricht abgespielt wird, stoppe sie
+    if (playingMessageId === messageIndex) {
+      setPlayingMessageId(null)
+      return
+    }
+
+    try {
+      setIsGeneratingTTS(true)
+      setError('')
+      setPlayingMessageId(messageIndex)
+
+      // Generiere Audio mit TTS
+      const audioBlob = await getTextToSpeech(text, currentLanguage, 'nova')
+      
+      // Erstelle Audio-URL aus Blob (mit Timestamp für Cache-Busting)
+      const audioUrl = URL.createObjectURL(audioBlob)
+      const audio = new Audio(audioUrl)
+      
+      // Speichere Audio-Referenz
+      audioRef.current = audio
+
+      // Warte bis Audio vollständig geladen und gepuffert ist
+      // Dies verhindert, dass die ersten Wörter fehlen
+      audio.preload = 'auto'
+      
+      await new Promise<void>((resolve, reject) => {
+        let resolved = false
+        
+        // Prüfe ob genug Daten gepuffert sind (robuster Ansatz)
+        const checkBufferReady = (): boolean => {
+          // Prüfe ob Audio bereit ist
+          if (audio.readyState < 4) return false // HAVE_ENOUGH_DATA
+          
+          // Prüfe ob gepufferte Daten vorhanden sind
+          if (audio.buffered.length === 0) return false
+          
+          const bufferedEnd = audio.buffered.end(0)
+          const duration = audio.duration || 0
+          
+          // Intelligentes Buffering: Angepasst an Textlänge
+          if (duration > 0 && !isNaN(duration) && isFinite(duration)) {
+            // Für sehr kurze Texte (< 5s): Warte auf 0.8s gepuffert
+            if (duration < 5) {
+              return bufferedEnd >= 0.8
+            }
+            // Für mittlere Texte (5-20s): Warte auf 1.5s oder 20% gepuffert
+            if (duration < 20) {
+              const minBuffer = Math.max(1.5, duration * 0.2)
+              return bufferedEnd >= minBuffer
+            }
+            // Für längere Texte (> 20s): Warte auf 3s oder 25% gepuffert
+            const minBuffer = Math.max(3.0, duration * 0.25)
+            return bufferedEnd >= minBuffer
+          }
+          
+          // Wenn Duration noch nicht bekannt, warte auf mindestens 1s gepuffert
+          return bufferedEnd >= 1.0
+        }
+
+        const handleProgress = () => {
+          if (!resolved && checkBufferReady()) {
+            cleanup()
+            // Audio auf Anfang setzen und dann warten
+            audio.currentTime = 0
+            // Längere Verzögerung für zuverlässigere Wiedergabe
+            const delay = audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)
+              ? (audio.duration < 5 ? 300 : audio.duration < 20 ? 400 : 500)
+              : 400
+            setTimeout(() => resolve(), delay)
+          }
+        }
+
+        const handleCanPlayThrough = () => {
+          // canplaythrough bedeutet, dass genug Daten gepuffert sind für ununterbrochene Wiedergabe
+          if (!resolved && checkBufferReady()) {
+            cleanup()
+            // Audio auf Anfang setzen und dann warten
+            audio.currentTime = 0
+            // Längere Verzögerung für zuverlässigere Wiedergabe
+            const delay = audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)
+              ? (audio.duration < 5 ? 300 : audio.duration < 20 ? 400 : 500)
+              : 400
+            setTimeout(() => resolve(), delay)
+          }
+        }
+
+        const handleError = () => {
+          cleanup()
+          reject(new Error('Fehler beim Laden der Audio-Datei'))
+        }
+
+        const cleanup = () => {
+          if (resolved) return
+          resolved = true
+          audio.removeEventListener('progress', handleProgress)
+          audio.removeEventListener('canplaythrough', handleCanPlayThrough)
+          audio.removeEventListener('loadeddata', handleProgress)
+          audio.removeEventListener('error', handleError)
+        }
+
+        // Prüfe ob Audio bereits vollständig geladen ist
+        if (checkBufferReady()) {
+          cleanup()
+          audio.currentTime = 0
+          const delay = audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)
+            ? (audio.duration < 5 ? 300 : audio.duration < 20 ? 400 : 500)
+            : 400
+          setTimeout(() => resolve(), delay)
+        } else {
+          // Warte auf Events für maximale Sicherheit
+          audio.addEventListener('progress', handleProgress) // Wird mehrfach aufgerufen während des Ladens
+          audio.addEventListener('canplaythrough', handleCanPlayThrough)
+          audio.addEventListener('loadeddata', handleProgress) // Zusätzliches Event für mehr Zuverlässigkeit
+          audio.addEventListener('error', handleError)
+          // Lade Audio explizit vor
+          audio.load()
+          
+          // Fallback: Prüfe regelmäßig ob Buffer bereit ist
+          const checkInterval = setInterval(() => {
+            if (!resolved && checkBufferReady()) {
+              clearInterval(checkInterval)
+              cleanup()
+              audio.currentTime = 0
+              const delay = audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)
+                ? (audio.duration < 5 ? 300 : audio.duration < 20 ? 400 : 500)
+                : 400
+              setTimeout(() => resolve(), delay)
+            }
+          }, 100) // Prüfe alle 100ms
+          
+          // Fallback: Timeout nach 10 Sekunden
+          setTimeout(() => {
+            if (!resolved) {
+              clearInterval(checkInterval)
+              cleanup()
+              if (audio.readyState >= 4) {
+                audio.currentTime = 0
+                const delay = audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)
+                  ? (audio.duration < 5 ? 300 : audio.duration < 20 ? 400 : 500)
+                  : 400
+                setTimeout(() => resolve(), delay)
+              } else {
+                reject(new Error('Timeout beim Laden der Audio-Datei'))
+              }
+            }
+          }, 10000)
+        }
+      })
+
+      // Audio-Events
+      audio.onended = () => {
+        setPlayingMessageId(null)
+        URL.revokeObjectURL(audioUrl)
+        audioRef.current = null
+      }
+
+      audio.onerror = () => {
+        // Nur loggen, keine Fehlermeldung anzeigen (kann durch manuelles Stoppen ausgelöst werden)
+        console.error('[SmartServiceModal] Audio-Fehler:', audio.error)
+        // Keine Fehlermeldung anzeigen, da sie beim manuellen Stoppen irritierend ist
+        setPlayingMessageId(null)
+        URL.revokeObjectURL(audioUrl)
+        audioRef.current = null
+      }
+
+      // Starte Wiedergabe nachdem alles geladen ist
+      await audio.play()
+    } catch (error: any) {
+      console.error('TTS Fehler:', error)
+      setError(error.response?.data?.error || error.message || 'Fehler bei der Text-to-Speech Konvertierung')
+      setPlayingMessageId(null)
+    } finally {
+      setIsGeneratingTTS(false)
+    }
+  }
+
   const handleClose = () => {
+    // Stoppe Aufnahme falls aktiv
+    if (isRecording) {
+      stopRecording()
+    }
+    
+    // Stoppe Audio-Wiedergabe falls aktiv
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current = null
+    }
+    
     // Reset State
     setPhase('chat')
     setMessages([])
@@ -226,6 +559,10 @@ const SmartServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: SmartSer
     setShowReadyPopup(false)
     setExtractedData({})
     setError('')
+    setIsRecording(false)
+    setIsTranscribing(false)
+    setIsGeneratingTTS(false)
+    setPlayingMessageId(null)
     setReviewData({
       title: '',
       description: '',
@@ -334,7 +671,27 @@ const SmartServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: SmartSer
                           : 'bg-white text-gray-800 border border-gray-200'
                       }`}
                     >
-                      <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="flex-1 whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                        {message.role === 'assistant' && (
+                          <button
+                            onClick={() => handlePlayTTS(message.content, index)}
+                            disabled={isGeneratingTTS}
+                            className={`flex-shrink-0 p-1.5 rounded-lg transition-all ${
+                              playingMessageId === index
+                                ? 'bg-red-100 text-red-600 hover:bg-red-200'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                            title={playingMessageId === index ? 'Audio stoppen' : 'Text vorlesen'}
+                          >
+                            {playingMessageId === index ? (
+                              <VolumeX className="h-4 w-4" />
+                            ) : (
+                              <Volume2 className="h-4 w-4" />
+                            )}
+                          </button>
+                        )}
+                      </div>
                     </div>
                     {message.role === 'user' && (
                       <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center shadow-md">
@@ -377,17 +734,59 @@ const SmartServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: SmartSer
                     }}
                     placeholder={t('modals.smartService.messagePlaceholder')}
                     className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#060E5D] focus:border-[#060E5D] transition-all disabled:bg-gray-50 disabled:cursor-not-allowed"
-                    disabled={isLoading || !sessionId}
+                    disabled={isLoading || isTranscribing || !sessionId}
                   />
+                  
+                  {/* Audio-Aufnahme Button */}
+                  <button
+                    onClick={isRecording ? stopRecording : startRecording}
+                    disabled={isLoading || isTranscribing || !sessionId}
+                    className={`px-4 py-3 rounded-xl transition-all shadow-md hover:shadow-lg transform hover:scale-105 disabled:transform-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-medium ${
+                      isRecording
+                        ? 'bg-red-500 hover:bg-red-600 text-white'
+                        : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                    }`}
+                    title={isRecording ? 'Aufnahme stoppen' : 'Audio-Aufnahme starten'}
+                  >
+                    {isRecording ? (
+                      <>
+                        <Square className="h-5 w-5" />
+                        <span className="hidden sm:inline">Stoppen</span>
+                      </>
+                    ) : (
+                      <>
+                        <Mic className="h-5 w-5" />
+                      </>
+                    )}
+                  </button>
+
+                  {/* Senden Button */}
                   <button
                     onClick={handleSendMessage}
-                    disabled={!inputMessage.trim() || isLoading || !sessionId}
+                    disabled={!inputMessage.trim() || isLoading || isTranscribing || !sessionId}
                     className="px-6 py-3 bg-gradient-to-r from-[#060E5D] to-[#1a47a3] text-white rounded-xl hover:from-[#050B4A] hover:to-[#163d8f] disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg transform hover:scale-105 disabled:transform-none flex items-center gap-2 font-medium"
                   >
-                    <Send className="h-5 w-5" />
-                    <span>Senden</span>
+                    {isTranscribing ? (
+                      <>
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <span>Transkribiere...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send className="h-5 w-5" />
+                        <span>Senden</span>
+                      </>
+                    )}
                   </button>
                 </div>
+                
+                {/* Aufnahme-Status */}
+                {isRecording && (
+                  <div className="mt-3 flex items-center gap-2 text-red-600 text-sm">
+                    <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></div>
+                    <span>Aufnahme läuft... Klicken Sie auf "Stoppen" wenn Sie fertig sind.</span>
+                  </div>
+                )}
 
               </div>
             </>
@@ -399,7 +798,7 @@ const SmartServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: SmartSer
                 <div className="bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl p-2">
                   <Check className="h-5 w-5 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900">Antrag überprüfen</h3>
+                <h3 className="text-2xl font-bold text-gray-900">{t('modals.smartService.review.title')}</h3>
               </div>
 
               {error && (
@@ -411,7 +810,7 @@ const SmartServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: SmartSer
               <div className="space-y-6">
                 <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Antragstyp
+                    {t('modals.smartService.review.serviceType')}
                   </label>
                   <input
                     type="text"
@@ -423,7 +822,7 @@ const SmartServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: SmartSer
 
                 <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Titel (Original) *
+                    {t('modals.smartService.review.titleOriginal')} *
                   </label>
                   <input
                     type="text"
@@ -436,7 +835,7 @@ const SmartServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: SmartSer
 
                 <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Beschreibung (Original) *
+                    {t('modals.smartService.review.descriptionOriginal')} *
                   </label>
                   <textarea
                     value={reviewData.descriptionInmate}
@@ -453,14 +852,14 @@ const SmartServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: SmartSer
                   onClick={() => setPhase('chat')}
                   className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all font-medium shadow-sm hover:shadow-md"
                 >
-                  Zurück zum Chat
+                  {t('modals.smartService.review.backToChat')}
                 </button>
                 <button
                   onClick={handleFinalize}
                   disabled={!reviewData.titleInmate || !reviewData.descriptionInmate || isSubmitting}
                   className="px-8 py-3 bg-gradient-to-r from-[#060E5D] to-[#1a47a3] text-white rounded-xl hover:from-[#050B4A] hover:to-[#163d8f] disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg transform hover:scale-105 disabled:transform-none font-medium"
                 >
-                  {isSubmitting ? 'Wird eingereicht...' : 'Antrag einreichen'}
+                  {isSubmitting ? t('modals.smartService.review.submitting') : t('modals.smartService.review.submitRequest')}
                 </button>
               </div>
             </div>
@@ -472,8 +871,8 @@ const SmartServiceModal = ({ isOpen, onClose, onSubmit, isSubmitting }: SmartSer
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-[#060E5D]/10 to-[#1a47a3]/10 mb-4">
                   <Loader2 className="h-8 w-8 animate-spin text-[#060E5D]" />
                 </div>
-                <p className="text-xl font-semibold text-gray-700">Antrag wird eingereicht...</p>
-                <p className="text-sm text-gray-500">Bitte warten Sie einen Moment</p>
+                <p className="text-xl font-semibold text-gray-700">{t('modals.smartService.review.submittingTitle')}</p>
+                <p className="text-sm text-gray-500">{t('modals.smartService.review.submittingMessage')}</p>
               </div>
             </div>
           )}

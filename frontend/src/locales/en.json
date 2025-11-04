@@ -175,6 +175,17 @@
         "message": "I have collected all the necessary information for your request. Would you like to go to the request review now?",
         "notYet": "Not yet",
         "yesReview": "Yes, to review"
+      },
+      "review": {
+        "title": "Review request",
+        "serviceType": "Request type",
+        "titleOriginal": "Title (Original)",
+        "descriptionOriginal": "Description (Original)",
+        "backToChat": "Back to chat",
+        "submitRequest": "Submit request",
+        "submitting": "Submitting...",
+        "submittingTitle": "Request is being submitted...",
+        "submittingMessage": "Please wait a moment"
       }
     },
     "aiTranslator": {

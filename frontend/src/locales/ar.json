@@ -175,6 +175,17 @@
         "message": "لقد جمعت جميع المعلومات اللازمة لطلبك. هل ترغب الآن في الانتقال إلى مراجعة الطلب؟",
         "notYet": "ليس بعد",
         "yesReview": "نعم، إلى المراجعة"
+      },
+      "review": {
+        "title": "مراجعة الطلب",
+        "serviceType": "نوع الطلب",
+        "titleOriginal": "العنوان (الأصلي)",
+        "descriptionOriginal": "الوصف (الأصلي)",
+        "backToChat": "العودة إلى الدردشة",
+        "submitRequest": "إرسال الطلب",
+        "submitting": "جاري الإرسال...",
+        "submittingTitle": "جاري إرسال الطلب...",
+        "submittingMessage": "يرجى الانتظار قليلاً"
       }
     },
     "aiTranslator": {

@@ -175,6 +175,17 @@
         "message": "J'ai collecté toutes les informations nécessaires pour votre demande. Souhaitez-vous maintenant passer à l'examen de la demande ?",
         "notYet": "Pas encore",
         "yesReview": "Oui, à l'examen"
+      },
+      "review": {
+        "title": "Examiner la demande",
+        "serviceType": "Type de demande",
+        "titleOriginal": "Titre (Original)",
+        "descriptionOriginal": "Description (Original)",
+        "backToChat": "Retour au chat",
+        "submitRequest": "Soumettre la demande",
+        "submitting": "Envoi en cours...",
+        "submittingTitle": "La demande est en cours d'envoi...",
+        "submittingMessage": "Veuillez patienter un instant"
       }
     },
     "aiTranslator": {

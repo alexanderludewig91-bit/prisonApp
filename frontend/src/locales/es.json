@@ -175,6 +175,17 @@
         "message": "He recopilado toda la información necesaria para su solicitud. ¿Desea revisar la solicitud ahora?",
         "notYet": "Todavía no",
         "yesReview": "Sí, a la revisión"
+      },
+      "review": {
+        "title": "Revisar solicitud",
+        "serviceType": "Tipo de solicitud",
+        "titleOriginal": "Título (Original)",
+        "descriptionOriginal": "Descripción (Original)",
+        "backToChat": "Volver al chat",
+        "submitRequest": "Enviar solicitud",
+        "submitting": "Enviando...",
+        "submittingTitle": "La solicitud se está enviando...",
+        "submittingMessage": "Por favor espere un momento"
       }
     },
     "aiTranslator": {

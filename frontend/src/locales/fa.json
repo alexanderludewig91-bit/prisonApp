@@ -175,6 +175,17 @@
         "message": "من تمام اطلاعات لازم برای درخواست شما را جمع‌آوری کرده‌ام. آیا اکنون می‌خواهید به بررسی درخواست بروید؟",
         "notYet": "هنوز نه",
         "yesReview": "بله، به بررسی"
+      },
+      "review": {
+        "title": "بررسی درخواست",
+        "serviceType": "نوع درخواست",
+        "titleOriginal": "عنوان (اصلی)",
+        "descriptionOriginal": "توضیحات (اصلی)",
+        "backToChat": "بازگشت به گفتگو",
+        "submitRequest": "ارسال درخواست",
+        "submitting": "در حال ارسال...",
+        "submittingTitle": "درخواست در حال ارسال است...",
+        "submittingMessage": "لطفاً کمی صبر کنید"
       }
     },
     "aiTranslator": {

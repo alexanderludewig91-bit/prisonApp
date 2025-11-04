@@ -229,4 +229,39 @@ export const finalizeSmartService = async (data: {
   return response.data
 }
 
+export const uploadAudioForTranscription = async (
+  audioFile: File,
+  sessionId: string | null,
+  language: string = 'de'
+) => {
+  const formData = new FormData()
+  formData.append('audio', audioFile)
+  if (sessionId) {
+    formData.append('sessionId', sessionId)
+  }
+  formData.append('language', language)
+
+  const response = await api.post('/smart-service/chat/audio', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+  return response.data
+}
+
+export const getTextToSpeech = async (
+  text: string,
+  language: string = 'de',
+  voice: string = 'nova'
+): Promise<Blob> => {
+  const response = await api.post(
+    '/smart-service/chat/tts',
+    { text, language, voice },
+    {
+      responseType: 'blob' // Wichtig: Audio-Daten als Blob empfangen
+    }
+  )
+  return response.data
+}
+
 export default api

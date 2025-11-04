@@ -176,6 +176,17 @@
         "message": "Ich habe alle benötigten Informationen für Ihren Antrag gesammelt. Möchten Sie jetzt zur Überprüfung des Antrags gehen?",
         "notYet": "Nein, noch nicht",
         "yesReview": "Ja, zur Überprüfung"
+      },
+      "review": {
+        "title": "Antrag überprüfen",
+        "serviceType": "Antragstyp",
+        "titleOriginal": "Titel (Original)",
+        "descriptionOriginal": "Beschreibung (Original)",
+        "backToChat": "Zurück zum Chat",
+        "submitRequest": "Antrag einreichen",
+        "submitting": "Wird eingereicht...",
+        "submittingTitle": "Antrag wird eingereicht...",
+        "submittingMessage": "Bitte warten Sie einen Moment"
       }
     },
     "aiTranslator": {

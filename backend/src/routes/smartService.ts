@@ -10,9 +10,32 @@ import {
 } from '../services/smartServiceChat'
 import { PrismaClient } from '@prisma/client'
 import { AIProviderFactory } from '../services/ai/AIProviderFactory'
+import multer from 'multer'
 
 const router = express.Router()
 const prisma = new PrismaClient()
+
+// Multer-Konfiguration für Audio-Upload
+// Speichert Audio-Dateien im Memory (nicht auf Disk)
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 25 * 1024 * 1024, // 25 MB (Whisper API Limit)
+  },
+  fileFilter: (req, file, cb) => {
+    // Erlaube nur Audio-Formate
+    const allowedMimes = [
+      'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/m4a', 
+      'audio/webm', 'audio/mp4', 'audio/x-m4a'
+    ]
+    
+    if (allowedMimes.includes(file.mimetype)) {
+      cb(null, true)
+    } else {
+      cb(new Error('Ungültiges Audio-Format. Unterstützt: mp3, wav, m4a, webm'))
+    }
+  }
+})
 
 /**
  * POST /api/smart-service/chat/start
@@ -412,6 +435,245 @@ router.post(
         error: 'Fehler bei der Antragserstellung',
         message: error.message 
       })
+    }
+  }
+)
+
+/**
+ * POST /api/smart-service/chat/audio
+ * Empfängt Audio-Datei, transkribiert sie mit Whisper und gibt Text zurück
+ */
+router.post(
+  '/chat/audio',
+  authenticateToken,
+  upload.single('audio'), // Multer-Middleware für Audio-Upload
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.userId
+      if (!userId) {
+        return res.status(401).json({ error: 'Nicht authentifiziert' })
+      }
+
+      const { sessionId, language } = req.body
+
+      // Prüfe ob Session existiert und dem User gehört
+      if (sessionId) {
+        const session = chatSessionManager.getSession(sessionId)
+        if (!session || session.userId !== userId) {
+          return res.status(404).json({ error: 'Session nicht gefunden' })
+        }
+      }
+
+      // Prüfe ob Audio-Datei vorhanden ist
+      if (!req.file) {
+        return res.status(400).json({ error: 'Keine Audio-Datei hochgeladen' })
+      }
+
+      // Prüfe Dateigröße
+      if (req.file.size > 25 * 1024 * 1024) {
+        return res.status(400).json({ error: 'Audio-Datei ist zu groß. Maximale Größe: 25 MB' })
+      }
+
+      // Hole OpenAI Provider
+      const aiProvider = AIProviderFactory.createProvider('openai')
+      if (!aiProvider || !aiProvider.speechToText) {
+        return res.status(500).json({ error: 'Audio-Transkription nicht verfügbar' })
+      }
+
+      // Konvertiere Buffer zu FileBuffer für OpenAI
+      const audioBuffer = req.file.buffer
+      const filename = req.file.originalname || 'audio.webm'
+
+      // Logge Audio-Upload
+      console.log('[SmartService] Audio-Upload erhalten:', {
+        sessionId: sessionId || 'keine',
+        userId,
+        filename,
+        size: req.file.size,
+        mimetype: req.file.mimetype,
+        language: language || 'auto'
+      })
+
+      // Transkribiere Audio mit Whisper
+      const transcript = await aiProvider.speechToText(
+        audioBuffer,
+        language || undefined,
+        filename
+      )
+
+      // Logge Transkription
+      console.log('[SmartService] Audio-Transkription erfolgreich:', {
+        sessionId: sessionId || 'keine',
+        transcriptLength: transcript.length,
+        preview: transcript.substring(0, 100)
+      })
+
+      // Gibt Transkript zurück
+      res.json({
+        success: true,
+        transcript,
+        language: language || 'auto'
+      })
+    } catch (error: any) {
+      console.error('[SmartService] Audio-Upload Fehler:', error)
+      console.error('[SmartService] Fehler-Details:', {
+        message: error.message,
+        code: error.code,
+        status: error.status,
+        statusCode: error.statusCode,
+        response: error.response?.data,
+        stack: error.stack
+      })
+      
+      // Prüfe ob es ein AIProviderError ist
+      if (error.code === 'QUOTA_EXCEEDED' || error.code === 'QUOTA_EXCEEDED') {
+        return res.status(402).json({ 
+          error: 'OpenAI API Limit erreicht. Bitte versuchen Sie es später erneut.'
+        })
+      } else if (error.code === 'INVALID_API_KEY') {
+        return res.status(401).json({ 
+          error: 'Ungültiger OpenAI API-Schlüssel.'
+        })
+      } else if (error.code === 'FILE_TOO_LARGE') {
+        return res.status(400).json({ 
+          error: 'Audio-Datei ist zu groß. Maximale Größe: 25 MB'
+        })
+      } else if (error.code === 'INVALID_FORMAT') {
+        return res.status(400).json({ 
+          error: 'Ungültiges Audio-Format. Unterstützt: mp3, wav, m4a, webm'
+        })
+      } else {
+        // Detaillierte Fehlermeldung für Debugging
+        return res.status(500).json({ 
+          error: 'Fehler bei der Audio-Transkription',
+          message: error.message || error.response?.data?.message || 'Unbekannter Fehler',
+          details: process.env.NODE_ENV === 'development' ? {
+            code: error.code,
+            status: error.status,
+            response: error.response?.data
+          } : undefined
+        })
+      }
+    }
+  }
+)
+
+// TTS Route: Text-to-Speech für Assistant-Antworten
+router.post(
+  '/chat/tts',
+  authenticateToken,
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.userId
+      if (!userId) {
+        return res.status(401).json({ error: 'Nicht authentifiziert' })
+      }
+
+      const { text, language, voice } = req.body
+
+      // Validierung
+      if (!text || typeof text !== 'string' || text.trim().length === 0) {
+        return res.status(400).json({ 
+          error: 'Text ist erforderlich' 
+        })
+      }
+
+      // Maximal 5000 Zeichen für TTS (OpenAI Limit)
+      if (text.length > 5000) {
+        return res.status(400).json({ 
+          error: 'Text ist zu lang. Maximum: 5000 Zeichen' 
+        })
+      }
+
+      // AI Provider initialisieren
+      const aiProvider = AIProviderFactory.createProvider('openai')
+
+      if (!aiProvider.textToSpeech) {
+        return res.status(501).json({ 
+          error: 'Text-to-Speech wird von diesem Provider nicht unterstützt' 
+        })
+      }
+
+      // Logge TTS-Anfrage mit Timing
+      const ttsStartTime = Date.now()
+      console.log('[SmartService] TTS-Anfrage erhalten:', {
+        userId,
+        textLength: text.length,
+        language: language || 'auto',
+        voice: voice || 'nova'
+      })
+
+      // Generiere Audio mit TTS
+      const audioBuffer = await aiProvider.textToSpeech(
+        text,
+        language || undefined,
+        voice || 'nova'
+      )
+
+      // Berechne Metriken
+      const ttsDuration = Date.now() - ttsStartTime
+      const audioSizeKB = Math.round((audioBuffer.length / 1024) * 100) / 100
+      const audioSizeMB = Math.round((audioBuffer.length / (1024 * 1024)) * 100) / 100
+      
+      // Geschätzte Audio-Dauer (ca. 1 Sekunde = ~16 KB für MP3/TTS, kann variieren)
+      // OpenAI TTS gibt MP3 zurück, typischerweise ~16-20 KB pro Sekunde
+      const estimatedAudioDuration = Math.round((audioBuffer.length / 16000) * 10) / 10
+
+      // Logge TTS-Erfolg mit Metriken
+      console.log('[SmartService] TTS erfolgreich:', {
+        userId,
+        textLength: text.length,
+        audioSizeBytes: audioBuffer.length,
+        audioSizeKB: `${audioSizeKB} KB`,
+        audioSizeMB: audioSizeMB > 0.1 ? `${audioSizeMB} MB` : undefined,
+        estimatedDuration: `${estimatedAudioDuration}s`,
+        generationTime: `${ttsDuration}ms`,
+        voice: voice || 'nova',
+        bytesPerSecond: Math.round(audioBuffer.length / (estimatedAudioDuration || 1))
+      })
+
+      // Setze Content-Type Header für Audio
+      res.setHeader('Content-Type', 'audio/mpeg')
+      res.setHeader('Content-Length', audioBuffer.length.toString())
+      
+      // Sende Audio-Buffer als Response
+      res.send(audioBuffer)
+    } catch (error: any) {
+      console.error('[SmartService] TTS Fehler:', error)
+      console.error('[SmartService] TTS Fehler-Details:', {
+        message: error.message,
+        code: error.code,
+        status: error.status,
+        statusCode: error.statusCode,
+        response: error.response?.data,
+        stack: error.stack
+      })
+      
+      // Spezifische Fehlerbehandlung
+      if (error.code === 'QUOTA_EXCEEDED') {
+        return res.status(402).json({ 
+          error: 'OpenAI API Limit erreicht. Bitte versuchen Sie es später erneut.'
+        })
+      } else if (error.code === 'INVALID_API_KEY') {
+        return res.status(401).json({ 
+          error: 'Ungültiger OpenAI API-Schlüssel.'
+        })
+      } else if (error.code === 'TTS_ERROR') {
+        return res.status(500).json({ 
+          error: 'Fehler bei der Text-to-Speech Konvertierung',
+          message: error.message || 'Unbekannter Fehler'
+        })
+      } else {
+        return res.status(500).json({ 
+          error: 'Fehler bei der Text-to-Speech Konvertierung',
+          message: error.message || error.response?.data?.message || 'Unbekannter Fehler',
+          details: process.env.NODE_ENV === 'development' ? {
+            code: error.code,
+            status: error.status,
+            response: error.response?.data
+          } : undefined
+        })
+      }
     }
   }
 )

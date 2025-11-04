@@ -76,6 +76,24 @@ export interface AIProvider {
    * @returns Provider-Name
    */
   getProviderName(): string
+
+  /**
+   * Speech-to-Text: Konvertiert Audio-Datei in Text
+   * @param audioFile - Audio-Datei als Buffer oder File
+   * @param language - Optionale Sprache (z.B. 'de', 'en')
+   * @param filename - Dateiname mit Extension (z.B. 'audio.webm')
+   * @returns Promise mit dem transkribierten Text
+   */
+  speechToText?(audioFile: Buffer | File, language?: string, filename?: string): Promise<string>
+
+  /**
+   * Text-to-Speech: Konvertiert Text in Audio
+   * @param text - Text der gesprochen werden soll
+   * @param language - Optionale Sprache (z.B. 'de', 'en')
+   * @param voice - Optionale Stimme (z.B. 'alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer')
+   * @returns Promise mit Audio-Daten als Buffer
+   */
+  textToSpeech?(text: string, language?: string, voice?: string): Promise<Buffer>
 }
 
 /**
