@@ -206,7 +206,7 @@ export class ClaudeProvider implements AIProvider {
         ]
       })
 
-      const translatedText = (response.content[0] as any)?.text
+      const translatedText = response.content[0]?.type === 'text' ? response.content[0].text : null
       if (!translatedText) {
         throw new AIProviderError('Keine Übersetzung erhalten', 'NO_RESPONSE', 500)
       }
