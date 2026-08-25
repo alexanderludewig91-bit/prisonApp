@@ -18,8 +18,8 @@ const Legal: React.FC = () => {
               </p>
               <p className="text-gray-700 leading-relaxed">
                 Kontakt:{' '}
-                <a href="mailto:Datenschutz@Hayward-Consulting.de" className="text-[#060E5D] hover:underline">
-                  Datenschutz@Hayward-Consulting.de
+                <a href="mailto:Datenschutz@Hayone.de" className="text-[#060E5D] hover:underline">
+                  Datenschutz@Hayone.de
                 </a>
               </p>
               <p className="text-gray-700 leading-relaxed">
@@ -63,11 +63,30 @@ const Legal: React.FC = () => {
                 Diese Datenschutzhinweise gelten für die Anwendung „Prisoner Services“.
               </p>
 
+              <div className="rounded-xl border-2 border-[#060E5D]/20 bg-[#060E5D]/[0.04] p-5 space-y-2">
+                <p className="font-semibold text-[#060E5D]">
+                  Es werden keine realen personenbezogenen Daten verarbeitet.
+                </p>
+                <p className="text-gray-700 leading-relaxed">
+                  „Prisoner Services“ ist ein reines Demonstrationsprodukt. Sämtliche in der Anwendung
+                  angelegten Konten, Anträge, Vorgänge und Dokumente sind frei erfunden. Es werden zu keinem
+                  Zeitpunkt personenbezogene Daten realer Inhaftierter, Bediensteter oder sonstiger Betroffener
+                  erhoben, verarbeitet oder gespeichert. Die Zugänge sind offen einsehbare Testkonten und
+                  keiner realen Person zugeordnet.
+                </p>
+                <p className="text-gray-700 leading-relaxed">
+                  Personenbezug entsteht daher allenfalls durch den technischen Betrieb der Website selbst
+                  (etwa die IP-Adresse in den Server-Logfiles) sowie durch Inhalte, die Sie selbst freiwillig
+                  eingeben. Bitte geben Sie in der Demo keine echten personenbezogenen oder vertraulichen Daten
+                  ein.
+                </p>
+              </div>
+
               <h3 className="text-base font-semibold text-gray-900 pt-2">Verantwortlicher</h3>
               <p className="text-gray-700 leading-relaxed">
                 Verantwortlicher im Sinne des Art. 4 Nr. 7 DSGVO ist Dr. Alexander Hayward, erreichbar unter{' '}
-                <a href="mailto:Datenschutz@Hayward-Consulting.de" className="text-[#060E5D] hover:underline">
-                  Datenschutz@Hayward-Consulting.de
+                <a href="mailto:Datenschutz@Hayone.de" className="text-[#060E5D] hover:underline">
+                  Datenschutz@Hayone.de
                 </a>
                 . Ein Datenschutzbeauftragter ist nicht bestellt, da die gesetzlichen Voraussetzungen hierfür
                 nicht vorliegen.
@@ -80,9 +99,9 @@ const Legal: React.FC = () => {
                 verwendet.
               </p>
               <p className="text-gray-700 leading-relaxed">
-                Rechtsgrundlagen: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Demonstration,
-                Funktionsprüfung und am sicheren Betrieb der Anwendung) sowie Art. 6 Abs. 1 lit. b DSGVO für die
-                Bereitstellung und Nutzung der Test-Logins.
+                Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Demonstration,
+                der Funktionsprüfung und am sicheren Betrieb der Anwendung). Ein Vertragsverhältnis wird durch
+                die Nutzung der Demo nicht begründet.
               </p>
 
               <h3 className="text-base font-semibold text-gray-900 pt-2">Hosting und Server-Logfiles</h3>
@@ -149,8 +168,8 @@ const Legal: React.FC = () => {
               </p>
               <p className="text-gray-700 leading-relaxed">
                 Zur Ausübung dieser Rechte genügt eine Nachricht an{' '}
-                <a href="mailto:Datenschutz@Hayward-Consulting.de" className="text-[#060E5D] hover:underline">
-                  Datenschutz@Hayward-Consulting.de
+                <a href="mailto:Datenschutz@Hayone.de" className="text-[#060E5D] hover:underline">
+                  Datenschutz@Hayone.de
                 </a>
                 .
               </p>
@@ -160,7 +179,7 @@ const Legal: React.FC = () => {
                 Ihres Arbeitsplatzes oder des Orts des mutmaßlichen Verstoßes.
               </p>
 
-              <p className="text-gray-500 text-sm pt-2">Stand: 25. August 2026, Version 1.1</p>
+              <p className="text-gray-500 text-sm pt-2">Stand: 25. August 2026, Version 1.2</p>
             </section>
           </div>
         </div>
