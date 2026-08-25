@@ -1,7 +1,42 @@
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { Eye, EyeOff, Lock, User, LogIn, Shield } from 'lucide-react'
+import { Eye, EyeOff, Lock, User, LogIn, Shield, Users, KeyRound } from 'lucide-react'
 import { Link } from 'react-router-dom'
+
+type DemoAccount = {
+  username: string
+  password: string
+  name: string
+  role: string
+  short: string
+}
+
+type DemoGroup = {
+  title: string
+  accounts: DemoAccount[]
+}
+
+// Demo-Zugaenge: Diese Anwendung ist eine Demo-Instanz ohne echte Daten.
+// Der Admin-Zugang wird bewusst NICHT veroeffentlicht.
+const DEMO_GROUPS: DemoGroup[] = [
+  {
+    title: 'Verwaltung',
+    accounts: [
+      { username: 'avd001', password: 'asdf1234', name: 'Maria Müller', role: 'Allg. Vollzugsdienst', short: 'AVD' },
+      { username: 'val001', password: 'asdf1234', name: 'Hans Schmidt', role: 'Vollzugsabt.-Leitung', short: 'VAL' },
+      { username: 'vl001', password: 'asdf1234', name: 'Anna Weber', role: 'Vollzugsleitung', short: 'VL' },
+      { username: 'al001', password: 'asdf1234', name: 'Peter Fischer', role: 'Anstaltsleitung', short: 'AL' },
+      { username: 'zahlstelle001', password: 'asdf1234', name: 'Lisa Klein', role: 'Zahlstelle', short: 'ZS' },
+      { username: 'arzt001', password: 'asdf1234', name: 'Dr. Thomas Wagner', role: 'Ärztliches Personal', short: 'MED' },
+    ],
+  },
+  {
+    title: 'Gefangener',
+    accounts: [
+      { username: 'inmate001', password: 'test', name: 'Max Mustermann', role: 'Insasse', short: 'GEF' },
+    ],
+  },
+]
 
 const Login = () => {
   const [username, setUsername] = useState('')
@@ -9,7 +44,15 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [selectedDemo, setSelectedDemo] = useState<string | null>(null)
   const { login } = useAuth()
+
+  const fillDemoAccount = (account: DemoAccount) => {
+    setUsername(account.username)
+    setPassword(account.password)
+    setSelectedDemo(account.username)
+    setError('')
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,7 +76,7 @@ const Login = () => {
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-white opacity-5 rounded-full blur-3xl"></div>
       </div>
 
-      <div className="relative max-w-md w-full">
+      <div className="relative max-w-lg w-full">
         {/* Login-Karte */}
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
           {/* Header mit Gradient */}
@@ -128,6 +171,72 @@ const Login = () => {
                   </>
                 )}
               </button>
+            </div>
+
+            {/* Demo-Zugaenge */}
+            <div className="pt-2">
+              <div className="rounded-xl border-2 border-dashed border-[#060E5D]/20 bg-[#060E5D]/[0.03] p-4">
+                <div className="flex items-start gap-2 mb-3">
+                  <div className="bg-[#060E5D]/10 rounded-lg p-1.5 mt-0.5">
+                    <Users className="h-4 w-4 text-[#060E5D]" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-[#060E5D]">Demo-Zugänge</p>
+                    <p className="text-xs text-gray-600 leading-snug">
+                      Testumgebung ohne echte Daten. Klicken Sie eine Rolle an – die Anmeldedaten werden automatisch eingetragen.
+                    </p>
+                  </div>
+                </div>
+
+                {DEMO_GROUPS.map((group) => (
+                  <div key={group.title} className="mt-3 first:mt-0">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">
+                      {group.title}
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                      {group.accounts.map((account) => {
+                        const isSelected = selectedDemo === account.username
+                        return (
+                          <button
+                            key={account.username}
+                            type="button"
+                            onClick={() => fillDemoAccount(account)}
+                            title={`${account.name} · ${account.username}`}
+                            className={`flex items-center gap-2 rounded-lg border-2 px-2.5 py-2 text-left transition-all ${
+                              isSelected
+                                ? 'border-[#060E5D] bg-white shadow-md'
+                                : 'border-gray-200 bg-white/70 hover:border-[#060E5D]/40 hover:bg-white hover:shadow-sm'
+                            }`}
+                          >
+                            <span
+                              className={`flex-shrink-0 inline-flex items-center justify-center min-w-[2.25rem] rounded-md px-1.5 py-1 text-[10px] font-bold ${
+                                isSelected ? 'bg-[#060E5D] text-white' : 'bg-[#060E5D]/10 text-[#060E5D]'
+                              }`}
+                            >
+                              {account.short}
+                            </span>
+                            <span className="min-w-0">
+                              <span className="block text-xs font-semibold text-gray-800 truncate">
+                                {account.role}
+                              </span>
+                              <span className="block text-[10px] text-gray-500 truncate">
+                                {account.username}
+                              </span>
+                            </span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ))}
+
+                {selectedDemo && (
+                  <p className="mt-3 flex items-center gap-1.5 text-[11px] text-[#060E5D] font-medium">
+                    <KeyRound className="h-3.5 w-3.5 flex-shrink-0" />
+                    Anmeldedaten eingetragen – klicken Sie auf „Anmelden“.
+                  </p>
+                )}
+              </div>
             </div>
 
             {/* Footer: Impressum & Datenschutz + Copyright */}
